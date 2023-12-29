@@ -3,8 +3,7 @@ package com.price.pegging.ServiceImp;
 import com.price.pegging.Entity.DsaExport;
 import com.price.pegging.Entity.PricePegging;
 import com.price.pegging.FileUtilittyValidation;
-import com.price.pegging.Model.CommonResponse;
-import com.price.pegging.Model.UserDetail;
+import com.price.pegging.Model.*;
 import com.price.pegging.Entity.User;
 import com.price.pegging.Repository.DsaExportRepository;
 import com.price.pegging.Repository.PricePeggingRepository;
@@ -12,10 +11,14 @@ import com.price.pegging.Repository.UserRepository;
 import com.price.pegging.Service.Service;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -31,6 +34,8 @@ public class ServiceImpl implements Service {
     @Autowired
     private FileUtilittyValidation fileUtilittyValidation;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
     @Override
     public List<User> userExist(String userEmail) {
 
@@ -77,11 +82,11 @@ public class ServiceImpl implements Service {
             Sheet sheet = workbook.getSheetAt(0);
             Iterator<Row> rowIterator = sheet.iterator();
             Boolean fileFormat = true;
-            Row headerRow=rowIterator.next();
+            Row headerRow = rowIterator.next();
 
-            fileFormat= fileUtilittyValidation.dsaFileFormat(headerRow);
+            fileFormat = fileUtilittyValidation.dsaFileFormat(headerRow);
 
-            if(fileFormat) {
+            if (fileFormat) {
 
                 System.out.println("file format matched");
 
@@ -95,10 +100,10 @@ public class ServiceImpl implements Service {
                     for (int i = 0; i < 13; i++) {
                         Cell cell = row.getCell(i);
 
-                        errorMsg = (cell == null || cell.getCellType() == CellType.BLANK) ? "file upload error due to row no " + (row.getRowNum()+1) + " is empty" : "";
+                        errorMsg = (cell == null || cell.getCellType() == CellType.BLANK) ? "file upload error due to row no " + (row.getRowNum() + 1) + " is empty" : "";
 
                         if (errorMsg.isEmpty()) {
-                            System.out.println("value="+cell.toString());
+                            System.out.println("value=" + cell.toString());
 
                             switch (i) {
 
@@ -115,7 +120,7 @@ public class ServiceImpl implements Service {
                                     dsaExport.setProperty_address(row.getCell(4).toString());
                                     break;
                                 case 5:
-                                    dsaExport.setPropertyPincode(row.getCell(5).toString().replace(".0",""));
+                                    dsaExport.setPropertyPincode(row.getCell(5).toString().replace(".0", ""));
                                     break;
                                 case 6:
                                     dsaExport.setRegion(row.getCell(6).toString());
@@ -127,7 +132,7 @@ public class ServiceImpl implements Service {
                                     dsaExport.setLocation(row.getCell(8).toString());
                                     break;
                                 case 9:
-                                    dsaExport.setRate_per_sqft(row.getCell(9).toString().replace(".0",""));
+                                    dsaExport.setRate_per_sqft(row.getCell(9).toString().replace(".0", ""));
 
                                     break;
                                 case 10:
@@ -152,12 +157,10 @@ public class ServiceImpl implements Service {
 
                 }
 
+            } else {
+                //   System.out.println("file format is not matched");
+                errorMsg = "file format is not matching or technical issue.";
             }
-            else
-                         {
-                          //   System.out.println("file format is not matched");
-                             errorMsg="file format is not matching or technical issue.";
-                         }
 
             System.out.println(errorMsg);
             //System.out.println(count);
@@ -169,7 +172,7 @@ public class ServiceImpl implements Service {
         if (errorMsg.isEmpty() && count > 0) {
             dsaExportRepository.saveAll(dsaExports);
             commonResponse.setCode("0000");
-            commonResponse.setMsg("file uploaded successfully "+dsaExports.size()+" row uploaded.");
+            commonResponse.setMsg("file uploaded successfully " + dsaExports.size() + " row uploaded.");
         } else {
             if (errorMsg.isEmpty()) {
                 errorMsg = "file is empty or technical issue";
@@ -198,13 +201,13 @@ public class ServiceImpl implements Service {
             Workbook workbook = WorkbookFactory.create(inputStream);
             Sheet sheet = workbook.getSheetAt(0);
             Iterator<Row> rowIterator = sheet.iterator();
-           // rowIterator.next();
-            Row headerRow=rowIterator.next();
-            Boolean fileFormat=true;
+            // rowIterator.next();
+            Row headerRow = rowIterator.next();
+            Boolean fileFormat = true;
 
-            fileFormat= fileUtilittyValidation.pricePeggingFileFormat(headerRow);
-            System.out.println("true/false "+fileFormat);
-            if(fileFormat) {
+            fileFormat = fileUtilittyValidation.pricePeggingFileFormat(headerRow);
+            System.out.println("true/false " + fileFormat);
+            if (fileFormat) {
 
 
                 while (rowIterator.hasNext()) {
@@ -217,7 +220,7 @@ public class ServiceImpl implements Service {
 
                         Cell cell = row.getCell(i);
 
-                        errorMsg = (cell == null || cell.getCellType() == CellType.BLANK) ? "file upload error due to row no " + (row.getRowNum()+1) + " is empty" : "";
+                        errorMsg = (cell == null || cell.getCellType() == CellType.BLANK) ? "file upload error due to row no " + (row.getRowNum() + 1) + " is empty" : "";
 
 
                         if (errorMsg.isEmpty()) {
@@ -241,7 +244,7 @@ public class ServiceImpl implements Service {
                                     pricePeggingUpload.setAverageRate(row.getCell(4).toString());
                                     break;
                                 case 5:
-                                    pricePeggingUpload.setPinCode(row.getCell(5).toString().replace(".0",""));
+                                    pricePeggingUpload.setPinCode(row.getCell(5).toString().replace(".0", ""));
                                     break;
                             }
                         }
@@ -254,11 +257,9 @@ public class ServiceImpl implements Service {
                     peggingUploads.add(pricePeggingUpload);
 
                 }
-            }
-            else
-            {
+            } else {
                 System.out.println("file format is not matched");
-                errorMsg="file format is not matching or technical issue.";
+                errorMsg = "file format is not matching or technical issue.";
             }
 
             System.out.println(errorMsg);
@@ -271,7 +272,7 @@ public class ServiceImpl implements Service {
         if (errorMsg.isEmpty() && count > 0) {
             pricePeggingRepository.saveAll(peggingUploads);
             commonResponse.setCode("0000");
-            commonResponse.setMsg("file uploaded successfully "+ peggingUploads.size()+" row uploaded.");
+            commonResponse.setMsg("file uploaded successfully " + peggingUploads.size() + " row uploaded.");
         } else {
             if (errorMsg.isEmpty()) {
                 errorMsg = "file is empty or technical issue";
@@ -289,7 +290,7 @@ public class ServiceImpl implements Service {
     }
 
     @Override
-    public List<DsaExport> getAllExportData(String applicationNo,String uploadDate) {
+    public List<DsaExport> getAllExportData(String applicationNo, String uploadDate) {
         List<DsaExport> exportsData = new ArrayList<>();
 
 
@@ -311,7 +312,7 @@ public class ServiceImpl implements Service {
      * @return
      */
     @Override
-    public List<PricePegging> getAllPricePeggingData(String zone,String uploadDate) {
+    public List<PricePegging> getAllPricePeggingData(String zone, String uploadDate) {
         List<PricePegging> pricePeggings = new ArrayList<>();
 
 
@@ -333,10 +334,68 @@ public class ServiceImpl implements Service {
      */
     @Override
     public List getAllZone() {
-        List zones = null;
-
+        List zones;
         zones = pricePeggingRepository.getUniqeZones();
         return zones;
     }
+
+    @Override
+    public DashboardDistinctDetail getAllDashboarDetail() {
+        DashboardDistinctDetail dashboardDistinctDetail=new DashboardDistinctDetail();
+        DashboardDistinctDetail.DsaData dashboardDsa=new DashboardDistinctDetail.DsaData();
+        DashboardDistinctDetail.PeggingData peggingData=new DashboardDistinctDetail.PeggingData();
+
+try {
+
+
+    String peggingQuery = " SELECT  COUNT(DISTINCT pincode) AS distinctCountPincode,COUNT(DISTINCT zone) AS distinctCountZone,COUNT(DISTINCT location) AS distinctCountLocations, COUNT(DISTINCT upload_date) AS distinctCountUploadDate from price_pegging";
+    String dsaQuery = "SELECT  COUNT(DISTINCT property_pincode) AS distinctCountPincode,COUNT(DISTINCT zone) AS distinctCountZone,COUNT(DISTINCT location) AS distinctCountLocations,COUNT(DISTINCT region) AS distinctCountRegion, COUNT(DISTINCT upload_date) As distinctCountUploadDate from dsa_export";
+
+    peggingData  = jdbcTemplate.queryForObject(peggingQuery, new MyRowMapperPegging());
+    dashboardDsa = jdbcTemplate.queryForObject(dsaQuery, new MyRowMapperDsa());
+
+
+    dashboardDistinctDetail.setPeggingData(peggingData);
+    dashboardDistinctDetail.setDsaData(dashboardDsa);
 }
+catch (Exception e)
+{
+    System.out.println(e);
+}
+
+        return dashboardDistinctDetail;
+    }
+
+
+
+    public class MyRowMapperPegging implements RowMapper<DashboardDistinctDetail.PeggingData> {
+        @Override
+        public DashboardDistinctDetail.PeggingData mapRow(ResultSet resultSet, int rowNum) throws SQLException {
+            DashboardDistinctDetail.PeggingData dashboardPegging = new DashboardDistinctDetail.PeggingData();
+            dashboardPegging.setPeggingZoneTotal(resultSet.getString("distinctCountZone"));
+            dashboardPegging.setPeggingPincodeTotal(resultSet.getString("distinctCountPincode"));
+            dashboardPegging.setPeggingLocationsTotal(resultSet.getString("distinctCountLocations"));
+            dashboardPegging.setPeggingQuartersTotal(resultSet.getString("distinctCountUploadDate"));
+
+            return dashboardPegging;
+        }
+    }
+
+
+    public class MyRowMapperDsa implements RowMapper<DashboardDistinctDetail.DsaData> {
+        @Override
+        public DashboardDistinctDetail.DsaData mapRow(ResultSet resultSet, int rowNum) throws SQLException {
+            DashboardDistinctDetail.DsaData dashboardDsa = new DashboardDistinctDetail.DsaData();
+            dashboardDsa.setDsaPincodeTotal(resultSet.getString("distinctCountPincode"));
+            dashboardDsa.setDsaZoneTotal(resultSet.getString("distinctCountZone"));
+            dashboardDsa.setDsaRegionTotal(resultSet.getString("distinctCountRegion"));
+            dashboardDsa.setDsaLocationsTotal(resultSet.getString("distinctCountLocations"));
+            dashboardDsa.setDsaQuartersTotal(resultSet.getString("distinctCountUploadDate"));
+
+            return dashboardDsa;
+        }
+    }
+}
+
+
 

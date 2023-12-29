@@ -2,8 +2,7 @@ package com.price.pegging.Service;
 
 import com.price.pegging.Entity.DsaExport;
 import com.price.pegging.Entity.PricePegging;
-import com.price.pegging.Model.CommonResponse;
-import com.price.pegging.Model.UserDetail;
+import com.price.pegging.Model.*;
 import com.price.pegging.Entity.User;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,4 +22,6 @@ public interface Service {
     List<PricePegging> getAllPricePeggingData(String zone,String uploadDate);
 
     List getAllZone();
+
+    DashboardDistinctDetail getAllDashboarDetail();
 }

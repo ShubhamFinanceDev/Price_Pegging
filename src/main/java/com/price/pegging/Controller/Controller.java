@@ -2,20 +2,15 @@ package com.price.pegging.Controller;
 
 import com.price.pegging.Entity.DsaExport;
 import com.price.pegging.Entity.PricePegging;
-import com.price.pegging.Model.CommonResponse;
-import com.price.pegging.Model.ExportModel;
-import com.price.pegging.Model.PricePeggingData;
-import com.price.pegging.Model.UserDetail;
+import com.price.pegging.Model.*;
 import com.price.pegging.Entity.User;
 import com.price.pegging.Service.Service;
-import org.aspectj.apache.bcel.classfile.Module;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.util.JavaScriptUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -136,12 +131,34 @@ catch (Exception e)
         return new ResponseEntity<ExportModel>(dsaExportData, HttpStatus.OK);
 
     }
-@CrossOrigin
+    @CrossOrigin
     @GetMapping("/allZone")
     public List zoneDetail()
     {
         return service.getAllZone();
     }
 
+    @CrossOrigin
+    @GetMapping("/dashboardDistinctDetail")
+    DashboardDistinctDetail dashboardDetail()
+    {
+        DashboardDistinctDetail dashboardDistinctDetail=new DashboardDistinctDetail();
+        dashboardDistinctDetail=service.getAllDashboarDetail();
+
+        return dashboardDistinctDetail;
+    }
+
+//    @CrossOrigin
+//    @GetMapping("/getChartForM")
+//    Testing getPincodeLocation()
+//    {
+//        Testing dashboardDetail=new Testing();
+//
+//        dashboardDetail=service.getAllDashboarDetail();
+//        return dashboardDetail;
+//    }
+//
+//
 }
+
 

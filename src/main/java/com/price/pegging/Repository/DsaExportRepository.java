@@ -1,7 +1,6 @@
 package com.price.pegging.Repository;
 
 import com.price.pegging.Entity.DsaExport;
-import com.price.pegging.Entity.PricePegging;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -17,4 +16,5 @@ public interface DsaExportRepository extends JpaRepository<DsaExport,Long> {
     List<DsaExport> findByApllicationAndUpdatedDate(String applicationNo, String updateddate);
     @Query("select pp from DsaExport pp where pp.uploadDate=:updateddate")
     List<DsaExport> findByUpdatedDate(String updateddate);
+
 }
