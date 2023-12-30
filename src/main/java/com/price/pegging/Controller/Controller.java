@@ -148,17 +148,17 @@ catch (Exception e)
         return dashboardDistinctDetail;
     }
 
-//    @CrossOrigin
-//    @GetMapping("/getChartForM")
-//    Testing getPincodeLocation()
-//    {
-//        Testing dashboardDetail=new Testing();
-//
-//        dashboardDetail=service.getAllDashboarDetail();
-//        return dashboardDetail;
-//    }
-//
-//
+    @CrossOrigin
+    @GetMapping("/dashboardGraphCount")
+    DashboardGraph dashboardGraph()
+    {
+        DashboardGraph dashboardGraph=new DashboardGraph();
+
+        dashboardGraph=service.countTotalByDate();
+        return dashboardGraph;
+    }
+
+
 }
 
 

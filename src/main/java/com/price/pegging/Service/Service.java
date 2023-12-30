@@ -24,4 +24,6 @@ public interface Service {
     List getAllZone();
 
     DashboardDistinctDetail getAllDashboarDetail();
+
+    DashboardGraph countTotalByDate();
 }

@@ -11,6 +11,8 @@ import com.price.pegging.Repository.UserRepository;
 import com.price.pegging.Service.Service;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.batch.BatchProperties;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -395,6 +397,33 @@ catch (Exception e)
             return dashboardDsa;
         }
     }
+
+
+    @Override
+    public DashboardGraph countTotalByDate() {
+
+        DashboardGraph dashboardGraph=new DashboardGraph();
+        List<DashboardGraph.DsaData> dsaData=new ArrayList<>();
+        List<DashboardGraph.PeggingData> peggingData=new ArrayList<>();
+try {
+    String dsaQuery = "SELECT date_format(upload_date,'%Y-%M') date,COUNT(*)total FROM dsa_export group BY date_format(upload_date,'%Y-%M')";
+    String peggingQuery = "SELECT date_format(upload_date,'%Y-%M') Date,COUNT(*)total FROM price_pegging group BY date_format(upload_date,'%Y-%M')";
+
+    dsaData = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DashboardGraph.DsaData.class));
+    peggingData = jdbcTemplate.query(peggingQuery, new BeanPropertyRowMapper<>(DashboardGraph.PeggingData.class));
+}
+catch (Exception e) {
+    System.out.println(e);
+}
+
+        dashboardGraph.setDsaData(dsaData);
+        dashboardGraph.setPeggingData(peggingData);
+
+        return  dashboardGraph;
+    }
+
+
+
 }
 
 
