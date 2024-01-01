@@ -6,6 +6,8 @@ public class DashboardDistinctDetail {
 
     private DsaData dsaData;
     private PeggingData peggingData;
+    private String msg;
+    private String code;
     @Data
     public static class DsaData {
         private String dsaPincodeTotal;

@@ -1,6 +1,7 @@
 package com.price.pegging.Repository;
 
 import com.price.pegging.Entity.PricePegging;
+import com.price.pegging.Model.FilterModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -21,5 +22,6 @@ public interface PricePeggingRepository extends JpaRepository<PricePegging,Long>
     List<PricePegging> findByZoneAndUpdatedDate(String zone, String updateddate);
     @Query("select pp from PricePegging pp where pp.uploadDate=:updateddate")
     List<PricePegging> findByUpdatedDate(String updateddate);
-
+ @Query("select distinct pp.zone  from PricePegging pp ")
+ List getAllDistictZone();
 }

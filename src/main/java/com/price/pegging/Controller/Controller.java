@@ -109,12 +109,12 @@ catch (Exception e)
 
 @CrossOrigin
     @GetMapping("/exportData")
-    public ResponseEntity<ExportModel> exportData(@RequestParam(name="applicationNo",required = false) String applicationNo,@RequestParam(name="uploadDate",required = false) String uploadDate)
+    public ResponseEntity<ExportModel> exportData(@RequestParam(name="applicationNo",required = false) String applicationNo,@RequestParam(name="uploadDate",required = false) String uploadDate,@RequestParam(name="zone",required = false) String zone,@RequestParam(name="region",required = false) String region)
     {
         List<DsaExport> dsaExports= new ArrayList<>();
         ExportModel dsaExportData= new ExportModel();
 
-        dsaExports=service.getAllExportData(applicationNo,uploadDate);
+        dsaExports=service.getAllExportData(applicationNo,uploadDate,region,zone);
         System.out.println(dsaExports.size());
         if(dsaExports.isEmpty())
         {
@@ -138,6 +138,13 @@ catch (Exception e)
         return service.getAllZone();
     }
 
+//    @CrossOrigin
+//    @GetMapping("/region")
+//    public List regionDetail()
+//    {
+//        return service.regionAll();
+//    }
+
     @CrossOrigin
     @GetMapping("/dashboardDistinctDetail")
     DashboardDistinctDetail dashboardDetail()
@@ -158,6 +165,15 @@ catch (Exception e)
         return dashboardGraph;
     }
 
+    @CrossOrigin
+    @GetMapping("/filterOption")
+    FilterModel getFilterData()
+    {
+        FilterModel filterModel=new FilterModel();
+
+        filterModel=service.getAllFilterData();
+        return filterModel;
+    }
 
 }
 

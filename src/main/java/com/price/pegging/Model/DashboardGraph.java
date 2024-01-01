@@ -6,10 +6,25 @@ import java.util.List;
 
 @Data
 public class DashboardGraph {
-    private List<DsaData> dsaData;
-    private List<PeggingData> peggingData;
+    private DsaData dsaData;
+    private PeggingData peggingData;
+    private String msg;
+    private String code;
   @Data
     public static class DsaData
+    {
+        private List<Pincode> pincode;
+        private List<Location> location;
+    }
+    @Data
+    public static class Pincode
+    {
+        private String date;
+        private String total;
+    }
+
+    @Data
+    public static class Location
     {
         private String date;
         private String total;
@@ -17,8 +32,8 @@ public class DashboardGraph {
     @Data
     public static class PeggingData
     {
-        private String date;
-        private String total;
+        private List<Pincode> pincode;
+        private List<Location> location;
     }
 
 }

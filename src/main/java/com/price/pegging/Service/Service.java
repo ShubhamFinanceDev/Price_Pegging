@@ -17,7 +17,7 @@ public interface Service {
 
     CommonResponse peggingFileReadData(MultipartFile file);
 
-    List<DsaExport> getAllExportData(String applicationNo,String uploadDate);
+    List<DsaExport> getAllExportData(String applicationNo,String uploadDate,String region,String zone);
 
     List<PricePegging> getAllPricePeggingData(String zone,String uploadDate);
 
@@ -26,4 +26,7 @@ public interface Service {
     DashboardDistinctDetail getAllDashboarDetail();
 
     DashboardGraph countTotalByDate();
+
+
+    FilterModel getAllFilterData();
 }

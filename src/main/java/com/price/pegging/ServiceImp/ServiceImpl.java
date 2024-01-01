@@ -38,6 +38,7 @@ public class ServiceImpl implements Service {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
     @Override
     public List<User> userExist(String userEmail) {
 
@@ -292,19 +293,22 @@ public class ServiceImpl implements Service {
     }
 
     @Override
-    public List<DsaExport> getAllExportData(String applicationNo, String uploadDate) {
+    public List<DsaExport> getAllExportData(String applicationNo, String uploadDate,String region,String zone) {
         List<DsaExport> exportsData = new ArrayList<>();
 
 
-        if (applicationNo != null && uploadDate != null) {
-            exportsData = dsaExportRepository.findByApllicationAndUpdatedDate(applicationNo, uploadDate);
-        } else if (applicationNo != null) {
-            exportsData = dsaExportRepository.findByApplicationNo(applicationNo);
-        } else if (uploadDate != null) {
-            exportsData = dsaExportRepository.findByUpdatedDate(uploadDate);
-        } else {
-            exportsData = dsaExportRepository.findAll();
-        }
+//        if (applicationNo != null && uploadDate != null) {
+//            exportsData = dsaExportRepository.findByApllicationAndUpdatedDate(applicationNo, uploadDate);
+//        } else if (applicationNo != null) {
+//            exportsData = dsaExportRepository.findByApplicationNo(applicationNo);
+//        } else if (uploadDate != null) {
+//            exportsData = dsaExportRepository.findByUpdatedDate(uploadDate);
+//        } else {
+//            exportsData = dsaExportRepository.findAll();
+//        }
+
+       exportsData=dsaExportRepository.findByAll(applicationNo,uploadDate,region,zone);
+
 
         return exportsData;
     }
@@ -343,31 +347,47 @@ public class ServiceImpl implements Service {
 
     @Override
     public DashboardDistinctDetail getAllDashboarDetail() {
-        DashboardDistinctDetail dashboardDistinctDetail=new DashboardDistinctDetail();
-        DashboardDistinctDetail.DsaData dashboardDsa=new DashboardDistinctDetail.DsaData();
-        DashboardDistinctDetail.PeggingData peggingData=new DashboardDistinctDetail.PeggingData();
+        DashboardDistinctDetail dashboardDistinctDetail = new DashboardDistinctDetail();
+        DashboardDistinctDetail.DsaData dashboardDsa = new DashboardDistinctDetail.DsaData();
+        DashboardDistinctDetail.PeggingData peggingData = new DashboardDistinctDetail.PeggingData();
 
-try {
-
-
-    String peggingQuery = " SELECT  COUNT(DISTINCT pincode) AS distinctCountPincode,COUNT(DISTINCT zone) AS distinctCountZone,COUNT(DISTINCT location) AS distinctCountLocations, COUNT(DISTINCT upload_date) AS distinctCountUploadDate from price_pegging";
-    String dsaQuery = "SELECT  COUNT(DISTINCT property_pincode) AS distinctCountPincode,COUNT(DISTINCT zone) AS distinctCountZone,COUNT(DISTINCT location) AS distinctCountLocations,COUNT(DISTINCT region) AS distinctCountRegion, COUNT(DISTINCT upload_date) As distinctCountUploadDate from dsa_export";
-
-    peggingData  = jdbcTemplate.queryForObject(peggingQuery, new MyRowMapperPegging());
-    dashboardDsa = jdbcTemplate.queryForObject(dsaQuery, new MyRowMapperDsa());
+        try {
 
 
-    dashboardDistinctDetail.setPeggingData(peggingData);
-    dashboardDistinctDetail.setDsaData(dashboardDsa);
-}
-catch (Exception e)
-{
-    System.out.println(e);
-}
+            String peggingQuery = " SELECT  COUNT(DISTINCT pincode) AS distinctCountPincode,COUNT(DISTINCT zone) AS distinctCountZone,COUNT(DISTINCT location) AS distinctCountLocations, COUNT(DISTINCT upload_date) AS distinctCountUploadDate from price_pegging";
+            String dsaQuery = "SELECT  COUNT(DISTINCT property_pincode) AS distinctCountPincode,COUNT(DISTINCT zone) AS distinctCountZone,COUNT(DISTINCT location) AS distinctCountLocations,COUNT(DISTINCT region) AS distinctCountRegion, COUNT(DISTINCT upload_date) As distinctCountUploadDate from dsa_export";
+
+            peggingData = jdbcTemplate.queryForObject(peggingQuery, new MyRowMapperPegging());
+            dashboardDsa = jdbcTemplate.queryForObject(dsaQuery, new MyRowMapperDsa());
+
+            if (dashboardDsa == null && peggingData == null) {
+                dashboardDistinctDetail.setMsg("Data found successfully.");
+                dashboardDistinctDetail.setCode("0000");
+            } else {
+                if (dashboardDsa == null) {
+                    dashboardDistinctDetail.setMsg("Data not available  for Dsa.");
+                    dashboardDistinctDetail.setCode("1111");
+                } else {
+                    if (peggingData == null) {
+                        dashboardDistinctDetail.setMsg("Data is not found for Pegging.");
+                        dashboardDistinctDetail.setCode("1111");
+                    } else
+
+                        dashboardDistinctDetail.setMsg("Data found successfully.");
+                    dashboardDistinctDetail.setCode("0000");
+
+                }
+
+            }
+
+            dashboardDistinctDetail.setPeggingData(peggingData);
+            dashboardDistinctDetail.setDsaData(dashboardDsa);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
 
         return dashboardDistinctDetail;
     }
-
 
 
     public class MyRowMapperPegging implements RowMapper<DashboardDistinctDetail.PeggingData> {
@@ -402,26 +422,97 @@ catch (Exception e)
     @Override
     public DashboardGraph countTotalByDate() {
 
-        DashboardGraph dashboardGraph=new DashboardGraph();
-        List<DashboardGraph.DsaData> dsaData=new ArrayList<>();
-        List<DashboardGraph.PeggingData> peggingData=new ArrayList<>();
-try {
-    String dsaQuery = "SELECT date_format(upload_date,'%Y-%M') date,COUNT(*)total FROM dsa_export group BY date_format(upload_date,'%Y-%M')";
-    String peggingQuery = "SELECT date_format(upload_date,'%Y-%M') Date,COUNT(*)total FROM price_pegging group BY date_format(upload_date,'%Y-%M')";
+        DashboardGraph dashboardGraph = new DashboardGraph();
+        DashboardGraph.DsaData dsaData = new DashboardGraph.DsaData();
+        DashboardGraph.PeggingData peggingData = new DashboardGraph.PeggingData();
 
-    dsaData = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DashboardGraph.DsaData.class));
-    peggingData = jdbcTemplate.query(peggingQuery, new BeanPropertyRowMapper<>(DashboardGraph.PeggingData.class));
-}
-catch (Exception e) {
-    System.out.println(e);
-}
 
+        List<DashboardGraph.Pincode> pincodesDsa = new ArrayList<>();
+        List<DashboardGraph.Location> locationsDsa = new ArrayList<>();
+        List<DashboardGraph.Pincode> pincodesPegging = new ArrayList<>();
+        List<DashboardGraph.Location> locationsPeeging = new ArrayList<>();
+
+        List<DashboardGraph.Pincode> pincodes = new ArrayList<>();
+        List<DashboardGraph.Location> locations = new ArrayList<>();
+
+
+//        List<DashboardGraph.PeggingData> peggingData=new ArrayList<>();
+
+        try {
+            String dsaQuery = "SELECT date_format(upload_date,'%Y-%M') date,COUNT(property_pincode)total FROM dsa_export group BY date_format(upload_date,'%Y-%M')";
+            String peggingQuery = "SELECT date_format(upload_date,'%Y-%M') Date,COUNT(pincode)total FROM price_pegging group BY date_format(upload_date,'%Y-%M')";
+
+            String dsaQuery1 = "SELECT date_format(upload_date,'%Y-%M') date,COUNT(property_pincode)total FROM dsa_export group BY date_format(upload_date,'%Y-%M')";
+            String peggingQuery1 = "SELECT date_format(upload_date,'%Y-%M') Date,COUNT(pincode)total FROM price_pegging group BY date_format(upload_date,'%Y-%M')";
+
+
+            pincodesDsa = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DashboardGraph.Pincode.class));
+            pincodesPegging = jdbcTemplate.query(peggingQuery, new BeanPropertyRowMapper<>(DashboardGraph.Pincode.class));
+
+            locationsDsa = jdbcTemplate.query(dsaQuery1, new BeanPropertyRowMapper<>(DashboardGraph.Location.class));
+            locationsPeeging = jdbcTemplate.query(peggingQuery1, new BeanPropertyRowMapper<>(DashboardGraph.Location.class));
+//    peggingData = jdbcTemplate.query(peggingQuery, new BeanPropertyRowMapper<>(DashboardGraph.PeggingData.class));
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        dsaData.setPincode(pincodesDsa);
+        dsaData.setLocation(locationsDsa);
+        peggingData.setPincode(pincodesPegging);
+        peggingData.setLocation(locationsPeeging);
+
+        if (dsaData == null && peggingData == null) {
+            dashboardGraph.setMsg("Data is not found for Pegging.");
+            dashboardGraph.setCode("1111");
+        } else {
+            dashboardGraph.setMsg("Data found successfully.");
+            dashboardGraph.setCode("0000");
+        }
         dashboardGraph.setDsaData(dsaData);
         dashboardGraph.setPeggingData(peggingData);
 
-        return  dashboardGraph;
+        return dashboardGraph;
     }
 
+    @Override
+    public FilterModel getAllFilterData() {
+
+        FilterModel filterModel=new FilterModel();
+        FilterModel.Dsa dsa=new FilterModel.Dsa();
+        FilterModel.Pegging pegging=new FilterModel.Pegging();
+try {
+    List<FilterModel.Zone> zoneListPegging = new ArrayList<>();
+    zoneListPegging = pricePeggingRepository.getAllDistictZone();
+    pegging.setZone(zoneListPegging);
+
+    List<FilterModel.Zone> zoneListDsa = new ArrayList<>();
+    zoneListDsa = dsaExportRepository.getAllDistinctZone();
+    dsa.setZone(zoneListDsa);
+    List<FilterModel.Region> regionListDsa = new ArrayList<>();
+    regionListDsa = dsaExportRepository.getAllDistinctRegion();
+    dsa.setRegion(regionListDsa);
+}
+catch (Exception e)
+{
+    System.out.println(e);
+}
+        if(dsa==null && pegging== null)
+        {
+            filterModel.setMsg("Data is not found for Pegging.");
+            filterModel.setCode("1111");
+        }
+        else
+        {
+            filterModel.setMsg("Data found successfully.");
+            filterModel.setCode("0000");
+        }
+        filterModel.setDsa(dsa);
+        filterModel.setPegging(pegging);
+
+
+
+        return filterModel;
+    }
 
 
 }
