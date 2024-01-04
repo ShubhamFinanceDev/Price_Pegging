@@ -19,8 +19,10 @@ public interface Service {
 
     List<DsaExport> getAllExportData(String applicationNo,String uploadDate,String region,String zone);
 
-    List<PricePegging> getAllPricePeggingData(String zone,String uploadDate);
-
+    List<PricePegging> getAllPricePeggingDataByZone(String zone);
+    List<PricePegging> getAllPricePeggingDataByZonFromDateTo(String zone, String fromDate,String toDate);
+    public List<PricePegging> getAllPricePeggingDataByFromToDate(String fromDate,String toDate);
+    List<PricePegging> getAllPricePeggingDataByAll();
     List getAllZone();
 
     DashboardDistinctDetail getAllDashboarDetail();
@@ -29,4 +31,6 @@ public interface Service {
 
 
     FilterModel getAllFilterData();
+
+    List<PricePeggingLineChart> getDataByZoneLocation(String zone, String location);
 }

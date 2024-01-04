@@ -295,21 +295,7 @@ public class ServiceImpl implements Service {
     @Override
     public List<DsaExport> getAllExportData(String applicationNo, String uploadDate,String region,String zone) {
         List<DsaExport> exportsData = new ArrayList<>();
-
-
-//        if (applicationNo != null && uploadDate != null) {
-//            exportsData = dsaExportRepository.findByApllicationAndUpdatedDate(applicationNo, uploadDate);
-//        } else if (applicationNo != null) {
-//            exportsData = dsaExportRepository.findByApplicationNo(applicationNo);
-//        } else if (uploadDate != null) {
-//            exportsData = dsaExportRepository.findByUpdatedDate(uploadDate);
-//        } else {
-//            exportsData = dsaExportRepository.findAll();
-//        }
-
        exportsData=dsaExportRepository.findByAll(applicationNo,uploadDate,region,zone);
-
-
         return exportsData;
     }
 
@@ -318,22 +304,36 @@ public class ServiceImpl implements Service {
      * @return
      */
     @Override
-    public List<PricePegging> getAllPricePeggingData(String zone, String uploadDate) {
+    public List<PricePegging> getAllPricePeggingDataByZone(String zone) {
         List<PricePegging> pricePeggings = new ArrayList<>();
-
-
-        if (zone != null && uploadDate != null) {
-            pricePeggings = pricePeggingRepository.findByZoneAndUpdatedDate(zone, uploadDate);
-        } else if (zone != null) {
-            pricePeggings = pricePeggingRepository.findByZone(zone);
-        } else if (uploadDate != null) {
-            pricePeggings = pricePeggingRepository.findByUpdatedDate(uploadDate);
-        } else {
-            pricePeggings = pricePeggingRepository.findAll();
-        }
-
+        pricePeggings = pricePeggingRepository.findByZone(zone);
         return pricePeggings;
     }
+
+    public List<PricePegging> getAllPricePeggingDataByZonFromDateTo(String zone, String fromDate,String toDate) {
+        List<PricePegging> pricePeggings = new ArrayList<>();
+        pricePeggings = pricePeggingRepository.findByZoneAndFromDateTo(zone, fromDate,toDate);
+        return pricePeggings;
+    }
+
+    /**
+     * @param fromDate
+     * @param toDate
+     * @return
+     */
+
+    public List<PricePegging> getAllPricePeggingDataByFromToDate(String fromDate,String toDate) {
+        List<PricePegging> pricePeggings = new ArrayList<>();
+        pricePeggings = pricePeggingRepository.findByFromDateTo(fromDate,toDate);
+        return pricePeggings;
+    }
+
+    public List<PricePegging> getAllPricePeggingDataByAll() {
+        List<PricePegging> pricePeggings = new ArrayList<>();
+        pricePeggings = pricePeggingRepository.findAll();
+        return pricePeggings;
+    }
+
 
     /**
      * @return
@@ -512,6 +512,29 @@ catch (Exception e)
 
 
         return filterModel;
+    }
+
+    /**
+     * @param zone
+     * @param location
+     * @return
+     */
+    @Override
+    public List<PricePeggingLineChart> getDataByZoneLocation(String zone, String location) {
+        List<PricePeggingLineChart> pricePeggingLineCharts = new ArrayList<>();
+        try {
+
+
+        if (!(zone == null && location == null)) {
+            pricePeggingLineCharts = pricePeggingRepository.findDataByZoneLocation(zone, location);
+        }
+    }
+        catch (Exception e)
+        {
+            System.out.println(e);
+        }
+
+        return pricePeggingLineCharts;
     }
 
 

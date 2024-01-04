@@ -5,6 +5,7 @@ import com.price.pegging.Entity.PricePegging;
 import com.price.pegging.Model.*;
 import com.price.pegging.Entity.User;
 import com.price.pegging.Service.Service;
+import org.apache.commons.collections4.map.HashedMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +14,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class Controller {
@@ -78,32 +81,43 @@ catch (Exception e)
     }
 @CrossOrigin
     @GetMapping("/pricePeggingData")
-    public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name="zone",required = false) String zone,@RequestParam(name="uploadDate",required = false) String uploadDate)
+    public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name="zone",required = false) String zone,@RequestParam(name="fromDate",required = false) String fromDate,@RequestParam(name="toDate",required = false) String toDate)
     {
         List<PricePegging> pricePeggingDatas=new ArrayList<>();
         PricePeggingData pricePeggingData= new PricePeggingData();
 
-        pricePeggingDatas =service.getAllPricePeggingData(zone,uploadDate);
-
-        System.out.println(pricePeggingDatas.size());
-        if(pricePeggingDatas.isEmpty())
-        {
+        if(zone !=null && fromDate!=null && toDate !=null) {
+            pricePeggingDatas=service.getAllPricePeggingDataByZonFromDateTo(zone,fromDate,toDate);
+        }
+      else if(zone ==null && fromDate ==null && toDate ==null) {
+            pricePeggingDatas=service.getAllPricePeggingDataByAll();
+        }
+       else if(zone !=null && (fromDate==null && toDate==null)) {
+            pricePeggingDatas=service.getAllPricePeggingDataByZone(zone);
+        }
+        else if(fromDate !=null && toDate !=null) {
+            pricePeggingDatas=service.getAllPricePeggingDataByFromToDate(fromDate,toDate);
+        }
+        else {
             pricePeggingData.setCode("1111");
-            pricePeggingData.setMsg("Data not found");
-            pricePeggingData.setPricePeggingList(null);
+            pricePeggingData.setMsg("Please select required field");
         }
-        else
-        {
-            pricePeggingData.setCode("0000");
-            pricePeggingData.setMsg("Data found successfully");
-            pricePeggingData.setPricePeggingList(pricePeggingDatas);
-        }
+
+
+        if(pricePeggingData.getCode()==null) {
+                    if (pricePeggingDatas.isEmpty()) {
+                        pricePeggingData.setCode("1111");
+                        pricePeggingData.setMsg("Data not found");
+                        pricePeggingData.setPricePeggingList(null);
+                    } else {
+                        pricePeggingData.setCode("0000");
+                        pricePeggingData.setMsg("Data found successfully");
+                        pricePeggingData.setPricePeggingList(pricePeggingDatas);
+                    }
+                }
         return new ResponseEntity<PricePeggingData>(pricePeggingData, HttpStatus.OK);
 
     }
-
-
-
 
 
 
@@ -173,6 +187,29 @@ catch (Exception e)
 
         filterModel=service.getAllFilterData();
         return filterModel;
+    }
+
+    @GetMapping("/lineChartForPricePegging/{zone}/{location}")
+    public CommonResponseForLineChart getDataForLineChart(@PathVariable String zone,@PathVariable String location)
+    {
+        CommonResponseForLineChart commonResponseForLineChart=new CommonResponseForLineChart();
+        List<PricePeggingLineChart> pricePeggingLineCharts=new ArrayList<>();
+        pricePeggingLineCharts=service.getDataByZoneLocation(zone,location);
+        if(!(pricePeggingLineCharts.isEmpty()))
+        {
+            commonResponseForLineChart.setCode("0000");
+            commonResponseForLineChart.setMsg("Data found successfully.");
+            commonResponseForLineChart.setPricePeggingLineCharts(pricePeggingLineCharts);
+        }
+        else
+        {
+            commonResponseForLineChart.setCode("1111");
+            commonResponseForLineChart.setMsg("Data Not found.");
+            commonResponseForLineChart.setPricePeggingLineCharts(pricePeggingLineCharts);
+        }
+
+
+        return commonResponseForLineChart;
     }
 
 }
