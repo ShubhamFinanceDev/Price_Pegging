@@ -27,7 +27,7 @@ public interface PricePeggingRepository extends JpaRepository<PricePegging,Long>
  @Query("select distinct pp.zone  from PricePegging pp ")
  List getAllDistictZone();
 
- @Query("select new com.price.pegging.Model.PricePeggingLineChart(pp.minimumRate,pp.maximumRate,pp.uploadDate,pp.averageRate) from PricePegging pp where pp.zone=:zone AND pp.locations=:location")
+ @Query("select new com.price.pegging.Model.PricePeggingLineChart(pp.minimumRate,pp.maximumRate,pp.averageRate,pp.uploadDate) from PricePegging pp where pp.zone=:zone AND pp.locations=:location")
  List<PricePeggingLineChart> findDataByZoneLocation(String zone,String location);
 
 
