@@ -204,14 +204,12 @@ public class ServiceImpl implements Service {
             Workbook workbook = WorkbookFactory.create(inputStream);
             Sheet sheet = workbook.getSheetAt(0);
             Iterator<Row> rowIterator = sheet.iterator();
-            // rowIterator.next();
+//             rowIterator.next();
             Row headerRow = rowIterator.next();
             Boolean fileFormat = true;
-
             fileFormat = fileUtilittyValidation.pricePeggingFileFormat(headerRow);
             System.out.println("true/false " + fileFormat);
             if (fileFormat) {
-
 
                 while (rowIterator.hasNext()) {
 
@@ -219,35 +217,40 @@ public class ServiceImpl implements Service {
                     Row row = rowIterator.next();
                     PricePegging pricePeggingUpload = new PricePegging();
 
-                    for (int i = 0; i < 6; i++) {
+                    for (int i = 0; i < 9; i++) {
 
                         Cell cell = row.getCell(i);
 
                         errorMsg = (cell == null || cell.getCellType() == CellType.BLANK) ? "file upload error due to row no " + (row.getRowNum() + 1) + " is empty" : "";
 
-
                         if (errorMsg.isEmpty()) {
                             switch (i) {
-                                //    case 0: pricePeggingUpload.setsNo(Long.valueOf(row.getCell(0).toString()));
-                                //            System.out.println(Long.valueOf(row.getCell(0).toString()));
-                                //   break;
-                                case 0:
-                                    pricePeggingUpload.setZone(row.getCell(0).toString());
-                                    break;
+//                                    case 0: pricePeggingUpload.setsNo(Long.valueOf(row.getCell(0).toString()));//            System.out.println(Long.valueOf(row.getCell(0).toString()));
+//                                   break;
                                 case 1:
-                                    pricePeggingUpload.setLocations(row.getCell(1).toString());
+                                    pricePeggingUpload.setZone(row.getCell(1).toString());
                                     break;
                                 case 2:
-                                    pricePeggingUpload.setMinimumRate(row.getCell(2).toString());
+                                    pricePeggingUpload.setRegion(row.getCell(2).toString());   //Add logic of region column
                                     break;
                                 case 3:
-                                    pricePeggingUpload.setMaximumRate(row.getCell(3).toString());
+                                    pricePeggingUpload.setZoneDist(row.getCell(3).toString());
                                     break;
                                 case 4:
-                                    pricePeggingUpload.setAverageRate(row.getCell(4).toString());
+                                    pricePeggingUpload.setLocations(row.getCell(4).toString());
                                     break;
                                 case 5:
-                                    pricePeggingUpload.setPinCode(row.getCell(5).toString().replace(".0", ""));
+                                    pricePeggingUpload.setMinimumRate(row.getCell(5).toString());
+                                    break;
+
+                                case 6:
+                                    pricePeggingUpload.setAverageRate(row.getCell(6).toString());
+                                    break;
+                                case 7:
+                                    pricePeggingUpload.setMaximumRate(row.getCell(7).toString());
+                                    break;
+                                case 8:
+                                    pricePeggingUpload.setPinCode(row.getCell(8).toString().replace(".0", ""));
                                     break;
                             }
                         }
