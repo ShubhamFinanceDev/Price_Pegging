@@ -304,33 +304,15 @@ public class ServiceImpl implements Service {
      * @return
      */
     @Override
-    public List<PricePegging> getAllPricePeggingDataByZone(String zone) {
+    public List<PricePegging> getAllPricePeggingDataByZoneAndRegion(String zone,String region) {
         List<PricePegging> pricePeggings = new ArrayList<>();
-        pricePeggings = pricePeggingRepository.findByZone(zone);
+        pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone,region);
         return pricePeggings;
     }
 
-    public List<PricePegging> getAllPricePeggingDataByZonFromDateTo(String zone, String fromDate,String toDate) {
+    public List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, String fromDate,String toDate,String region) {
         List<PricePegging> pricePeggings = new ArrayList<>();
-        pricePeggings = pricePeggingRepository.findByZoneAndFromDateTo(zone, fromDate,toDate);
-        return pricePeggings;
-    }
-
-    /**
-     * @param fromDate
-     * @param toDate
-     * @return
-     */
-
-    public List<PricePegging> getAllPricePeggingDataByFromToDate(String fromDate,String toDate) {
-        List<PricePegging> pricePeggings = new ArrayList<>();
-        pricePeggings = pricePeggingRepository.findByFromDateTo(fromDate,toDate);
-        return pricePeggings;
-    }
-
-    public List<PricePegging> getAllPricePeggingDataByAll() {
-        List<PricePegging> pricePeggings = new ArrayList<>();
-        pricePeggings = pricePeggingRepository.findAll();
+        pricePeggings = pricePeggingRepository.findByZoneAndFromDateTo(zone, fromDate,toDate,region);
         return pricePeggings;
     }
 
@@ -482,8 +464,12 @@ public class ServiceImpl implements Service {
         FilterModel.Pegging pegging=new FilterModel.Pegging();
 try {
     List<FilterModel.Zone> zoneListPegging = new ArrayList<>();
-    zoneListPegging = pricePeggingRepository.getAllDistictZone();
+    zoneListPegging = pricePeggingRepository.getAllDistinctZone();
     pegging.setZone(zoneListPegging);
+    List<FilterModel.Region> regionListpegging = new ArrayList<>();
+    regionListpegging = pricePeggingRepository.getAllDistinctRegion();
+    pegging.setRegion(regionListpegging);
+
 
     List<FilterModel.Zone> zoneListDsa = new ArrayList<>();
     zoneListDsa = dsaExportRepository.getAllDistinctZone();

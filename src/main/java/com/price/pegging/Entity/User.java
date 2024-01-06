@@ -8,8 +8,6 @@ import lombok.Data;
 
 
 @Entity
-
-
 @Table(name="USER",schema="pricepegging")
 @Data
 public class User {

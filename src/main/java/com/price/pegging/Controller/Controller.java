@@ -23,7 +23,7 @@ public class Controller {
 
     @Autowired
     private Service service;
-@CrossOrigin
+    @CrossOrigin
     @PostMapping("/loginValidation")
     public ResponseEntity<UserDetail> loginAuthentication(@RequestBody User userRequest)
     {
@@ -61,7 +61,7 @@ catch (Exception e)
         return new ResponseEntity<UserDetail>(commonResponse, HttpStatus.OK);
     }
 
-@CrossOrigin
+    @CrossOrigin
     @PostMapping("/dsaExportUpload")
     public ResponseEntity<CommonResponse> exportFileUpload(@RequestParam("file") MultipartFile file)
     {
@@ -70,7 +70,7 @@ catch (Exception e)
 
         return new ResponseEntity<CommonResponse>(commonResponse, HttpStatus.OK);
     }
-@CrossOrigin
+    @CrossOrigin
     @PostMapping("/pricePeggingUpload")
     public ResponseEntity<CommonResponse> peggingFileUpload(@RequestParam("file") MultipartFile file)
     {
@@ -79,30 +79,26 @@ catch (Exception e)
 
         return new ResponseEntity<CommonResponse>(commonResponse, HttpStatus.OK);
     }
-@CrossOrigin
+    @CrossOrigin
     @GetMapping("/pricePeggingData")
-    public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name="zone",required = false) String zone,@RequestParam(name="fromDate",required = false) String fromDate,@RequestParam(name="toDate",required = false) String toDate)
+    public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name="zone",required = false) String zone,@RequestParam(name="fromDate",required = false) String fromDate,@RequestParam(name="toDate",required = false) String toDate,@RequestParam(name="region",required = false) String region)
     {
         List<PricePegging> pricePeggingDatas=new ArrayList<>();
         PricePeggingData pricePeggingData= new PricePeggingData();
 
-        if(zone !=null && fromDate!=null && toDate !=null) {
-            pricePeggingDatas=service.getAllPricePeggingDataByZonFromDateTo(zone,fromDate,toDate);
+        if(fromDate!=null && toDate !=null)
+        {
+            pricePeggingDatas=service.getAllPricePeggingDataByZonFromDateToRegion(zone,fromDate,toDate,region);
         }
-      else if(zone ==null && fromDate ==null && toDate ==null) {
-            pricePeggingDatas=service.getAllPricePeggingDataByAll();
+        else if(fromDate==null && toDate ==null)
+        {
+            pricePeggingDatas=service.getAllPricePeggingDataByZoneAndRegion(zone,region);
         }
-       else if(zone !=null && (fromDate==null && toDate==null)) {
-            pricePeggingDatas=service.getAllPricePeggingDataByZone(zone);
-        }
-        else if(fromDate !=null && toDate !=null) {
-            pricePeggingDatas=service.getAllPricePeggingDataByFromToDate(fromDate,toDate);
-        }
-        else {
+        else
+        {
             pricePeggingData.setCode("1111");
-            pricePeggingData.setMsg("Please select required field");
+           pricePeggingData.setMsg("Please select required field");
         }
-
 
         if(pricePeggingData.getCode()==null) {
                     if (pricePeggingDatas.isEmpty()) {
@@ -121,7 +117,7 @@ catch (Exception e)
 
 
 
-@CrossOrigin
+    @CrossOrigin
     @GetMapping("/exportData")
     public ResponseEntity<ExportModel> exportData(@RequestParam(name="applicationNo",required = false) String applicationNo,@RequestParam(name="uploadDate",required = false) String uploadDate,@RequestParam(name="zone",required = false) String zone,@RequestParam(name="region",required = false) String region)
     {
@@ -174,7 +170,6 @@ catch (Exception e)
     DashboardGraph dashboardGraph()
     {
         DashboardGraph dashboardGraph=new DashboardGraph();
-
         dashboardGraph=service.countTotalByDate();
         return dashboardGraph;
     }
@@ -188,7 +183,7 @@ catch (Exception e)
         filterModel=service.getAllFilterData();
         return filterModel;
     }
-
+    @CrossOrigin
     @GetMapping("/lineChartForPricePegging/{zone}/{location}")
     public CommonResponseForLineChart getDataForLineChart(@PathVariable String zone,@PathVariable String location)
     {

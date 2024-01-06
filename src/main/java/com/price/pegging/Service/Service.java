@@ -19,10 +19,8 @@ public interface Service {
 
     List<DsaExport> getAllExportData(String applicationNo,String uploadDate,String region,String zone);
 
-    List<PricePegging> getAllPricePeggingDataByZone(String zone);
-    List<PricePegging> getAllPricePeggingDataByZonFromDateTo(String zone, String fromDate,String toDate);
-    public List<PricePegging> getAllPricePeggingDataByFromToDate(String fromDate,String toDate);
-    List<PricePegging> getAllPricePeggingDataByAll();
+    List<PricePegging> getAllPricePeggingDataByZoneAndRegion(String zone,String region);
+    List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, String fromDate,String toDate,String region);
     List getAllZone();
 
     DashboardDistinctDetail getAllDashboarDetail();

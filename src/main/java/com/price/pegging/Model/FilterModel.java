@@ -13,7 +13,7 @@ public class FilterModel {
     public static class Pegging
     {
         private List<Zone> zone;
-
+        private List<Region> region;
     }
     @Data
     public static class Dsa
