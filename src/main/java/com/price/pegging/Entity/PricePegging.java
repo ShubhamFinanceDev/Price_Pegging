@@ -9,7 +9,6 @@ import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name="PRICE_PEGGING")
-@Data
 public class PricePegging {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,7 +17,8 @@ public class PricePegging {
 
     @Column(name="zone")
     private String zone;
-
+    @Column(name="region")
+    private String region;
     @Column(name="location")
     private String locations;
 
@@ -106,5 +106,12 @@ public class PricePegging {
 
     public void setPinCode(String pinCode) {
         this.pinCode = pinCode;
+    }
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 }
