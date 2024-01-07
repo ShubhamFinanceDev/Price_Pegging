@@ -14,6 +14,8 @@ import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -308,11 +310,12 @@ public class ServiceImpl implements Service {
     public List<DsaExport> getAllExportData(String applicationNo, String disbursalDate,String region,String zone) {
         List<DsaExport> exportsData = new ArrayList<>();
         String disbursalDateNew=null;
+        Pageable pageable = PageRequest.of(0, 100);
 
         if(!(disbursalDate==null)) {
              disbursalDateNew =dateFormatUtilty.changeDateFormate(disbursalDate);
         }
-       exportsData=dsaExportRepository.findByAll(applicationNo,disbursalDateNew,region,zone);
+       exportsData=dsaExportRepository.findByAll(applicationNo,disbursalDateNew,region,zone,pageable);
         return exportsData;
     }
 
@@ -323,13 +326,17 @@ public class ServiceImpl implements Service {
     @Override
     public List<PricePegging> getAllPricePeggingDataByZoneAndRegion(String zone,String region) {
         List<PricePegging> pricePeggings = new ArrayList<>();
-        pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone,region);
+        Pageable pageable = PageRequest.of(0, 100);
+
+        pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone,region,pageable);
         return pricePeggings;
     }
 
     public List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, String fromDate,String toDate,String region) {
         List<PricePegging> pricePeggings = new ArrayList<>();
-        pricePeggings = pricePeggingRepository.findByZoneAndFromDateTo(zone, fromDate,toDate,region);
+        Pageable pageable = PageRequest.of(0, 100);
+
+        pricePeggings = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate,toDate,region,pageable);
         return pricePeggings;
     }
 
@@ -480,17 +487,17 @@ public class ServiceImpl implements Service {
         FilterModel.Dsa dsa=new FilterModel.Dsa();
         FilterModel.Pegging pegging=new FilterModel.Pegging();
 try {
-    List<FilterModel.Zone> zoneListPegging = new ArrayList<>();
+    List<FilterModel.ZoneDis> zoneListPegging = new ArrayList<>();
     zoneListPegging = pricePeggingRepository.getAllDistinctZone();
-    pegging.setZone(zoneListPegging);
+    pegging.setZoneDis(zoneListPegging);
     List<FilterModel.Region> regionListpegging = new ArrayList<>();
     regionListpegging = pricePeggingRepository.getAllDistinctRegion();
     pegging.setRegion(regionListpegging);
 
 
-    List<FilterModel.Zone> zoneListDsa = new ArrayList<>();
+    List<FilterModel.ZoneDis> zoneListDsa = new ArrayList<>();
     zoneListDsa = dsaExportRepository.getAllDistinctZone();
-    dsa.setZone(zoneListDsa);
+    dsa.setZoneDis(zoneListDsa);
     List<FilterModel.Region> regionListDsa = new ArrayList<>();
     regionListDsa = dsaExportRepository.getAllDistinctRegion();
     dsa.setRegion(regionListDsa);

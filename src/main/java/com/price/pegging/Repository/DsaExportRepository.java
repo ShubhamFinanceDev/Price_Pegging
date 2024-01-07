@@ -2,6 +2,7 @@ package com.price.pegging.Repository;
 
 import com.price.pegging.Entity.DsaExport;
 import com.price.pegging.Model.FilterModel;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -27,5 +28,5 @@ public interface DsaExportRepository extends JpaRepository<DsaExport,Long> {
         "AND (:zone IS NULL OR d.zone = :zone) " +
         "AND (:region IS NULL OR d.region = :region) " +
         "AND (:applicationNo IS NULL OR d.applicationNo = :applicationNo)")
-    List<DsaExport> findByAll(String applicationNo, String disbursalDate, String region, String zone);
+    List<DsaExport> findByAll(String applicationNo, String disbursalDate, String region, String zone, Pageable pageable);
 }
