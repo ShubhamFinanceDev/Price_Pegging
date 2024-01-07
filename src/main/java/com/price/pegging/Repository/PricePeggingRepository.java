@@ -13,7 +13,7 @@ import java.util.List;
 @Repository
 public interface PricePeggingRepository extends JpaRepository<PricePegging,Long> {
 
-   @Query("select pp from PricePegging pp where (:zone IS NULL OR pp.zone = :zone) AND (:region IS NULL OR pp.region = :region)")
+   @Query("select pp from PricePegging pp where (:zone IS NULL OR pp.zoneDist = :zone) AND (:region IS NULL OR pp.region = :region)")
     List<PricePegging> findByZoneAndRegion(String zone,String region);
     @Query("select DISTINCT(pp.zone) pp from PricePegging pp")
     List getUniqeZones();
@@ -24,13 +24,13 @@ public interface PricePeggingRepository extends JpaRepository<PricePegging,Long>
   @Query("SELECT pp FROM PricePegging pp " +
           "WHERE (:fromDate IS NULL OR pp.uploadDate >= :fromDate) " +
           "AND (:toDate IS NULL OR pp.uploadDate <= :toDate) " +
-          "AND (:zone IS NULL OR pp.zone = :zone) " +
+          "AND (:zone IS NULL OR pp.zoneDist = :zone) " +
           "AND (:region IS NULL OR pp.region = :region)")
     List<PricePegging> findByZoneAndFromDateTo(String zone, String fromDate,String toDate,String region);
- @Query("select distinct pp.zone  from PricePegging pp ")
+ @Query("select distinct pp.zoneDist  from PricePegging pp ")
  List getAllDistinctZone();
 
- @Query("select new com.price.pegging.Model.PricePeggingLineChart(pp.minimumRate,pp.maximumRate,pp.averageRate,pp.uploadDate) from PricePegging pp where pp.zone=:zone AND pp.locations=:location and pp.uploadDate in (select distinct(rr.uploadDate) from  PricePegging rr)")
+ @Query("select new com.price.pegging.Model.PricePeggingLineChart(pp.minimumRate,pp.maximumRate,pp.averageRate,pp.uploadDate) from PricePegging pp where pp.zoneDist=:zone AND pp.locations=:location and pp.uploadDate in (select distinct(rr.uploadDate) from  PricePegging rr)")
  List<PricePeggingLineChart> findDataByZoneLocation(String zone,String location);
 @Query("select distinct pp.region  from PricePegging pp ")
 List getAllDistinctRegion();

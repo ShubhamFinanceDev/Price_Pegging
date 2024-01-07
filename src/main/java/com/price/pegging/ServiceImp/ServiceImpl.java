@@ -9,6 +9,7 @@ import com.price.pegging.Repository.DsaExportRepository;
 import com.price.pegging.Repository.PricePeggingRepository;
 import com.price.pegging.Repository.UserRepository;
 import com.price.pegging.Service.Service;
+import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
@@ -24,6 +25,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.zip.ZipFile;
+
 @org.springframework.stereotype.Service
 
 public class ServiceImpl implements Service {
@@ -80,7 +83,9 @@ public class ServiceImpl implements Service {
         int count = 0;
 
         try {
+
             InputStream inputStream = file.getInputStream();
+            ZipSecureFile.setMinInflateRatio(0);                //for zip bomb detected
             Workbook workbook = WorkbookFactory.create(inputStream);
             Sheet sheet = workbook.getSheetAt(0);
             Iterator<Row> rowIterator = sheet.iterator();
@@ -201,6 +206,7 @@ public class ServiceImpl implements Service {
 
         try {
             InputStream inputStream = file.getInputStream();
+            ZipSecureFile.setMinInflateRatio(0);                //for zip bomb detected
             Workbook workbook = WorkbookFactory.create(inputStream);
             Sheet sheet = workbook.getSheetAt(0);
             Iterator<Row> rowIterator = sheet.iterator();
@@ -339,7 +345,7 @@ public class ServiceImpl implements Service {
         try {
 
 
-            String peggingQuery = " SELECT  COUNT(DISTINCT pincode) AS distinctCountPincode,COUNT(DISTINCT zone) AS distinctCountZone,COUNT(DISTINCT location) AS distinctCountLocations, COUNT(DISTINCT upload_date) AS distinctCountUploadDate from price_pegging";
+            String peggingQuery = " SELECT  COUNT(DISTINCT pincode) AS distinctCountPincode,COUNT(DISTINCT zone_dist) AS distinctCountZone,COUNT(DISTINCT location) AS distinctCountLocations, COUNT(DISTINCT upload_date) AS distinctCountUploadDate from price_pegging";
             String dsaQuery = "SELECT  COUNT(DISTINCT property_pincode) AS distinctCountPincode,COUNT(DISTINCT zone) AS distinctCountZone,COUNT(DISTINCT location) AS distinctCountLocations,COUNT(DISTINCT region) AS distinctCountRegion, COUNT(DISTINCT upload_date) As distinctCountUploadDate from dsa_export";
 
             peggingData = jdbcTemplate.queryForObject(peggingQuery, new MyRowMapperPegging());
