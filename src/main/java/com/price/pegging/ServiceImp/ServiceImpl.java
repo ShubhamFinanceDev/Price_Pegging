@@ -9,6 +9,7 @@ import com.price.pegging.Repository.DsaExportRepository;
 import com.price.pegging.Repository.PricePeggingRepository;
 import com.price.pegging.Repository.UserRepository;
 import com.price.pegging.Service.Service;
+import com.price.pegging.Utilitty.DateFormatUtility;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,8 @@ public class ServiceImpl implements Service {
     private PricePeggingRepository pricePeggingRepository;
     @Autowired
     private FileUtilittyValidation fileUtilittyValidation;
+    @Autowired
+    private DateFormatUtility dateFormatUtilty;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -302,9 +305,14 @@ public class ServiceImpl implements Service {
     }
 
     @Override
-    public List<DsaExport> getAllExportData(String applicationNo, String uploadDate,String region,String zone) {
+    public List<DsaExport> getAllExportData(String applicationNo, String disbursalDate,String region,String zone) {
         List<DsaExport> exportsData = new ArrayList<>();
-       exportsData=dsaExportRepository.findByAll(applicationNo,uploadDate,region,zone);
+        String disbursalDateNew=null;
+
+        if(!(disbursalDate==null)) {
+             disbursalDateNew =dateFormatUtilty.changeDateFormate(disbursalDate);
+        }
+       exportsData=dsaExportRepository.findByAll(applicationNo,disbursalDateNew,region,zone);
         return exportsData;
     }
 

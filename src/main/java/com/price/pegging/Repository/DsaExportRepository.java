@@ -23,9 +23,9 @@ public interface DsaExportRepository extends JpaRepository<DsaExport,Long> {
  List getAllDistinctRegion();
 
 @Query("SELECT d FROM DsaExport d " +
-        "WHERE (:uploadDate IS NULL OR d.uploadDate = :uploadDate) " +
+        "WHERE (:disbursalDate IS NULL OR d.disbursalDate = :disbursalDate) " +
         "AND (:zone IS NULL OR d.zone = :zone) " +
         "AND (:region IS NULL OR d.region = :region) " +
         "AND (:applicationNo IS NULL OR d.applicationNo = :applicationNo)")
-    List<DsaExport> findByAll(String applicationNo, String uploadDate, String region, String zone);
+    List<DsaExport> findByAll(String applicationNo, String disbursalDate, String region, String zone);
 }
