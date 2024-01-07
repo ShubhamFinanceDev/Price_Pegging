@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name="PRICE_PEGGING")
+@Data
 public class PricePegging {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,6 +20,8 @@ public class PricePegging {
     private String zone;
     @Column(name="region")
     private String region;
+    @Column(name="zone_dist")
+    private String zoneDist;
     @Column(name="location")
     private String locations;
 
@@ -42,6 +45,14 @@ public class PricePegging {
         LocalDate currentDate = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         uploadDate = currentDate.format(formatter);
+    }
+
+    public String getZoneDist() {
+        return zoneDist;
+    }
+
+    public void setZoneDist(String zoneDist) {
+        this.zoneDist = zoneDist;
     }
 
     public String getUploadDate() {
