@@ -547,8 +547,26 @@ catch (Exception e)
         return pricePeggingLineCharts;
     }
 
+    @Override
+    public List<DsaExportData> getDataByPropertyPinCodeRegionZoneLocation(String propertyPincode, String region, String zone, String location) {
 
-}
+            List<DsaExportData> dsaExportData = new ArrayList<>();
+
+            try {
+                if (!(zone == null && location == null && propertyPincode == null && region == null )) {
+                    dsaExportData = dsaExportRepository.findByPropertyPinCodeRegionZoneLocation(propertyPincode, region, zone, location);
+
+                }
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+            return dsaExportData;
+
+        }
+    }
+
+
+
 
 
 

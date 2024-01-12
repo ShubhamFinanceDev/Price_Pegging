@@ -207,6 +207,27 @@ catch (Exception e)
         return commonResponseForLineChart;
     }
 
+
+    @GetMapping("/GetMapDsaData")
+    public CommonDsaExportData getDsaExportData(@RequestParam String propertyPincode, String region, String zone,String location){
+        List<DsaExportData> dsaExportData = new ArrayList<>();
+        CommonDsaExportData commonDsaExportData = new CommonDsaExportData();
+
+        dsaExportData = service.getDataByPropertyPinCodeRegionZoneLocation(propertyPincode, region, zone,location );
+        System.out.println(dsaExportData.size());
+
+        if (!(dsaExportData.isEmpty())){
+            commonDsaExportData.setCode("0000");
+            commonDsaExportData.setMsg("Data found successfully");
+            commonDsaExportData.setDsaExportData(dsaExportData);
+        } else {
+            commonDsaExportData.setCode("1111");
+            commonDsaExportData.setMsg("Data Not found");
+            commonDsaExportData.setDsaExportData(dsaExportData);
+        }
+        return commonDsaExportData;
+    }
+
 }
 
 

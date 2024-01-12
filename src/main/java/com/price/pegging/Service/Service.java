@@ -31,4 +31,5 @@ public interface Service {
     FilterModel getAllFilterData();
 
     List<PricePeggingLineChart> getDataByZoneLocation(String zone, String location);
+    List<DsaExportData> getDataByPropertyPinCodeRegionZoneLocation(String propertyPincode, String region, String zone, String location);
 }
