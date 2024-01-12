@@ -1,5 +1,6 @@
 package com.price.pegging.ServiceImp;
 
+<<<<<<< Updated upstream
 import com.price.pegging.Entity.DsaExport;
 import com.price.pegging.Entity.PricePegging;
 import com.price.pegging.FileUtilittyValidation;
@@ -12,18 +13,78 @@ import com.price.pegging.Service.Service;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
+=======
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+//import com.price.pegging.Utilitty.DateFormatUtility;
+import org.apache.poi.openxml4j.util.ZipSecureFile;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+>>>>>>> Stashed changes
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+<<<<<<< Updated upstream
 import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+=======
+import com.price.pegging.FileUtilittyValidation;
+import com.price.pegging.Entity.DsaExport;
+import com.price.pegging.Entity.PricePegging;
+import com.price.pegging.Entity.User;
+import com.price.pegging.Model.CommonResponse;
+import com.price.pegging.Model.DashboardDistinctDetail;
+import com.price.pegging.Model.DashboardGraph;
+import com.price.pegging.Model.DsaDataComparison;
+import com.price.pegging.Model.DsaValues;
+import com.price.pegging.Model.FilterModel;
+import com.price.pegging.Model.PricePeggingLineChart;
+import com.price.pegging.Model.UserDetail;
+import com.price.pegging.Repository.DsaExportRepository;
+import com.price.pegging.Repository.PricePeggingRepository;
+import com.price.pegging.Repository.UserRepository;
+import com.price.pegging.Service.Service;
+
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
+import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
+import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+
+>>>>>>> Stashed changes
 @org.springframework.stereotype.Service
 
 public class ServiceImpl implements Service {
@@ -35,6 +96,11 @@ public class ServiceImpl implements Service {
     private PricePeggingRepository pricePeggingRepository;
     @Autowired
     private FileUtilittyValidation fileUtilittyValidation;
+<<<<<<< Updated upstream
+=======
+//    @Autowired
+//    private DateFormatUtility dateFormatUtilty;
+>>>>>>> Stashed changes
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -293,6 +359,7 @@ public class ServiceImpl implements Service {
     }
 
     @Override
+<<<<<<< Updated upstream
     public List<DsaExport> getAllExportData(String applicationNo, String uploadDate,String region,String zone) {
         List<DsaExport> exportsData = new ArrayList<>();
 
@@ -310,16 +377,50 @@ public class ServiceImpl implements Service {
        exportsData=dsaExportRepository.findByAll(applicationNo,uploadDate,region,zone);
 
 
+=======
+    public List<DsaExport> getAllExportData(Integer pageNumber,String applicationNo, String uploadDate,String region,String zone) {
+        List<DsaExport> exportsData = new ArrayList<>();
+        String disbursalDateNew=null;
+        if(pageNumber == null) {
+        	pageNumber = 0;
+        }
+        Pageable pageable = PageRequest.of(pageNumber, 100);
+        
+        
+        if(uploadDate!=null) {
+        	DateTimeFormatter inputDate = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        	DateTimeFormatter outputDate = DateTimeFormatter.ofPattern("dd-MMM-yyyy");
+        	
+        	LocalDate localdate = LocalDate.parse(uploadDate, inputDate);
+        	
+        	String outPutdate = localdate.format(outputDate);
+        	  exportsData=dsaExportRepository.findByAll(applicationNo,outPutdate,region,zone, pageable);
+        }
+        else
+        {
+        	  exportsData=dsaExportRepository.findByAll(applicationNo,uploadDate,region,zone, pageable);
+        }
+>>>>>>> Stashed changes
         return exportsData;
     }
+    
 
     /**
      * @param zone
      * @return
      */
     @Override
+<<<<<<< Updated upstream
     public List<PricePegging> getAllPricePeggingData(String zone, String uploadDate) {
         List<PricePegging> pricePeggings = new ArrayList<>();
+=======
+    public List<PricePegging> getAllPricePeggingDataByZoneAndRegion(Integer pageNumber,String zone,String region) {
+        List<PricePegging> pricePeggings = new ArrayList<>();
+        if(pageNumber == null) {
+        	pageNumber = 0;
+        }
+        Pageable pageable = PageRequest.of(pageNumber, 100);
+>>>>>>> Stashed changes
 
 
         if (zone != null && uploadDate != null) {
@@ -335,6 +436,21 @@ public class ServiceImpl implements Service {
         return pricePeggings;
     }
 
+<<<<<<< Updated upstream
+=======
+    public List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(Integer pageNumber,String zone, String fromDate,String toDate,String region) {
+        List<PricePegging> pricePeggings = new ArrayList<>();
+        if(pageNumber == null) {
+        	pageNumber = 0;
+        }
+        Pageable pageable = PageRequest.of(pageNumber, 100);
+
+        pricePeggings = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate,toDate,region,pageable);
+        return pricePeggings;
+    }
+
+
+>>>>>>> Stashed changes
     /**
      * @return
      */
@@ -514,6 +630,220 @@ catch (Exception e)
         return filterModel;
     }
 
+<<<<<<< Updated upstream
+=======
+    /**
+     * @param zone
+     * @param location
+     * @return
+     */
+    @Override
+    public List<PricePeggingLineChart> getDataByZoneLocation(String zone, String location) {
+        List<PricePeggingLineChart> pricePeggingLineCharts = new ArrayList<>();
+        try {
+
+
+        if (!(zone == null && location == null)) {
+            pricePeggingLineCharts = pricePeggingRepository.findDataByZoneLocation(zone, location);
+        }
+    }
+        catch (Exception e)
+        {
+            System.out.println(e);
+        }
+
+        return pricePeggingLineCharts;
+    }
+
+    @Override
+    public List<DsaDataComparison> rateRange(String location, String pinCode) throws FileNotFoundException, JRException{
+    	
+    	List<DsaDataComparison> dsaComparison = new ArrayList<>();
+    	String path = "D:\\new";
+//    	status.setLocation(location);
+//		status.setPincode(pinCode);
+//		status.setStatus("red");
+    	
+//		DsaExport dsaExports = new DsaExport();
+    	List<DsaExport> dsaExports  = new ArrayList<>();
+		PricePegging pricePegging = new PricePegging();
+	    dsaExports = dsaExportRepository.findByLocationAndPincode(location,pinCode);
+		pricePegging = pricePeggingRepository.findByLocationAndpropertyPincode(location,pinCode);
+		
+		if(pricePegging != null && !(dsaExports.isEmpty())) {
+		 int maximumRate = Integer.parseInt(pricePegging.getMaximumRate().replace(".0",""));
+		 int minimumRate = Integer.parseInt(pricePegging.getMinimumRate().replace(".0",""));
+
+		 int maximumper = maximumRate-((maximumRate*10)/100);
+		 int minimumper = minimumRate-((minimumRate*10)/100);
+
+		 int maximumperthird = maximumRate-((maximumRate*15)/100);
+		 int minimumperthird = minimumRate-((minimumRate*15)/100);
+		
+//		status.setDsaExport(dsaExports);
+//		status.setPricePegging(pricePegging);
+		
+//		int square_ft = Integer.parseInt(rate_per_sqft);
+//		int minimum = Integer.parseInt(minimumRate);
+//		int maximum = Integer.parseInt(maximumRate);
+		   
+		   for(DsaExport ds : dsaExports) {
+			   
+			   DsaDataComparison dsaData = new DsaDataComparison();
+			   
+			   int squareRate = Integer.parseInt(ds.getRate_per_sqft().replace(".",""));
+
+		          if (squareRate <= maximumRate && squareRate >= minimumRate){
+		              dsaData.setFlag("green");
+		   } else if (squareRate <= maximumper && squareRate >= minimumper){
+		              dsaData.setFlag("yellow");
+		   } else if (squareRate <= maximumperthird && squareRate >= minimumperthird){
+		              dsaData.setFlag("yellow");
+		   } else {
+		              dsaData.setFlag("Bad rate");
+		   }
+		          File file = ResourceUtils.getFile("classpath:jasperfolder\\dsa_pegging.jrxml");
+		          JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
+		          JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(dsaComparison);
+		          Map<String, Object> parameters = new HashMap<>();
+		          JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport,parameters,dataSource);
+//		          JRXlsxExporter.(jasperPrint, path+"\\GenerateReport.xlsx");
+		          JRXlsxExporter exporter = new JRXlsxExporter();
+		          exporter.setExporterInput(new SimpleExporterInput(jasperPrint));
+		          exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(path+ "\\GenerateReport.xlsx"));
+		          exporter.exportReport();
+
+		          dsaData.setLocation(ds.getLocation());
+		          dsaData.setPropertyPincode(ds.getPropertyPincode());
+		          dsaData.setApplicationNo(ds.getApplicationNo());
+		          dsaData.setRate_per_sqft(ds.getRate_per_sqft());
+		          dsaData.setMaximumRate(pricePegging.getMaximumRate());
+		          dsaData.setMinimumRate(pricePegging.getMinimumRate());
+
+		       dsaComparison.add(dsaData);
+		   }
+		
+		}
+		
+    	return dsaComparison;
+    	
+    }
+
+    @Override
+    public List<DsaDataComparison> checkStatus(String flag) throws FileNotFoundException, JRException{
+    	List<DsaDataComparison> dsaComparison = new ArrayList<>();
+    	//DsaDataComparison dsaData = new DsaDataComparison();
+		 List<DsaDataComparison> dsa = new ArrayList<>();
+		 String path = "D:\\new";
+		
+	            String dsaQuery = "select  b.*,a.minimum_rate,a.maximum_rate,b.rate_per_sqft, case when b.rate_per_sqft between a.minimum_rate and a.maximum_rate   then \r\n"
+	            		+ "'G'  when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*10)/100) and (a.maximum_rate-(a.maximum_rate*10)/100) then 'R'\r\n"
+	            		+ "when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*15)/100) and (a.maximum_rate-(a.maximum_rate*15)/100) then 'Y'\r\n"
+	            		+ "  else 'B' end  flag  from pricepegging.price_pegging  a, pricepegging.dsa_export b  where a.pincode = b.property_pincode  and a.region=b.region \r\n"
+	            		+ "and a.zone_dist = b.zone  and a.location = b.location";	           
+	            try {		
+	            dsaComparison = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DsaDataComparison.class));
+	  
+	            for(DsaDataComparison dsaList :dsaComparison) {
+	   			 if(dsaList.getFlag().equals(flag)) {
+	   				 dsa.add(dsaList);
+	   			 }
+	   		 }System.out.println(generateExcelSheet(dsa));
+	        } catch (Exception e) {
+	            System.out.println(e);
+	        }
+//	            System.out.println("value check for pricePegging ======== "+pricePegging);
+//	            System.out.println("value check for dsaexport ====== "+dsaExports);
+//	            System.out.println("loop check ======= "+(pricePegging != null && !(dsaExports.isEmpty())));
+	       
+	            
+		
+//		 System.out.println("value check ======== "+dsa);
+////		 }
+//		 System.out.println("before return value check ======== "+dsa);
+    	return dsa;
+    	
+    }
+    
+    public String generateExcelSheet(List<DsaDataComparison> dsaData) throws IOException {
+		
+    	List<String> headerRow = new ArrayList<>();
+    	headerRow.add("s_no");
+    	headerRow.add("applicationNo");
+    	headerRow.add("disbursal_date");
+    	headerRow.add("property_address");
+    	headerRow.add("propertyPincode");
+    	headerRow.add("region");
+    	headerRow.add("zone");
+    	headerRow.add("location");
+    	headerRow.add("rate_per_sqft");
+    	headerRow.add("property_type");
+    	headerRow.add("lattitude");
+    	headerRow.add("longitude");
+    	headerRow.add("product");
+    	headerRow.add("upload_date");
+    	headerRow.add("minimumRate");
+    	headerRow.add("maximumRate");
+    	headerRow.add("flag");
+    	
+    	Workbook workbook = new XSSFWorkbook();
+    	Sheet sheet = workbook.createSheet("Sheet1");
+    	
+    	 Row row = sheet.createRow(0);
+    	 
+    	 int cellIndex=0;
+    	 for(String head : headerRow) {
+    		 Cell headerCell = row.createCell(cellIndex++); 
+    		 headerCell.setCellValue(head);
+    	 }
+    	 
+    	int rowNum=1;
+    	for(DsaDataComparison dsc:dsaData) {
+    		Row dataRow = sheet.createRow(rowNum++);
+    		Cell dataCell = dataRow.createCell(0);
+    		dataCell.setCellValue(dsc.getS_no());
+    		dataCell = dataRow.createCell(1);
+    		dataCell.setCellValue(dsc.getApplicationNo());
+    		dataCell = dataRow.createCell(2);
+    		dataCell.setCellValue(dsc.getDisbursal_date());
+    		dataCell = dataRow.createCell(3);
+    		dataCell.setCellValue(dsc.getProperty_address());
+    		dataCell = dataRow.createCell(4);
+    		dataCell.setCellValue(dsc.getPropertyPincode());
+    	    dataCell = dataRow.createCell(5);
+    		dataCell.setCellValue(dsc.getRegion());
+    		dataCell = dataRow.createCell(6);
+    		dataCell.setCellValue(dsc.getZone());
+    		dataCell = dataRow.createCell(7);
+    		dataCell.setCellValue(dsc.getLocation());
+    		dataCell = dataRow.createCell(8);
+    		dataCell.setCellValue(dsc.getRate_per_sqft());
+    		dataCell = dataRow.createCell(9);
+    		dataCell.setCellValue(dsc.getProperty_type());
+    		dataCell = dataRow.createCell(10);
+    		dataCell.setCellValue(dsc.getLattitude());
+    		dataCell = dataRow.createCell(11);
+    		dataCell.setCellValue(dsc.getLongitude());
+    		dataCell = dataRow.createCell(12);
+    		dataCell.setCellValue(dsc.getProduct());
+    		dataCell = dataRow.createCell(13);
+    		dataCell.setCellValue(dsc.getUpload_date());
+    		dataCell = dataRow.createCell(14);
+    		dataCell.setCellValue(dsc.getMinimumRate());
+    		dataCell = dataRow.createCell(15);
+    		dataCell.setCellValue(dsc.getMaximumRate());
+    		dataCell = dataRow.createCell(16);
+    		dataCell.setCellValue(dsc.getFlag());
+    	}
+    	
+    	String filePath = "D:\\new\\generated_excel1.xlsx";
+    	workbook.write(new java.io.FileOutputStream(filePath));
+    	workbook.close();
+    	return "file generated";
+    	
+    	
+    }
+>>>>>>> Stashed changes
 
 }
 

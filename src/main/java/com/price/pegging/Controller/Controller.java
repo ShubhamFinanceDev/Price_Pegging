@@ -5,6 +5,13 @@ import com.price.pegging.Entity.PricePegging;
 import com.price.pegging.Model.*;
 import com.price.pegging.Entity.User;
 import com.price.pegging.Service.Service;
+<<<<<<< Updated upstream
+=======
+
+import net.sf.jasperreports.engine.JRException;
+
+import org.apache.commons.collections4.map.HashedMap;
+>>>>>>> Stashed changes
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +19,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,7 +86,11 @@ catch (Exception e)
     }
 @CrossOrigin
     @GetMapping("/pricePeggingData")
+<<<<<<< Updated upstream
     public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name="zone",required = false) String zone,@RequestParam(name="uploadDate",required = false) String uploadDate)
+=======
+    public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name="pageNumber",required = false) Integer pageNumber,@RequestParam(name="zone",required = false) String zone,@RequestParam(name="fromDate",required = false) String fromDate,@RequestParam(name="toDate",required = false) String toDate,@RequestParam(name="region",required = false) String region)
+>>>>>>> Stashed changes
     {
         List<PricePegging> pricePeggingDatas=new ArrayList<>();
         PricePeggingData pricePeggingData= new PricePeggingData();
@@ -88,9 +100,17 @@ catch (Exception e)
         System.out.println(pricePeggingDatas.size());
         if(pricePeggingDatas.isEmpty())
         {
+<<<<<<< Updated upstream
             pricePeggingData.setCode("1111");
             pricePeggingData.setMsg("Data not found");
             pricePeggingData.setPricePeggingList(null);
+=======
+            pricePeggingDatas=service.getAllPricePeggingDataByZonFromDateToRegion(pageNumber,zone,fromDate,toDate,region);
+        }
+        else if(fromDate==null && toDate ==null)
+        {
+            pricePeggingDatas=service.getAllPricePeggingDataByZoneAndRegion(pageNumber,zone,region);
+>>>>>>> Stashed changes
         }
         else
         {
@@ -109,12 +129,12 @@ catch (Exception e)
 
 @CrossOrigin
     @GetMapping("/exportData")
-    public ResponseEntity<ExportModel> exportData(@RequestParam(name="applicationNo",required = false) String applicationNo,@RequestParam(name="uploadDate",required = false) String uploadDate,@RequestParam(name="zone",required = false) String zone,@RequestParam(name="region",required = false) String region)
+    public ResponseEntity<ExportModel> exportData(@RequestParam(name="pageNumber",required = false) Integer pageNumber,@RequestParam(name="applicationNo",required = false) String applicationNo,@RequestParam(name="uploadDate",required = false) String uploadDate,@RequestParam(name="zone",required = false) String zone,@RequestParam(name="region",required = false) String region)
     {
         List<DsaExport> dsaExports= new ArrayList<>();
         ExportModel dsaExportData= new ExportModel();
 
-        dsaExports=service.getAllExportData(applicationNo,uploadDate,region,zone);
+        dsaExports=service.getAllExportData(pageNumber,applicationNo,uploadDate,region,zone);
         System.out.println(dsaExports.size());
         if(dsaExports.isEmpty())
         {
@@ -131,6 +151,31 @@ catch (Exception e)
         return new ResponseEntity<ExportModel>(dsaExportData, HttpStatus.OK);
 
     }
+    
+    @CrossOrigin
+    @GetMapping("/exportDsa")
+    public List<DsaDataComparison> checkRate(@RequestParam(name="applicationNo",required=false) String applicationNo, @RequestParam(name="location",required=false) String location,@RequestParam(name="pinCode",required=false) String pinCode) throws FileNotFoundException, JRException
+    {
+    	  List<DsaDataComparison> status = new ArrayList<>();
+    	  
+           status=service.rateRange(location, pinCode);
+           return status;
+		
+    	
+    }
+    
+    @CrossOrigin
+    @GetMapping("/flag")
+    public List<DsaDataComparison> checkstatus(@RequestParam(name="flag",required=false) String flag) throws FileNotFoundException, JRException
+    {
+    	  List<DsaDataComparison> status = new ArrayList<>();
+    	  
+           status=service.checkStatus(flag);
+           return status;
+		
+    	
+    }
+    
     @CrossOrigin
     @GetMapping("/allZone")
     public List zoneDetail()
