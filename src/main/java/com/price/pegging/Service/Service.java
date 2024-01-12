@@ -6,6 +6,7 @@ import com.price.pegging.Model.*;
 import com.price.pegging.Entity.User;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.sql.Date;
 import java.util.List;
 public interface Service {
 
@@ -13,11 +14,11 @@ public interface Service {
 
     UserDetail passwordMatch(String userPassword, User userDetail);
 
-    CommonResponse      readDataDsa(MultipartFile file);
+    CommonResponse   readDataDsa(MultipartFile file);
 
     CommonResponse peggingFileReadData(MultipartFile file);
 
-    List<DsaExport> getAllExportData(String applicationNo,String uploadDate,String region,String zone);
+    List<DsaExport> getAllExportData(String applicationNo, Date uploadDate, String region, String zone);
 
     List<PricePegging> getAllPricePeggingDataByZoneAndRegion(String zone,String region);
     List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, String fromDate,String toDate,String region);

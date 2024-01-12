@@ -8,11 +8,11 @@ import java.util.Date;
 @Service
 public class DateFormatUtility {
     public String changeDateFormate(String uploadDate) {
-        SimpleDateFormat originalFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat originalFormat = new SimpleDateFormat("dd-MMM-yyyy");
         String outputDateString="";
         try {
             Date inputDate = originalFormat.parse(uploadDate);
-            SimpleDateFormat desiredFormat = new SimpleDateFormat("dd-MMM-yyyy");
+            SimpleDateFormat desiredFormat = new SimpleDateFormat("yyyy-MM-dd");
 
              outputDateString = desiredFormat.format(inputDate);
 

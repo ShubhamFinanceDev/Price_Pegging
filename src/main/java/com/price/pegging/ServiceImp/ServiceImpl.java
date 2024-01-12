@@ -23,6 +23,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -116,7 +117,7 @@ public class ServiceImpl implements Service {
                         errorMsg = (cell == null || cell.getCellType() == CellType.BLANK) ? "file upload error due to row no " + (row.getRowNum() + 1) + " is empty" : "";
 
                         if (errorMsg.isEmpty()) {
-                            System.out.println("value=" + cell.toString());
+                            System.out.println("value=" + row.getRowNum());
 
                             switch (i) {
 
@@ -127,7 +128,7 @@ public class ServiceImpl implements Service {
                                     dsaExport.setProduct(row.getCell(2).toString());
                                     break;
                                 case 3:
-                                    dsaExport.setDisbursalDate(row.getCell(3).toString());
+                                    dsaExport.setDisbursalDate(Date.valueOf(dateFormatUtilty.changeDateFormate((row.getCell(3).toString()))));
                                     break;
                                 case 4:
                                     dsaExport.setProperty_address(row.getCell(4).toString());
@@ -307,15 +308,16 @@ public class ServiceImpl implements Service {
     }
 
     @Override
-    public List<DsaExport> getAllExportData(String applicationNo, String disbursalDate,String region,String zone) {
+    public List<DsaExport> getAllExportData(String applicationNo, Date disbursalDate,String region,String zone) {
         List<DsaExport> exportsData = new ArrayList<>();
-        String disbursalDateNew=null;
+//        String disbursalDateNew=null;
         Pageable pageable = PageRequest.of(0, 100);
 
-        if(!(disbursalDate==null)) {
-             disbursalDateNew =dateFormatUtilty.changeDateFormate(disbursalDate);
-        }
-       exportsData=dsaExportRepository.findByAll(applicationNo,disbursalDateNew,region,zone,pageable);
+//        if(!(disbursalDate==null)) {
+//             disbursalDateNew =dateFormatUtilty.changeDateFormate(disbursalDate);
+//        }
+       exportsData=dsaExportRepository.findByAll(applicationNo,disbursalDate,region,zone,pageable);
+       System.out.println(disbursalDate);
         return exportsData;
     }
 
