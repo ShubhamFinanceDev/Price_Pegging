@@ -27,5 +27,17 @@ public interface DsaExportRepository extends JpaRepository<DsaExport,Long> {
         "AND (:zone IS NULL OR d.zone = :zone) " +
         "AND (:region IS NULL OR d.region = :region) " +
         "AND (:applicationNo IS NULL OR d.applicationNo = :applicationNo)")
+<<<<<<< Updated upstream
     List<DsaExport> findByAll(String applicationNo, String uploadDate, String region, String zone);
+=======
+    List<DsaExport> findByAll(String applicationNo, String disbursalDate, String region, String zone, Pageable pageable);
+    @Query("SELECT d FROM DsaExport d " +
+            "WHERE (:applicationNo IS NULL OR d.applicationNo = :applicationNo) " +
+            "AND (:disbursalDate IS NULL OR d.uploadDate >= :disbursalDate) " +
+            "AND (:region IS NULL OR d.region = :region) " +
+            "AND (:fromDate IS NULL OR d.disbursalDate >= :fromDate) " +
+            "AND (:toDate IS NULL OR d.disbursalDate <= :toDate)"+
+            "AND (:zone IS NULL OR d.zone = :zone) ")
+    List<DsaExport> findByZoneAndFromdatetodate(String applicationNo, String disbursalDate, String region, String fromDate, String zone, String toDate);
+>>>>>>> Stashed changes
 }

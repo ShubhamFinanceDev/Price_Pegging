@@ -10,20 +10,32 @@ import com.price.pegging.Repository.PricePeggingRepository;
 import com.price.pegging.Repository.UserRepository;
 import com.price.pegging.Service.Service;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
+<<<<<<< Updated upstream
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
+=======
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+>>>>>>> Stashed changes
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 @org.springframework.stereotype.Service
 
 public class ServiceImpl implements Service {
@@ -296,26 +308,58 @@ public class ServiceImpl implements Service {
     }
 
     @Override
+<<<<<<< Updated upstream
     public List<DsaExport> getAllExportData(String applicationNo, String uploadDate,String region,String zone) {
         List<DsaExport> exportsData = new ArrayList<>();
        exportsData=dsaExportRepository.findByAll(applicationNo,uploadDate,region,zone);
+=======
+    public List<DsaExport> getAllExportData(String applicationNo, String disbursalDate, String region, String zone) {
+        List<DsaExport> exportsData = new ArrayList<>();
+        String disbursalDateNew = null;
+        Pageable pageable = PageRequest.of(0, 100);
+
+        if (!(disbursalDate == null)) {
+            disbursalDateNew = dateFormatUtilty.changeDateFormate(disbursalDate);
+        }
+        exportsData = dsaExportRepository.findByAll(applicationNo, disbursalDateNew, region, zone, pageable);
+>>>>>>> Stashed changes
         return exportsData;
+    }
+
+    @Override
+    public List<DsaExport> getAllExportDataByZonFromDateToRegion(String applicationNo, String disbursalDate, String region, String fromDate, String zone, String toDate) {
+        List<DsaExport> exportsData = new ArrayList<>();
+        exportsData = dsaExportRepository.findByZoneAndFromdatetodate(applicationNo, disbursalDate, region, fromDate, zone, toDate);   // create method for fromDate to toDate
+        return exportsData;
+
     }
 
     /**
      * @param zone
-     * @return
+     * @returnget
      */
     @Override
-    public List<PricePegging> getAllPricePeggingDataByZoneAndRegion(String zone,String region) {
+    public List<PricePegging> getAllPricePeggingDataByZoneAndRegion(String zone, String region) {
         List<PricePegging> pricePeggings = new ArrayList<>();
+<<<<<<< Updated upstream
         pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone,region);
+=======
+        Pageable pageable = PageRequest.of(0, 100);
+
+        pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone, region, pageable);
+>>>>>>> Stashed changes
         return pricePeggings;
     }
 
-    public List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, String fromDate,String toDate,String region) {
+    public List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, String fromDate, String toDate, String region) {
         List<PricePegging> pricePeggings = new ArrayList<>();
+<<<<<<< Updated upstream
         pricePeggings = pricePeggingRepository.findByZoneAndFromDateTo(zone, fromDate,toDate,region);
+=======
+        Pageable pageable = PageRequest.of(0, 100);
+
+        pricePeggings = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region, pageable);
+>>>>>>> Stashed changes
         return pricePeggings;
     }
 
@@ -462,6 +506,7 @@ public class ServiceImpl implements Service {
     @Override
     public FilterModel getAllFilterData() {
 
+<<<<<<< Updated upstream
         FilterModel filterModel=new FilterModel();
         FilterModel.Dsa dsa=new FilterModel.Dsa();
         FilterModel.Pegging pegging=new FilterModel.Pegging();
@@ -472,6 +517,18 @@ try {
     List<FilterModel.Region> regionListpegging = new ArrayList<>();
     regionListpegging = pricePeggingRepository.getAllDistinctRegion();
     pegging.setRegion(regionListpegging);
+=======
+        FilterModel filterModel = new FilterModel();
+        FilterModel.Dsa dsa = new FilterModel.Dsa();
+        FilterModel.Pegging pegging = new FilterModel.Pegging();
+        try {
+            List<FilterModel.ZoneDis> zoneListPegging = new ArrayList<>();
+            zoneListPegging = pricePeggingRepository.getAllDistinctZone();
+            pegging.setZoneDis(zoneListPegging);
+            List<FilterModel.Region> regionListpegging = new ArrayList<>();
+            regionListpegging = pricePeggingRepository.getAllDistinctRegion();
+            pegging.setRegion(regionListpegging);
+>>>>>>> Stashed changes
 
 
     List<FilterModel.Zone> zoneListDsa = new ArrayList<>();
@@ -497,7 +554,6 @@ catch (Exception e)
         }
         filterModel.setDsa(dsa);
         filterModel.setPegging(pegging);
-
 
 
         return filterModel;
@@ -526,8 +582,85 @@ catch (Exception e)
         return pricePeggingLineCharts;
     }
 
+    @Override
+    public List<JasperReport> getDataByFlag(String flag) {
+        List<JasperReport> jasperReport = new ArrayList<>();
+        List<JasperReport> jsp = new ArrayList<>();
 
+
+        String jasperquery = "SELECT b.*, a.minimum_rate, a.maximum_rate, b.rate_per_sqft, " +
+                "CASE WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G' " +
+                "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 10) / 100) AND (a.maximum_rate - (a.maximum_rate * 10) / 100) THEN 'R' " +
+                "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y' " +
+                "ELSE 'B' END AS flag " +
+                "FROM price_pegging a, dsa_export b " +
+                "WHERE a.pincode = b.property_pincode AND a.region = b.region " +
+                "AND a.zone_dist = b.zone AND a.location = b.location";
+
+        try {
+            jasperReport = jdbcTemplate.query(jasperquery, new BeanPropertyRowMapper<>(JasperReport.class));
+
+
+            for (JasperReport jspr : jasperReport) {
+                if (jspr.getFlag().equals(flag)) {
+                    jsp.add(jspr);
+
+                }
+            }
+            System.out.println(generateExcel(jsp));
+        }
+        catch (Exception e) {
+            System.out.println(e);
+        }
+
+            return jsp;
+        }
+
+        public String generateExcel(List<JasperReport> jasperReports) throws IOException {
+            Workbook workbook = new XSSFWorkbook();
+                Sheet sheet = workbook.createSheet("JasperReport Data");
+
+            Row headerRow = sheet.createRow(0);
+            String[] headers = {"s_no", "application_no","disbursal_date", "property_address", "property_pinCode", "region", "zone",
+                    "location", "rate_per_sqft", "property_type", "lattitude", "longitude", "product",
+                    "upload_date", "minimum_rate", "maximum_rate", "flag"};
+
+            for (int i = 0; i < headers.length; i++) {
+                headerRow.createCell(i).setCellValue(headers[i]);
+            }
+                int rowNum = 1;
+                for (JasperReport jspr : jasperReports) {
+                    Row row = sheet.createRow(rowNum++);
+                    row.createCell(0).setCellValue(jspr.getS_no());
+                    row.createCell(1).setCellValue(jspr.getApplication_no());
+                    row.createCell(2).setCellValue(jspr.getDisbursal_date());
+                    row.createCell(3).setCellValue(jspr.getProperty_address());
+                    row.createCell(4).setCellValue(jspr.getProperty_pinCode());
+                    row.createCell(5).setCellValue(jspr.getRegion());
+                    row.createCell(6).setCellValue(jspr.getZone());
+                    row.createCell(7).setCellValue(jspr.getLocation());
+                    row.createCell(8).setCellValue(jspr.getRate_per_sqft());
+                    row.createCell(9).setCellValue(jspr.getProperty_type());
+                    row.createCell(10).setCellValue(jspr.getLattitude());
+                    row.createCell(11).setCellValue(jspr.getLongitude());
+                    row.createCell(12).setCellValue(jspr.getProduct());
+                    row.createCell(13).setCellValue(jspr.getUpload_date());
+                    row.createCell(14).setCellValue(jspr.getMinimum_rate());
+                    row.createCell(15).setCellValue(jspr.getMaximum_rate());
+                    row.createCell(16).setCellValue(jspr.getFlag());
+                }
+                // Save the workbook to a file
+                FileOutputStream fileOut = new FileOutputStream("D:\\excel//Jasper.xlsx");
+                    workbook.write(fileOut);
+
+        return "success";
+
+    }
 }
+
+
+
+
 
 
 

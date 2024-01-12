@@ -19,8 +19,10 @@ public interface Service {
 
     List<DsaExport> getAllExportData(String applicationNo,String uploadDate,String region,String zone);
 
-    List<PricePegging> getAllPricePeggingDataByZoneAndRegion(String zone,String region);
-    List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, String fromDate,String toDate,String region);
+    List<DsaExport> getAllExportDataByZonFromDateToRegion(String applicationNo, String disbursalDate, String region, String fromDate, String zone, String toDate);
+
+    List<PricePegging> getAllPricePeggingDataByZoneAndRegion(String zone, String region);
+    List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, String fromDate,String toDate, String region);
     List getAllZone();
 
     DashboardDistinctDetail getAllDashboarDetail();
@@ -31,4 +33,6 @@ public interface Service {
     FilterModel getAllFilterData();
 
     List<PricePeggingLineChart> getDataByZoneLocation(String zone, String location);
+
+    List<JasperReport> getDataByFlag(String flag); // method for get flag list
 }
