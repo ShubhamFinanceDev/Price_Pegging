@@ -10,8 +10,11 @@ import com.price.pegging.Repository.PricePeggingRepository;
 import com.price.pegging.Repository.UserRepository;
 import com.price.pegging.Service.Service;
 import com.price.pegging.Utilitty.DateFormatUtility;
+import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -19,11 +22,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.zip.ZipFile;
+
 @org.springframework.stereotype.Service
 
 public class ServiceImpl implements Service {
@@ -82,7 +88,9 @@ public class ServiceImpl implements Service {
         int count = 0;
 
         try {
+
             InputStream inputStream = file.getInputStream();
+            ZipSecureFile.setMinInflateRatio(0);                //for zip bomb detected
             Workbook workbook = WorkbookFactory.create(inputStream);
             Sheet sheet = workbook.getSheetAt(0);
             Iterator<Row> rowIterator = sheet.iterator();
@@ -108,7 +116,7 @@ public class ServiceImpl implements Service {
                         errorMsg = (cell == null || cell.getCellType() == CellType.BLANK) ? "file upload error due to row no " + (row.getRowNum() + 1) + " is empty" : "";
 
                         if (errorMsg.isEmpty()) {
-                            System.out.println("value=" + cell.toString());
+                            System.out.println("value=" + row.getRowNum());
 
                             switch (i) {
 
@@ -119,7 +127,7 @@ public class ServiceImpl implements Service {
                                     dsaExport.setProduct(row.getCell(2).toString());
                                     break;
                                 case 3:
-                                    dsaExport.setDisbursalDate(row.getCell(3).toString());
+                                    dsaExport.setDisbursalDate(Date.valueOf(dateFormatUtilty.changeDateFormate((row.getCell(3).toString()))));
                                     break;
                                 case 4:
                                     dsaExport.setProperty_address(row.getCell(4).toString());
@@ -203,17 +211,16 @@ public class ServiceImpl implements Service {
 
         try {
             InputStream inputStream = file.getInputStream();
+            ZipSecureFile.setMinInflateRatio(0);                //for zip bomb detected
             Workbook workbook = WorkbookFactory.create(inputStream);
             Sheet sheet = workbook.getSheetAt(0);
             Iterator<Row> rowIterator = sheet.iterator();
             // rowIterator.next();
             Row headerRow = rowIterator.next();
             Boolean fileFormat = true;
-
             fileFormat = fileUtilittyValidation.pricePeggingFileFormat(headerRow);
             System.out.println("true/false " + fileFormat);
             if (fileFormat) {
-
 
                 while (rowIterator.hasNext()) {
 
@@ -221,35 +228,40 @@ public class ServiceImpl implements Service {
                     Row row = rowIterator.next();
                     PricePegging pricePeggingUpload = new PricePegging();
 
-                    for (int i = 0; i < 6; i++) {
+                    for (int i = 0; i < 9; i++) {
 
                         Cell cell = row.getCell(i);
 
                         errorMsg = (cell == null || cell.getCellType() == CellType.BLANK) ? "file upload error due to row no " + (row.getRowNum() + 1) + " is empty" : "";
 
-
                         if (errorMsg.isEmpty()) {
                             switch (i) {
-                                //    case 0: pricePeggingUpload.setsNo(Long.valueOf(row.getCell(0).toString()));
-                                //            System.out.println(Long.valueOf(row.getCell(0).toString()));
-                                //   break;
-                                case 0:
-                                    pricePeggingUpload.setZone(row.getCell(0).toString());
-                                    break;
+//                                    case 0: pricePeggingUpload.setsNo(Long.valueOf(row.getCell(0).toString()));//            System.out.println(Long.valueOf(row.getCell(0).toString()));
+//                                   break;
                                 case 1:
-                                    pricePeggingUpload.setLocations(row.getCell(1).toString());
+                                    pricePeggingUpload.setZone(row.getCell(1).toString());
                                     break;
                                 case 2:
-                                    pricePeggingUpload.setMinimumRate(row.getCell(2).toString());
+                                    pricePeggingUpload.setRegion(row.getCell(2).toString());   //Add logic of region column
                                     break;
                                 case 3:
-                                    pricePeggingUpload.setMaximumRate(row.getCell(3).toString());
+                                    pricePeggingUpload.setZoneDist(row.getCell(3).toString());
                                     break;
                                 case 4:
-                                    pricePeggingUpload.setAverageRate(row.getCell(4).toString());
+                                    pricePeggingUpload.setLocations(row.getCell(4).toString());
                                     break;
                                 case 5:
-                                    pricePeggingUpload.setPinCode(row.getCell(5).toString().replace(".0", ""));
+                                    pricePeggingUpload.setMinimumRate(row.getCell(5).toString());
+                                    break;
+
+                                case 6:
+                                    pricePeggingUpload.setAverageRate(row.getCell(6).toString());
+                                    break;
+                                case 7:
+                                    pricePeggingUpload.setMaximumRate(row.getCell(7).toString());
+                                    break;
+                                case 8:
+                                    pricePeggingUpload.setPinCode(row.getCell(8).toString().replace(".0", ""));
                                     break;
                             }
                         }
@@ -295,15 +307,22 @@ public class ServiceImpl implements Service {
     }
 
     @Override
-    public List<DsaExport> getAllExportData(String applicationNo, String disbursalDate,String region,String zone) {
+    public List<DsaExport> getAllExportData(String applicationNo, Date disbursalDate,String region,String zone) {
         List<DsaExport> exportsData = new ArrayList<>();
-        String disbursalDateNew=null;
+//        String disbursalDateNew=null;
+        Pageable pageable = PageRequest.of(0, 100);
 
-        if(!(disbursalDate==null)) {
-             disbursalDateNew =dateFormatUtilty.changeDateFormate(disbursalDate);
-        }
-       exportsData=dsaExportRepository.findByAll(applicationNo,disbursalDateNew,region,zone);
+//        if(!(disbursalDate==null)) {
+//             disbursalDateNew =dateFormatUtilty.changeDateFormate(disbursalDate);
+//        }
+       exportsData=dsaExportRepository.findByAll(applicationNo,disbursalDate,region,zone,pageable);
+       System.out.println(disbursalDate);
         return exportsData;
+    }
+    public List<DsaExport>getAllExportDatatoDatetofromDate(Date fromDate, Date toDate, String applicationNo, String region, String zone){
+        List<DsaExport> exportsDatafromDateTotoDate = new ArrayList<>();
+        exportsDatafromDateTotoDate = dsaExportRepository.findByfromdateTotoDate(fromDate,toDate,applicationNo,region,zone);
+        return exportsDatafromDateTotoDate;
     }
 
     /**
@@ -313,13 +332,17 @@ public class ServiceImpl implements Service {
     @Override
     public List<PricePegging> getAllPricePeggingDataByZoneAndRegion(String zone,String region) {
         List<PricePegging> pricePeggings = new ArrayList<>();
-        pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone,region);
+        Pageable pageable = PageRequest.of(0, 100);
+
+        pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone,region,pageable);
         return pricePeggings;
     }
 
     public List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, String fromDate,String toDate,String region) {
         List<PricePegging> pricePeggings = new ArrayList<>();
-        pricePeggings = pricePeggingRepository.findByZoneAndFromDateTo(zone, fromDate,toDate,region);
+        Pageable pageable = PageRequest.of(0, 100);
+
+        pricePeggings = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate,toDate,region,pageable);
         return pricePeggings;
     }
 
@@ -343,7 +366,7 @@ public class ServiceImpl implements Service {
         try {
 
 
-            String peggingQuery = " SELECT  COUNT(DISTINCT pincode) AS distinctCountPincode,COUNT(DISTINCT zone) AS distinctCountZone,COUNT(DISTINCT location) AS distinctCountLocations, COUNT(DISTINCT upload_date) AS distinctCountUploadDate from price_pegging";
+            String peggingQuery = " SELECT  COUNT(DISTINCT pincode) AS distinctCountPincode,COUNT(DISTINCT zone_dist) AS distinctCountZone,COUNT(DISTINCT location) AS distinctCountLocations, COUNT(DISTINCT upload_date) AS distinctCountUploadDate from price_pegging";
             String dsaQuery = "SELECT  COUNT(DISTINCT property_pincode) AS distinctCountPincode,COUNT(DISTINCT zone) AS distinctCountZone,COUNT(DISTINCT location) AS distinctCountLocations,COUNT(DISTINCT region) AS distinctCountRegion, COUNT(DISTINCT upload_date) As distinctCountUploadDate from dsa_export";
 
             peggingData = jdbcTemplate.queryForObject(peggingQuery, new MyRowMapperPegging());
@@ -470,17 +493,17 @@ public class ServiceImpl implements Service {
         FilterModel.Dsa dsa=new FilterModel.Dsa();
         FilterModel.Pegging pegging=new FilterModel.Pegging();
 try {
-    List<FilterModel.Zone> zoneListPegging = new ArrayList<>();
+    List<FilterModel.ZoneDis> zoneListPegging = new ArrayList<>();
     zoneListPegging = pricePeggingRepository.getAllDistinctZone();
-    pegging.setZone(zoneListPegging);
+    pegging.setZoneDis(zoneListPegging);
     List<FilterModel.Region> regionListpegging = new ArrayList<>();
     regionListpegging = pricePeggingRepository.getAllDistinctRegion();
     pegging.setRegion(regionListpegging);
 
 
-    List<FilterModel.Zone> zoneListDsa = new ArrayList<>();
+    List<FilterModel.ZoneDis> zoneListDsa = new ArrayList<>();
     zoneListDsa = dsaExportRepository.getAllDistinctZone();
-    dsa.setZone(zoneListDsa);
+    dsa.setZoneDis(zoneListDsa);
     List<FilterModel.Region> regionListDsa = new ArrayList<>();
     regionListDsa = dsaExportRepository.getAllDistinctRegion();
     dsa.setRegion(regionListDsa);
