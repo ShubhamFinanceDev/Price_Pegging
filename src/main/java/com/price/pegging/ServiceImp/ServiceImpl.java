@@ -550,6 +550,26 @@ catch (Exception e)
     }
 
 
+
+    // NOTE ... //This service implementation is made by shagun for getDataForMap controller....
+    @Override
+    public List<DsaExportData> getDataByPropertyPinCodeRegionZoneLocation(String propertyPincode, String region, String zone, String location) {
+        List<DsaExportData> dsaExportData = new ArrayList<>();
+        CommonDsaExportData commonDsaExportData = new CommonDsaExportData();
+
+
+//        try {
+//
+                dsaExportData = dsaExportRepository.findByPropertyPinCodeRegionZoneLocation(propertyPincode, region, zone, location);
+
+
+//        } catch (Exception e) {
+//            System.out.println(e);
+//        }
+        return dsaExportData;
+    }
+
+
 }
 
 

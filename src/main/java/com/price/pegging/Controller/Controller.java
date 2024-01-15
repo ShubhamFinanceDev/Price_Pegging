@@ -208,6 +208,84 @@ catch (Exception e)
         return commonResponseForLineChart;
     }
 
+
+
+    //this get api is updated by shagun.....
+
+    @CrossOrigin
+    @GetMapping("/getDataForMap")
+    public CommonDsaExportData getDsaExportData(@RequestParam(name="propertyPincode",required = false)String propertyPincode, @RequestParam(name="region",required = false)String region, @RequestParam(name="zone",required = false)String zone, @RequestParam(name="location",required = false)String location) {
+        List<DsaExportData> dsaExportData = new ArrayList<>();
+        CommonDsaExportData commonDsaExportData = new CommonDsaExportData();
+
+        if (propertyPincode != null && region != null && zone !=null && location != null) {
+            dsaExportData = service.getDataByPropertyPinCodeRegionZoneLocation(propertyPincode, region, zone, location);
+            commonDsaExportData.setCode("0000");
+                    commonDsaExportData.setMsg("Data found successfully");
+                    commonDsaExportData.setDsaExportData(dsaExportData);
+
+        }
+             else if (zone != null || location != null || propertyPincode != null || region != null)
+        {
+            commonDsaExportData.setCode("1111");
+            commonDsaExportData.setMsg("please fill the required fileds");
+            commonDsaExportData.setDsaExportData(dsaExportData);
+        }
+
+        else if (zone == null || location == null || propertyPincode == null || region == null){
+            commonDsaExportData.setCode("1111");
+            commonDsaExportData.setMsg("Data Not found");
+            commonDsaExportData.setDsaExportData(dsaExportData);
+
+        }
+
+
+
+
+//     else if (zone != null || location != null || propertyPincode != null || region != null)
+//        {
+//            commonDsaExportData.setCode("1111");
+//            commonDsaExportData.setMsg("please fill the required fileds");
+//            commonDsaExportData.setDsaExportData(dsaExportData);
+//        }
+//        else
+//        {
+//            commonDsaExportData.setCode("1111");
+//            commonDsaExportData.setMsg("You havent selected any fileds");
+//            commonDsaExportData.setDsaExportData(dsaExportData);
+//        }
+////
+
+
+//        dsaExportData = service.getDataByPropertyPinCodeRegionZoneLocation(propertyPincode, region, zone, location);
+//        System.out.println("value check size ========= " +dsaExportData.size());
+//        System.out.println("value check dsaexport ======== "+dsaExportData);
+
+//        try {
+//            if( commonDsaExportData.getCode() !=null) {
+//
+//                if (!(dsaExportData.isEmpty())) {
+//                    System.out.println("inside if condition ========== " + (dsaExportData.isEmpty()));
+//                    commonDsaExportData.setCode("0000");
+//                    commonDsaExportData.setMsg("Data found successfully");
+//                    commonDsaExportData.setDsaExportData(dsaExportData);
+//
+//                } else {
+//                    System.out.println("inside else =======");
+//                    commonDsaExportData.setCode("1111");
+//                    commonDsaExportData.setMsg("Data Not found");
+//                    commonDsaExportData.setDsaExportData(dsaExportData);
+//                }
+////            }
+//        } catch (Exception e) {
+//            System.out.println(e);
+//        }
+
+        System.out.println("value check of return ====== "+ commonDsaExportData);
+        return commonDsaExportData;
+    }
+
+
 }
 
 
