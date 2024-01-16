@@ -13,6 +13,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -119,7 +120,7 @@ catch (Exception e)
 
     @CrossOrigin
     @GetMapping("/exportData")
-    public ResponseEntity<ExportModel> exportData(@RequestParam(name="applicationNo",required = false) String applicationNo,@RequestParam(name="uploadDate",required = false) String uploadDate,@RequestParam(name="zone",required = false) String zone,@RequestParam(name="region",required = false) String region)
+    public ResponseEntity<ExportModel> exportData(@RequestParam(name="applicationNo",required = false) String applicationNo, @RequestParam(name="uploadDate",required = false) Date uploadDate, @RequestParam(name="zone",required = false) String zone, @RequestParam(name="region",required = false) String region)
     {
         List<DsaExport> dsaExports= new ArrayList<>();
         ExportModel dsaExportData= new ExportModel();

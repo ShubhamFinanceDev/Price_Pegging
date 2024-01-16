@@ -9,7 +9,6 @@ import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name="PRICE_PEGGING")
-@Data
 public class PricePegging {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

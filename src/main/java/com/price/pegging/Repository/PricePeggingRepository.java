@@ -3,6 +3,7 @@ package com.price.pegging.Repository;
 import com.price.pegging.Entity.PricePegging;
 import com.price.pegging.Model.FilterModel;
 import com.price.pegging.Model.PricePeggingLineChart;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,7 +15,7 @@ import java.util.List;
 public interface PricePeggingRepository extends JpaRepository<PricePegging,Long> {
 
    @Query("select pp from PricePegging pp where (:zone IS NULL OR pp.zoneDist = :zone) AND (:region IS NULL OR pp.region = :region)")
-    List<PricePegging> findByZoneAndRegion(String zone,String region);
+    List<PricePegging> findByZoneAndRegion(String zone, String region, Pageable pageable);
     @Query("select DISTINCT(pp.zone) pp from PricePegging pp")
     List getUniqeZones();
 
@@ -26,7 +27,7 @@ public interface PricePeggingRepository extends JpaRepository<PricePegging,Long>
           "AND (:toDate IS NULL OR pp.uploadDate <= :toDate) " +
           "AND (:zone IS NULL OR pp.zoneDist = :zone) " +
           "AND (:region IS NULL OR pp.region = :region)")
-    List<PricePegging> findByZoneAndFromDateTo(String zone, String fromDate,String toDate,String region);
+    List<PricePegging> findByZoneAndFromDateToRegion(String zone, String fromDate,String toDate,String region,Pageable pageable);
  @Query("select distinct pp.zoneDist  from PricePegging pp ")
  List getAllDistinctZone();
 

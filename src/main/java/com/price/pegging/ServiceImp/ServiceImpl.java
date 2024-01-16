@@ -9,10 +9,13 @@ import com.price.pegging.Repository.DsaExportRepository;
 import com.price.pegging.Repository.PricePeggingRepository;
 import com.price.pegging.Repository.UserRepository;
 import com.price.pegging.Service.Service;
+import com.price.pegging.Utilitty.DateFormatUtility;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -20,6 +23,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -38,6 +42,8 @@ public class ServiceImpl implements Service {
     private PricePeggingRepository pricePeggingRepository;
     @Autowired
     private FileUtilittyValidation fileUtilittyValidation;
+    @Autowired
+    private DateFormatUtility dateFormatUtilty;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -111,7 +117,7 @@ public class ServiceImpl implements Service {
                         errorMsg = (cell == null || cell.getCellType() == CellType.BLANK) ? "file upload error due to row no " + (row.getRowNum() + 1) + " is empty" : "";
 
                         if (errorMsg.isEmpty()) {
-                            System.out.println("value=" + cell.toString());
+                            System.out.println("value=" + row.getRowNum());
 
                             switch (i) {
 
@@ -122,7 +128,7 @@ public class ServiceImpl implements Service {
                                     dsaExport.setProduct(row.getCell(2).toString());
                                     break;
                                 case 3:
-                                    dsaExport.setDisbursalDate(row.getCell(3).toString());
+                                    dsaExport.setDisbursalDate(Date.valueOf(dateFormatUtilty.changeDateFormate((row.getCell(3).toString()))));
                                     break;
                                 case 4:
                                     dsaExport.setProperty_address(row.getCell(4).toString());
@@ -210,7 +216,7 @@ public class ServiceImpl implements Service {
             Workbook workbook = WorkbookFactory.create(inputStream);
             Sheet sheet = workbook.getSheetAt(0);
             Iterator<Row> rowIterator = sheet.iterator();
-//             rowIterator.next();
+            // rowIterator.next();
             Row headerRow = rowIterator.next();
             Boolean fileFormat = true;
             fileFormat = fileUtilittyValidation.pricePeggingFileFormat(headerRow);
@@ -302,9 +308,16 @@ public class ServiceImpl implements Service {
     }
 
     @Override
-    public List<DsaExport> getAllExportData(String applicationNo, String uploadDate,String region,String zone) {
+    public List<DsaExport> getAllExportData(String applicationNo, Date disbursalDate,String region,String zone) {
         List<DsaExport> exportsData = new ArrayList<>();
-       exportsData=dsaExportRepository.findByAll(applicationNo,uploadDate,region,zone);
+//        String disbursalDateNew=null;
+        Pageable pageable = PageRequest.of(0, 100);
+
+//        if(!(disbursalDate==null)) {
+//             disbursalDateNew =dateFormatUtilty.changeDateFormate(disbursalDate);
+//        }
+       exportsData=dsaExportRepository.findByAll(applicationNo,disbursalDate,region,zone,pageable);
+       System.out.println(disbursalDate);
         return exportsData;
     }
 
@@ -315,13 +328,17 @@ public class ServiceImpl implements Service {
     @Override
     public List<PricePegging> getAllPricePeggingDataByZoneAndRegion(String zone,String region) {
         List<PricePegging> pricePeggings = new ArrayList<>();
-        pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone,region);
+        Pageable pageable = PageRequest.of(0, 100);
+
+        pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone,region,pageable);
         return pricePeggings;
     }
 
     public List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, String fromDate,String toDate,String region) {
         List<PricePegging> pricePeggings = new ArrayList<>();
-        pricePeggings = pricePeggingRepository.findByZoneAndFromDateTo(zone, fromDate,toDate,region);
+        Pageable pageable = PageRequest.of(0, 100);
+
+        pricePeggings = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate,toDate,region,pageable);
         return pricePeggings;
     }
 
@@ -472,17 +489,17 @@ public class ServiceImpl implements Service {
         FilterModel.Dsa dsa=new FilterModel.Dsa();
         FilterModel.Pegging pegging=new FilterModel.Pegging();
 try {
-    List<FilterModel.Zone> zoneListPegging = new ArrayList<>();
+    List<FilterModel.ZoneDis> zoneListPegging = new ArrayList<>();
     zoneListPegging = pricePeggingRepository.getAllDistinctZone();
-    pegging.setZone(zoneListPegging);
+    pegging.setZoneDis(zoneListPegging);
     List<FilterModel.Region> regionListpegging = new ArrayList<>();
     regionListpegging = pricePeggingRepository.getAllDistinctRegion();
     pegging.setRegion(regionListpegging);
 
 
-    List<FilterModel.Zone> zoneListDsa = new ArrayList<>();
+    List<FilterModel.ZoneDis> zoneListDsa = new ArrayList<>();
     zoneListDsa = dsaExportRepository.getAllDistinctZone();
-    dsa.setZone(zoneListDsa);
+    dsa.setZoneDis(zoneListDsa);
     List<FilterModel.Region> regionListDsa = new ArrayList<>();
     regionListDsa = dsaExportRepository.getAllDistinctRegion();
     dsa.setRegion(regionListDsa);
