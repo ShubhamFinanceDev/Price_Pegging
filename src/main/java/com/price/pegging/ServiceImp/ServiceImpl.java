@@ -591,19 +591,12 @@ public class ServiceImpl implements Service {
 
     // NOTE ... //This service implementation is made by shagun for getDataForMap controller....
     @Override
-    public List<DsaExportData> getDataByPropertyPinCodeRegionZoneLocation(String propertyPincode, String region, String zone, String location) {
+    public List<DsaExportData> getDataByPropertyPinCodeRegionZoneLocation(String propertyPincode, String region, String zone) {
         List<DsaExportData> dsaExportData = new ArrayList<>();
         CommonDsaExportData commonDsaExportData = new CommonDsaExportData();
 
+        dsaExportData = dsaExportRepository.findByPropertyPinCodeRegionZoneLocation(propertyPincode, region, zone);
 
-//        try {
-//
-        dsaExportData = dsaExportRepository.findByPropertyPinCodeRegionZoneLocation(propertyPincode, region, zone, location);
-
-
-//        } catch (Exception e) {
-//            System.out.println(e);
-//        }
         return dsaExportData;
     }
     @Override

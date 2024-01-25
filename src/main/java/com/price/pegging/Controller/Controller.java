@@ -214,28 +214,24 @@ catch (Exception e)
 
     @CrossOrigin
     @GetMapping("/getDataForMap")
-    public CommonDsaExportData getDsaExportData(@RequestParam(name = "propertyPincode", required = false) String propertyPincode, @RequestParam(name = "region", required = false) String region, @RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "location", required = false) String location) {
+    public CommonDsaExportData getDsaExportData(@RequestParam(name = "propertyPincode", required = false) String propertyPincode, @RequestParam(name = "region", required = false) String region, @RequestParam(name = "zone", required = false) String zone) {
         List<DsaExportData> dsaExportData = new ArrayList<>();
         CommonDsaExportData commonDsaExportData = new CommonDsaExportData();
 
-        if (propertyPincode != null && region != null && zone != null && location != null) {
-            dsaExportData = service.getDataByPropertyPinCodeRegionZoneLocation(propertyPincode, region, zone, location);
+        if(propertyPincode != null && region != null && zone != null) {
+            dsaExportData = service.getDataByPropertyPinCodeRegionZoneLocation(propertyPincode, region, zone);
             commonDsaExportData.setCode("0000");
             commonDsaExportData.setMsg("Data found successfully");
             commonDsaExportData.setDsaExportData(dsaExportData);
 
-        } else if (zone != null || location != null || propertyPincode != null || region != null) {
+        } else  {
             commonDsaExportData.setCode("1111");
             commonDsaExportData.setMsg("please fill the required fileds");
-            commonDsaExportData.setDsaExportData(dsaExportData);
-        } else if (zone == null || location == null || propertyPincode == null || region == null) {
-            commonDsaExportData.setCode("1111");
-            commonDsaExportData.setMsg("Data Not found");
-            commonDsaExportData.setDsaExportData(dsaExportData);
-
+            commonDsaExportData.setDsaExportData(null);
         }
 
-        System.out.println("value check of return ====== " + commonDsaExportData);
+
+        System.out.println("value check of return=" + commonDsaExportData);
         return commonDsaExportData;
     }
 

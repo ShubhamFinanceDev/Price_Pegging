@@ -38,7 +38,7 @@ public interface Service {
 
 
     // NOTE ... //This service implementation is made by shagun for getDataForMap controller....
-    List<DsaExportData> getDataByPropertyPinCodeRegionZoneLocation(String propertyPincode, String region, String zone, String location);
+    List<DsaExportData> getDataByPropertyPinCodeRegionZoneLocation(String propertyPincode, String region, String zone);
 
     CommonResponse saveuser(User userData);
     CommonResponse readData(String type);
