@@ -120,24 +120,30 @@ catch (Exception e)
 
     @CrossOrigin
     @GetMapping("/exportData")
-    public ResponseEntity<ExportModel> exportData(@RequestParam(name="applicationNo",required = false) String applicationNo, @RequestParam(name="uploadDate",required = false) Date uploadDate, @RequestParam(name="zone",required = false) String zone, @RequestParam(name="region",required = false) String region)
+    public ResponseEntity<ExportModel> exportData(@RequestParam(name="applicationNo",required = false) String applicationNo, @RequestParam(name="uploadDate",required = false) Date uploadDate, @RequestParam(name="zone",required = false) String zone, @RequestParam(name="region",required = false) String region, @RequestParam(name = "fromDate",required = false)Date fromDate, @RequestParam(name = "toDate",required = false) Date toDate)      // changes for from to todate
     {
         List<DsaExport> dsaExports= new ArrayList<>();
         ExportModel dsaExportData= new ExportModel();
-
-        dsaExports=service.getAllExportData(applicationNo,uploadDate,region,zone);
         System.out.println(dsaExports.size());
-        if(dsaExports.isEmpty())
-        {
+
+        if (fromDate != null && toDate != null){
+            dsaExports = service.getAllExportDatatoDatetofromDate(fromDate,toDate,applicationNo,region,zone);
+        } else if (fromDate == null && toDate == null){
+            dsaExports=service.getAllExportData(applicationNo,uploadDate,region,zone);
+        } else{
             dsaExportData.setCode("1111");
-            dsaExportData.setMsg("Data not found");
-            dsaExportData.setDsaExportList(null);
+            dsaExportData.setMsg("Please select required field");
         }
-        else
-        {
-            dsaExportData.setCode("0000");
-            dsaExportData.setMsg("Data found successfully");
-            dsaExportData.setDsaExportList(dsaExports);
+        if (dsaExportData.getCode() == null) {
+            if (dsaExports.isEmpty()) {
+                dsaExportData.setCode("1111");
+                dsaExportData.setMsg("Data not found");
+                dsaExportData.setDsaExportList(null);
+            } else {
+                dsaExportData.setCode("0000");
+                dsaExportData.setMsg("Data found successfully");
+                dsaExportData.setDsaExportList(dsaExports);
+            }
         }
         return new ResponseEntity<ExportModel>(dsaExportData, HttpStatus.OK);
 

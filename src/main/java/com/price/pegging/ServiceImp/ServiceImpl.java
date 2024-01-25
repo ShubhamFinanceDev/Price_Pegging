@@ -13,7 +13,6 @@ import com.price.pegging.Utilitty.DateFormatUtility;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -319,6 +318,11 @@ public class ServiceImpl implements Service {
        exportsData=dsaExportRepository.findByAll(applicationNo,disbursalDate,region,zone,pageable);
        System.out.println(disbursalDate);
         return exportsData;
+    }
+    public List<DsaExport>getAllExportDatatoDatetofromDate(Date fromDate, Date toDate, String applicationNo, String region, String zone){
+        List<DsaExport> exportsDatafromDateTotoDate = new ArrayList<>();
+        exportsDatafromDateTotoDate = dsaExportRepository.findByfromdateTotoDate(fromDate,toDate,applicationNo,region,zone);
+        return exportsDatafromDateTotoDate;
     }
 
     /**

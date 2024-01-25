@@ -19,6 +19,7 @@ public interface Service {
     CommonResponse peggingFileReadData(MultipartFile file);
 
     List<DsaExport> getAllExportData(String applicationNo, Date uploadDate, String region, String zone);
+    List<DsaExport> getAllExportDatatoDatetofromDate(Date fomDate, Date toDate, String applicationNo, String region, String zone);
 
     List<PricePegging> getAllPricePeggingDataByZoneAndRegion(String zone,String region);
     List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, String fromDate,String toDate,String region);
