@@ -242,52 +242,26 @@ catch (Exception e)
 
         }
 
-
-
-
-//     else if (zone != null || location != null || propertyPincode != null || region != null)
-//        {
-//            commonDsaExportData.setCode("1111");
-//            commonDsaExportData.setMsg("please fill the required fileds");
-//            commonDsaExportData.setDsaExportData(dsaExportData);
-//        }
-//        else
-//        {
-//            commonDsaExportData.setCode("1111");
-//            commonDsaExportData.setMsg("You havent selected any fileds");
-//            commonDsaExportData.setDsaExportData(dsaExportData);
-//        }
-////
-
-
-//        dsaExportData = service.getDataByPropertyPinCodeRegionZoneLocation(propertyPincode, region, zone, location);
-//        System.out.println("value check size ========= " +dsaExportData.size());
-//        System.out.println("value check dsaexport ======== "+dsaExportData);
-
-//        try {
-//            if( commonDsaExportData.getCode() !=null) {
-//
-//                if (!(dsaExportData.isEmpty())) {
-//                    System.out.println("inside if condition ========== " + (dsaExportData.isEmpty()));
-//                    commonDsaExportData.setCode("0000");
-//                    commonDsaExportData.setMsg("Data found successfully");
-//                    commonDsaExportData.setDsaExportData(dsaExportData);
-//
-//                } else {
-//                    System.out.println("inside else =======");
-//                    commonDsaExportData.setCode("1111");
-//                    commonDsaExportData.setMsg("Data Not found");
-//                    commonDsaExportData.setDsaExportData(dsaExportData);
-//                }
-////            }
-//        } catch (Exception e) {
-//            System.out.println(e);
-//        }
-
         System.out.println("value check of return ====== "+ commonDsaExportData);
         return commonDsaExportData;
     }
 
+    @PostMapping("/invokeDsaReport")
+    public CommonResponse invokeDsaReport(@RequestBody Map<String,String> inputParam)
+    {
+        CommonResponse commonResponse=new CommonResponse();
+        if (inputParam.containsKey("type"))
+        {
+            commonResponse=service.readData(inputParam.get("type"));
+        }
+        else
+        {
+            commonResponse.setMsg("type field is empty");
+            commonResponse.setCode("1111");
+        }
+
+        return commonResponse;
+    }
 
 }
 
