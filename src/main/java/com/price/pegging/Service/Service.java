@@ -20,9 +20,9 @@ public interface Service {
 
     CommonResponse peggingFileReadData(MultipartFile file);
 
-    List<DsaExport> getAllExportData(String applicationNo, Date uploadDate, String region, String zone);
-    List<DsaExport> getAllExportDatatoDatetofromDate(Date fomDate, Date toDate, String applicationNo, String region, String zone);
-
+//    List<DsaExport> getAllExportData(String applicationNo, String region, String zone);
+    DsaDataResponse getAllDsaData(Date fromDate, Date toDate, String applicationNo, String region, String zone);
+//    List<DsaExport> getAllExportDatatoDatetofromDate(Date fomDate, Date toDate, String applicationNo, String region, String zone);
     List<PricePegging> getAllPricePeggingDataByZoneAndRegion(String zone,String region);
     List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, String fromDate,String toDate,String region);
     List getAllZone();
@@ -41,4 +41,6 @@ public interface Service {
     List<DsaExportData> getDataByPropertyPinCodeRegionZoneLocation(String propertyPincode, String region, String zone, String location);
 
     CommonResponse saveuser(User userData);
+    CommonResponse readData(String type);
+
 }
