@@ -10,6 +10,7 @@ import com.price.pegging.Repository.PricePeggingRepository;
 import com.price.pegging.Repository.UserRepository;
 import com.price.pegging.Service.Service;
 import com.price.pegging.Utilitty.DateFormatUtility;
+import lombok.Data;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -307,23 +308,56 @@ public class ServiceImpl implements Service {
         return commonResponse;
     }
 
-    @Override
-    public List<DsaExport> getAllExportData(String applicationNo, Date disbursalDate,String region,String zone) {
-        List<DsaExport> exportsData = new ArrayList<>();
-//        String disbursalDateNew=null;
-        Pageable pageable = PageRequest.of(0, 100);
+//    @Override
+//    public List<DsaExport> getAllExportData(String applicationNo, String region, String zone) {
+//        List<DsaExport> exportsData = new ArrayList<>();
+//        Pageable pageable = PageRequest.of(0, 100);
+//
+//        exportsData = dsaExportRepository.findByAll(applicationNo, region, zone, pageable);
+//        return exportsData;
+//    }
+//
+//
+//    public List<DsaExport> getAllExportDatatoDatetofromDate(Date fromDate, Date toDate, String applicationNo, String region, String zone) {
+//        List<DsaExport> exportsDatafromDateTotoDate = new ArrayList<>();
+//        exportsDatafromDateTotoDate = dsaExportRepository.findByfromdateTotoDate(fromDate, toDate, applicationNo, region, zone);
+//        return exportsDatafromDateTotoDate;
+//    }
+//
 
-//        if(!(disbursalDate==null)) {
-//             disbursalDateNew =dateFormatUtilty.changeDateFormate(disbursalDate);
-//        }
-       exportsData=dsaExportRepository.findByAll(applicationNo,disbursalDate,region,zone,pageable);
-       System.out.println(disbursalDate);
-        return exportsData;
+    public DsaDataResponse getAllDsaData(Date fromDate, Date toDate, String applicationNo, String region, String zone) {
+
+        DsaDataResponse dsaDataResponse=new DsaDataResponse();
+        List<DsaDataModel> dsaDataModelList = new ArrayList<>();
+
+        String dsaQuery = "select  b.*, case when b.rate_per_sqft between a.minimum_rate and a.maximum_rate   then \n" +
+                "'G'  when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*10)/100) and (a.maximum_rate-(a.maximum_rate*10)/100) then 'Y'\n" +
+                "when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*15)/100) and (a.maximum_rate-(a.maximum_rate*15)/100) then 'R'\n" +
+                "  else 'B' end  flag  from price_pegging  a, dsa_export b  where a.pincode = b.property_pincode  and a.region=b.region \n" +
+                "and a.zone_dist = b.zone  and a.location = b.location\n" +
+                "and b.application_no=COALESCE("+prepareVariableForQuery(applicationNo)+", b.application_no)\n" +
+                "and b.region = COALESCE("+prepareVariableForQuery(region)+",b.region)\n" +
+                "and b.zone = COALESCE("+prepareVariableForQuery(zone)+",b.zone)\n" +
+                "and b.disbursal_date between COALESCE("+prepareVariableForQuery(fromDate)+",b.disbursal_date) And COALESCE("+prepareVariableForQuery(toDate)+",b.disbursal_date)";
+        try {
+
+
+            dsaDataModelList = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DsaDataModel.class));
+            dsaDataResponse.setDsaDataModelList(dsaDataModelList);
+
+        } catch (Exception e) {
+            System.out.println(e);
+            dsaDataResponse.setCode("1111");
+            dsaDataResponse.setMsg("error:"+e);
+        }
+        return dsaDataResponse;
     }
-    public List<DsaExport>getAllExportDatatoDatetofromDate(Date fromDate, Date toDate, String applicationNo, String region, String zone){
-        List<DsaExport> exportsDatafromDateTotoDate = new ArrayList<>();
-        exportsDatafromDateTotoDate = dsaExportRepository.findByfromdateTotoDate(fromDate,toDate,applicationNo,region,zone);
-        return exportsDatafromDateTotoDate;
+    public String prepareVariableForQuery(String applicationNo) {
+        return (applicationNo == null) ? null : "'" + applicationNo + "'";
+    }
+
+    public String prepareVariableForQuery(Date applicationNo) {
+        return (applicationNo == null) ? null : "'" + applicationNo + "'";
     }
 
     /**
@@ -331,19 +365,19 @@ public class ServiceImpl implements Service {
      * @return
      */
     @Override
-    public List<PricePegging> getAllPricePeggingDataByZoneAndRegion(String zone,String region) {
+    public List<PricePegging> getAllPricePeggingDataByZoneAndRegion(String zone, String region) {
         List<PricePegging> pricePeggings = new ArrayList<>();
         Pageable pageable = PageRequest.of(0, 100);
 
-        pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone,region,pageable);
+        pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone, region, pageable);
         return pricePeggings;
     }
 
-    public List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, String fromDate,String toDate,String region) {
+    public List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, String fromDate, String toDate, String region) {
         List<PricePegging> pricePeggings = new ArrayList<>();
         Pageable pageable = PageRequest.of(0, 100);
 
-        pricePeggings = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate,toDate,region,pageable);
+        pricePeggings = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region, pageable);
         return pricePeggings;
     }
 
@@ -490,42 +524,36 @@ public class ServiceImpl implements Service {
     @Override
     public FilterModel getAllFilterData() {
 
-        FilterModel filterModel=new FilterModel();
-        FilterModel.Dsa dsa=new FilterModel.Dsa();
-        FilterModel.Pegging pegging=new FilterModel.Pegging();
-try {
-    List<FilterModel.ZoneDis> zoneListPegging = new ArrayList<>();
-    zoneListPegging = pricePeggingRepository.getAllDistinctZone();
-    pegging.setZoneDis(zoneListPegging);
-    List<FilterModel.Region> regionListpegging = new ArrayList<>();
-    regionListpegging = pricePeggingRepository.getAllDistinctRegion();
-    pegging.setRegion(regionListpegging);
+        FilterModel filterModel = new FilterModel();
+        FilterModel.Dsa dsa = new FilterModel.Dsa();
+        FilterModel.Pegging pegging = new FilterModel.Pegging();
+        try {
+            List<FilterModel.ZoneDis> zoneListPegging = new ArrayList<>();
+            zoneListPegging = pricePeggingRepository.getAllDistinctZone();
+            pegging.setZoneDis(zoneListPegging);
+            List<FilterModel.Region> regionListpegging = new ArrayList<>();
+            regionListpegging = pricePeggingRepository.getAllDistinctRegion();
+            pegging.setRegion(regionListpegging);
 
 
-    List<FilterModel.ZoneDis> zoneListDsa = new ArrayList<>();
-    zoneListDsa = dsaExportRepository.getAllDistinctZone();
-    dsa.setZoneDis(zoneListDsa);
-    List<FilterModel.Region> regionListDsa = new ArrayList<>();
-    regionListDsa = dsaExportRepository.getAllDistinctRegion();
-    dsa.setRegion(regionListDsa);
-}
-catch (Exception e)
-{
-    System.out.println(e);
-}
-        if(dsa==null && pegging== null)
-        {
+            List<FilterModel.ZoneDis> zoneListDsa = new ArrayList<>();
+            zoneListDsa = dsaExportRepository.getAllDistinctZone();
+            dsa.setZoneDis(zoneListDsa);
+            List<FilterModel.Region> regionListDsa = new ArrayList<>();
+            regionListDsa = dsaExportRepository.getAllDistinctRegion();
+            dsa.setRegion(regionListDsa);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        if (dsa == null && pegging == null) {
             filterModel.setMsg("Data is not found for Pegging.");
             filterModel.setCode("1111");
-        }
-        else
-        {
+        } else {
             filterModel.setMsg("Data found successfully.");
             filterModel.setCode("0000");
         }
         filterModel.setDsa(dsa);
         filterModel.setPegging(pegging);
-
 
 
         return filterModel;
@@ -542,18 +570,15 @@ catch (Exception e)
         try {
 
 
-        if (!(zone == null && location == null)) {
-            pricePeggingLineCharts = pricePeggingRepository.findDataByZoneLocation(zone, location);
-        }
-    }
-        catch (Exception e)
-        {
+            if (!(zone == null && location == null)) {
+                pricePeggingLineCharts = pricePeggingRepository.findDataByZoneLocation(zone, location);
+            }
+        } catch (Exception e) {
             System.out.println(e);
         }
 
         return pricePeggingLineCharts;
     }
-
 
 
     // NOTE ... //This service implementation is made by shagun for getDataForMap controller....
@@ -565,7 +590,7 @@ catch (Exception e)
 
 //        try {
 //
-                dsaExportData = dsaExportRepository.findByPropertyPinCodeRegionZoneLocation(propertyPincode, region, zone, location);
+        dsaExportData = dsaExportRepository.findByPropertyPinCodeRegionZoneLocation(propertyPincode, region, zone, location);
 
 
 //        } catch (Exception e) {
