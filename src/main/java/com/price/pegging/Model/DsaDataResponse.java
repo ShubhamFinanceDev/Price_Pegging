@@ -8,5 +8,5 @@ import java.util.List;
 public class DsaDataResponse {
     private String msg;
     private String code;
-    private List<DsaDataModel> dsaDataModelList;
+    private List<DsaDataModel> dsaExportList;
 }

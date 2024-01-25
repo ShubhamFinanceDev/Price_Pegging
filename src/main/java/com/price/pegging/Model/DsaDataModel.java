@@ -7,10 +7,10 @@ import lombok.Data;
 @Data
 public class DsaDataModel {
     private String s_no;
-    private String application_no;
+    private String applicationNo;
     private String disbursal_date;
     private String property_address;
-    private String property_pincode;
+    private String propertyPincode;
     private String region;
     private String zone;
     private String location;
@@ -19,7 +19,7 @@ public class DsaDataModel {
     private String lattitude;
     private String longitude;
     private String product;
-    private String upload_date;
+    private String uploadDate;
 //    private String minimum_rate;
 //    private String maximum_rate;
     private String flag;

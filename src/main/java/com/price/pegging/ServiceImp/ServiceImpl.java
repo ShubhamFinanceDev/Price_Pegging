@@ -343,7 +343,7 @@ public class ServiceImpl implements Service {
 
 
             dsaDataModelList = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DsaDataModel.class));
-            dsaDataResponse.setDsaDataModelList(dsaDataModelList);
+            dsaDataResponse.setDsaExportList(dsaDataModelList);
 
         } catch (Exception e) {
             System.out.println(e);

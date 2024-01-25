@@ -133,7 +133,7 @@ catch (Exception e)
         }
 
         if (dsaDataResponse.getCode() != "1111") {
-            if (dsaDataResponse.getDsaDataModelList().isEmpty()) {
+            if (dsaDataResponse.getDsaExportList().isEmpty()) {
                 dsaDataResponse.setCode("1111");
                 dsaDataResponse.setMsg("Data not found");
 
