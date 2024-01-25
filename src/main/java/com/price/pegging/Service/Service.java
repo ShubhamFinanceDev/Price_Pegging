@@ -8,6 +8,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Optional;
+
 public interface Service {
 
     public List<User> userExist(String userEmail);
@@ -37,4 +39,6 @@ public interface Service {
 
     // NOTE ... //This service implementation is made by shagun for getDataForMap controller....
     List<DsaExportData> getDataByPropertyPinCodeRegionZoneLocation(String propertyPincode, String region, String zone, String location);
+
+    CommonResponse saveuser(User userData);
 }

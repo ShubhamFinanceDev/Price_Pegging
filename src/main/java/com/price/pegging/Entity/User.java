@@ -5,6 +5,8 @@ package com.price.pegging.Entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
@@ -43,6 +45,8 @@ public class User {
     @Column(name="profile_picture")
     private String profilePicture;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<UserRole> userRoles;
 
     public Long getUserId() {
         return userId;

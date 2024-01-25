@@ -2,6 +2,7 @@ package com.price.pegging.ServiceImp;
 
 import com.price.pegging.Entity.DsaExport;
 import com.price.pegging.Entity.PricePegging;
+import com.price.pegging.Entity.UserRole;
 import com.price.pegging.FileUtilittyValidation;
 import com.price.pegging.Model.*;
 import com.price.pegging.Entity.User;
@@ -29,6 +30,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.ZipFile;
 
 @org.springframework.stereotype.Service
@@ -47,6 +49,8 @@ public class ServiceImpl implements Service {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
 
     @Override
     public List<User> userExist(String userEmail) {
@@ -57,7 +61,6 @@ public class ServiceImpl implements Service {
 
     @Override
     public UserDetail passwordMatch(String userPassword, User userDetail) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
 
         UserDetail commonResponse = new UserDetail();
@@ -573,9 +576,31 @@ catch (Exception e)
 //        }
         return dsaExportData;
     }
+    @Override
+    public CommonResponse saveuser(User userData) {
+        CommonResponse commonResponse=new CommonResponse();
+        User user=new User();
 
+try {
+    userData.setPassword(passwordEncoder.encode(userData.getPassword()));
+    for(UserRole data : userData.getUserRoles()) {
 
+        data.setUser(userData);
+
+    }
+    userRepository.save(userData);
+    commonResponse.setCode("0000");
+    commonResponse.setMsg("data saved successfully");
 }
+catch (Exception e)
+{
+    commonResponse.setCode("1111");
+    commonResponse.setMsg("error:"+e);
+}
+        return commonResponse;
+    }
+
+    }
 
 
 
