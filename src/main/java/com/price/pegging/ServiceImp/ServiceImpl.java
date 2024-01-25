@@ -13,6 +13,7 @@ import com.price.pegging.Utilitty.DateFormatUtility;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -551,6 +552,26 @@ catch (Exception e)
         }
 
         return pricePeggingLineCharts;
+    }
+
+
+
+    // NOTE ... //This service implementation is made by shagun for getDataForMap controller....
+    @Override
+    public List<DsaExportData> getDataByPropertyPinCodeRegionZoneLocation(String propertyPincode, String region, String zone, String location) {
+        List<DsaExportData> dsaExportData = new ArrayList<>();
+        CommonDsaExportData commonDsaExportData = new CommonDsaExportData();
+
+
+//        try {
+//
+                dsaExportData = dsaExportRepository.findByPropertyPinCodeRegionZoneLocation(propertyPincode, region, zone, location);
+
+
+//        } catch (Exception e) {
+//            System.out.println(e);
+//        }
+        return dsaExportData;
     }
 
 

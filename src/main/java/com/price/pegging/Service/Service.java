@@ -33,4 +33,8 @@ public interface Service {
     FilterModel getAllFilterData();
 
     List<PricePeggingLineChart> getDataByZoneLocation(String zone, String location);
+
+
+    // NOTE ... //This service implementation is made by shagun for getDataForMap controller....
+    List<DsaExportData> getDataByPropertyPinCodeRegionZoneLocation(String propertyPincode, String region, String zone, String location);
 }
