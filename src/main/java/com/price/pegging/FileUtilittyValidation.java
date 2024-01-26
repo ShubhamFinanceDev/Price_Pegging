@@ -89,7 +89,7 @@ public class FileUtilittyValidation {
         Boolean matched = true;
         String errorMsg="";
 
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 10; i++) {
             Cell cell= headerRow.getCell(i);
             errorMsg = (cell == null || cell.getCellType() == CellType.BLANK) ? "file upload error due to row no " + i + 1 + " is empty" : "";
 
@@ -105,26 +105,29 @@ public class FileUtilittyValidation {
                     case  "Zone":
                         matched = true;
                         break;
-                    case  "Zone/Dist":
+                    case  "Region":
                         matched = true;
                         break;
-                    case  "Region":
+                    case  "Zone/Dist":
                         matched = true; // Add column
                         break;
                     case "Locations":
                         matched = true;
                         break;
 
-                    case "Minimum Rate":
+                    case "Minimum Rate (per sqft)":
                         matched = true;
                         break;
-                    case "Maximum Rate":
+                    case "Average Rate (per sqft)":
                         matched = true;
                         break;
-                    case "Average Rate":
+                    case "Maximum Rate (per sqft)":
                         matched = true;
                         break;
                     case "Pincode":
+                        matched = true;
+                        break;
+                    case "Quarter Wise":
                         matched = true;
                         break;
                     default:

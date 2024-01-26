@@ -36,15 +36,17 @@ public class PricePegging {
     @Column(name="pincode")
     private String pinCode;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name="upload_date",nullable = false)
+   // @Temporal(TemporalType.DATE)
+  //  @Column(name="upload_date",nullable = false)
+   @Column(name="upload_date")
     private String uploadDate;
-    @PrePersist
-    private void oncreate() {
-        LocalDate currentDate = LocalDate.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        uploadDate = currentDate.format(formatter);
-    }
+
+//    @PrePersist
+//    private void oncreate() {
+//        LocalDate currentDate = LocalDate.now();
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//        uploadDate = currentDate.format(formatter);
+//    }
 
     public String getZoneDist() {
         return zoneDist;
@@ -124,4 +126,6 @@ public class PricePegging {
     public void setRegion(String region) {
         this.region = region;
     }
+
+
 }
