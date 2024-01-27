@@ -242,7 +242,7 @@ public class ServiceImpl implements Service {
                     Row row = rowIterator.next();
                     PricePegging pricePeggingUpload = new PricePegging();
 
-                    for (int i = 0; i < 9; i++) {
+                    for (int i = 0; i < 10; i++) {
 
                         Cell cell = row.getCell(i);
 
@@ -277,6 +277,10 @@ public class ServiceImpl implements Service {
                                 case 8:
                                     pricePeggingUpload.setPinCode(row.getCell(8).toString().replace(".0", ""));
                                     break;
+                                case 9:
+                                    pricePeggingUpload.setUploadDate(Date.valueOf(dateFormatUtilty.changeDateFormate(row.getCell(9).toString())));
+                                    break;
+
                             }
                         }
 

@@ -233,9 +233,11 @@ public class Controller {
         if (email != null && email.contains
                 ("@shubham")) {
             commonResponse = service.saveuser(usermodel);
+
         } else {
             commonResponse.setCode("1111");
             commonResponse.setMsg("invalid email");
+
         }
         return commonResponse;
     }
