@@ -4,6 +4,7 @@ import com.price.pegging.Entity.DsaExport;
 import com.price.pegging.Entity.PricePegging;
 import com.price.pegging.Model.*;
 import com.price.pegging.Entity.User;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Date;
@@ -41,6 +42,6 @@ public interface Service {
     List<DsaExportData> getDataByPropertyPinCodeRegionZoneLocation(String propertyPincode, String region, String zone);
 
     CommonResponse saveuser(User userData);
-    CommonResponse readData(String type);
+   CommonResponse readData(String type);
 
 }

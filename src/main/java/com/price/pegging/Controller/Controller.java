@@ -28,37 +28,36 @@ public class Controller {
 
     @CrossOrigin
     @PostMapping("/loginValidation")
-    public ResponseEntity<UserDetail> loginAuthentication(@RequestBody User userRequest)
-    {
+    public ResponseEntity<UserDetail> loginAuthentication(@RequestBody User userRequest) {
 
-        List<User> userDetail=new ArrayList<>();
-        UserDetail commonResponse= new UserDetail();
-        String userEmail=userRequest.getEmail();
-        String userPassword=userRequest.getPassword();
+        List<User> userDetail = new ArrayList<>();
+        UserDetail commonResponse = new UserDetail();
+        String userEmail = userRequest.getEmail();
+        String userPassword = userRequest.getPassword();
 
-try {
-    if (!userEmail.isEmpty() && userEmail.contains("@shubham") && !userPassword.isEmpty()) {
-        userDetail = service.userExist(userEmail);
+        try {
+            if (!userEmail.isEmpty() && userEmail.contains("@shubham") && !userPassword.isEmpty()) {
+                userDetail = service.userExist(userEmail);
 
-        if (!CollectionUtils.isEmpty(userDetail)) {
-            // System.out.print(userDetail.get(0).getPassword());
-            commonResponse = service.passwordMatch(userPassword, userDetail.get(0));
+                if (!CollectionUtils.isEmpty(userDetail)) {
+                    // System.out.print(userDetail.get(0).getPassword());
+                    commonResponse = service.passwordMatch(userPassword, userDetail.get(0));
 
-        } else {
-            System.out.println("Invalid email");
+                } else {
+                    System.out.println("Invalid email");
+                    commonResponse.setCode("1111");
+                    commonResponse.setMsg("User does not exist");
+                }
+            } else {
+                System.out.println("Invalid email");
+                commonResponse.setCode("1111");
+                commonResponse.setMsg("Invalid user email");
+            }
+        } catch (Exception e) {
+            System.out.println(e);
             commonResponse.setCode("1111");
-            commonResponse.setMsg("User does not exist");
+            commonResponse.setMsg("Technical issue");
         }
-    } else {
-        System.out.println("Invalid email");
-        commonResponse.setCode("1111");
-        commonResponse.setMsg("Invalid user email");
-    }
-}
-catch (Exception e)
-{
-    System.out.println(e);
-}
 
 
         return new ResponseEntity<UserDetail>(commonResponse, HttpStatus.OK);
@@ -66,69 +65,62 @@ catch (Exception e)
 
     @CrossOrigin
     @PostMapping("/dsaExportUpload")
-    public ResponseEntity<CommonResponse> exportFileUpload(@RequestParam("file") MultipartFile file)
-    {
-        CommonResponse commonResponse=new CommonResponse();
-        commonResponse=service.readDataDsa(file);
+    public ResponseEntity<CommonResponse> exportFileUpload(@RequestParam("file") MultipartFile file) {
+        CommonResponse commonResponse = new CommonResponse();
+        commonResponse = service.readDataDsa(file);
 
         return new ResponseEntity<CommonResponse>(commonResponse, HttpStatus.OK);
     }
+
     @CrossOrigin
     @PostMapping("/pricePeggingUpload")
-    public ResponseEntity<CommonResponse> peggingFileUpload(@RequestParam("file") MultipartFile file)
-    {
-        CommonResponse commonResponse=new CommonResponse();
-        commonResponse=service.peggingFileReadData(file);
+    public ResponseEntity<CommonResponse> peggingFileUpload(@RequestParam("file") MultipartFile file) {
+        CommonResponse commonResponse = new CommonResponse();
+        commonResponse = service.peggingFileReadData(file);
 
         return new ResponseEntity<CommonResponse>(commonResponse, HttpStatus.OK);
     }
+
     @CrossOrigin
     @GetMapping("/pricePeggingData")
-    public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name="zone",required = false) String zone,@RequestParam(name="fromDate",required = false) String fromDate,@RequestParam(name="toDate",required = false) String toDate,@RequestParam(name="region",required = false) String region)
-    {
-        List<PricePegging> pricePeggingDatas=new ArrayList<>();
-        PricePeggingData pricePeggingData= new PricePeggingData();
+    public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "fromDate", required = false) String fromDate, @RequestParam(name = "toDate", required = false) String toDate, @RequestParam(name = "region", required = false) String region) {
+        List<PricePegging> pricePeggingDatas = new ArrayList<>();
+        PricePeggingData pricePeggingData = new PricePeggingData();
 
-        if(fromDate!=null && toDate !=null)
-        {
-            pricePeggingDatas=service.getAllPricePeggingDataByZonFromDateToRegion(zone,fromDate,toDate,region);
-        }
-        else if(fromDate==null && toDate ==null)
-        {
-            pricePeggingDatas=service.getAllPricePeggingDataByZoneAndRegion(zone,region);
-        }
-        else
-        {
+        if (fromDate != null && toDate != null) {
+            pricePeggingDatas = service.getAllPricePeggingDataByZonFromDateToRegion(zone, fromDate, toDate, region);
+        } else if (fromDate == null && toDate == null) {
+            pricePeggingDatas = service.getAllPricePeggingDataByZoneAndRegion(zone, region);
+        } else {
             pricePeggingData.setCode("1111");
-           pricePeggingData.setMsg("Please select required field");
+            pricePeggingData.setMsg("Please select required field");
         }
 
-        if(pricePeggingData.getCode()==null) {
-                    if (pricePeggingDatas.isEmpty()) {
-                        pricePeggingData.setCode("1111");
-                        pricePeggingData.setMsg("Data not found");
-                        pricePeggingData.setPricePeggingList(null);
-                    } else {
-                        pricePeggingData.setCode("0000");
-                        pricePeggingData.setMsg("Data found successfully");
-                        pricePeggingData.setPricePeggingList(pricePeggingDatas);
-                    }
-                }
+        if (pricePeggingData.getCode() == null) {
+            if (pricePeggingDatas.isEmpty()) {
+                pricePeggingData.setCode("1111");
+                pricePeggingData.setMsg("Data not found");
+                pricePeggingData.setPricePeggingList(null);
+            } else {
+                pricePeggingData.setCode("0000");
+                pricePeggingData.setMsg("Data found successfully");
+                pricePeggingData.setPricePeggingList(pricePeggingDatas);
+            }
+        }
         return new ResponseEntity<PricePeggingData>(pricePeggingData, HttpStatus.OK);
 
     }
 
 
-
     @CrossOrigin
     @GetMapping("/exportData")
-    public ResponseEntity<DsaDataResponse> exportData(@RequestParam(name="applicationNo",required = false) String applicationNo /*, @RequestParam(name="uploadDate",required = false) Date uploadDate*/, @RequestParam(name="zone",required = false) String zone, @RequestParam(name="region",required = false) String region, @RequestParam(name = "fromDate",required = false)Date fromDate, @RequestParam(name = "toDate",required = false) Date toDate)      // changes for from to todate
+    public ResponseEntity<DsaDataResponse> exportData(@RequestParam(name = "applicationNo", required = false) String applicationNo /*, @RequestParam(name="uploadDate",required = false) Date uploadDate*/, @RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "region", required = false) String region, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate)      // changes for from to todate
     {
 
-        DsaDataResponse dsaDataResponse=new DsaDataResponse();
+        DsaDataResponse dsaDataResponse = new DsaDataResponse();
         if ((fromDate != null && toDate != null) || (fromDate == null && toDate == null)) {
             dsaDataResponse = service.getAllDsaData(fromDate, toDate, applicationNo, region, zone);
-        } else  {
+        } else {
             dsaDataResponse.setCode("1111");
             dsaDataResponse.setMsg("toDate fromDate both are required");
 
@@ -147,6 +139,7 @@ catch (Exception e)
         return new ResponseEntity<DsaDataResponse>(dsaDataResponse, HttpStatus.OK);
 
     }
+
     @CrossOrigin
     @GetMapping("/allZone")
     public List zoneDetail() {
@@ -179,28 +172,24 @@ catch (Exception e)
 
     @CrossOrigin
     @GetMapping("/filterOption")
-    FilterModel getFilterData()
-    {
-        FilterModel filterModel=new FilterModel();
+    FilterModel getFilterData() {
+        FilterModel filterModel = new FilterModel();
 
-        filterModel=service.getAllFilterData();
+        filterModel = service.getAllFilterData();
         return filterModel;
     }
+
     @CrossOrigin
     @GetMapping("/lineChartForPricePegging/{zone}/{location}")
-    public CommonResponseForLineChart getDataForLineChart(@PathVariable String zone,@PathVariable String location)
-    {
-        CommonResponseForLineChart commonResponseForLineChart=new CommonResponseForLineChart();
-        List<PricePeggingLineChart> pricePeggingLineCharts=new ArrayList<>();
-        pricePeggingLineCharts=service.getDataByZoneLocation(zone,location);
-        if(!(pricePeggingLineCharts.isEmpty()))
-        {
+    public CommonResponseForLineChart getDataForLineChart(@PathVariable String zone, @PathVariable String location) {
+        CommonResponseForLineChart commonResponseForLineChart = new CommonResponseForLineChart();
+        List<PricePeggingLineChart> pricePeggingLineCharts = new ArrayList<>();
+        pricePeggingLineCharts = service.getDataByZoneLocation(zone, location);
+        if (!(pricePeggingLineCharts.isEmpty())) {
             commonResponseForLineChart.setCode("0000");
             commonResponseForLineChart.setMsg("Data found successfully.");
             commonResponseForLineChart.setPricePeggingLineCharts(pricePeggingLineCharts);
-        }
-        else
-        {
+        } else {
             commonResponseForLineChart.setCode("1111");
             commonResponseForLineChart.setMsg("Data Not found.");
             commonResponseForLineChart.setPricePeggingLineCharts(pricePeggingLineCharts);
@@ -219,13 +208,13 @@ catch (Exception e)
         List<DsaExportData> dsaExportData = new ArrayList<>();
         CommonDsaExportData commonDsaExportData = new CommonDsaExportData();
 
-        if(propertyPincode != null && region != null && zone != null) {
+        if (propertyPincode != null && region != null && zone != null) {
             dsaExportData = service.getDataByPropertyPinCodeRegionZoneLocation(propertyPincode, region, zone);
             commonDsaExportData.setCode("0000");
             commonDsaExportData.setMsg("Data found successfully");
             commonDsaExportData.setDsaExportData(dsaExportData);
 
-        } else  {
+        } else {
             commonDsaExportData.setCode("1111");
             commonDsaExportData.setMsg("please fill the required fileds");
             commonDsaExportData.setDsaExportData(null);
@@ -252,20 +241,16 @@ catch (Exception e)
     }
 
     @PostMapping("/invokeDsaReport")
-    public CommonResponse invokeDsaReport(@RequestBody Map<String,String> inputParam)
-    {
-        CommonResponse commonResponse=new CommonResponse();
-        if (inputParam.containsKey("type"))
-        {
-            commonResponse=service.readData(inputParam.get("type"));
-        }
-        else
-        {
+    public ResponseEntity<CommonResponse> invokeDsaReport(@RequestBody Map<String, String> inputParam) {
+        CommonResponse commonResponse = new CommonResponse();
+        if (inputParam.containsKey("type")) {
+            commonResponse = service.readData(inputParam.get("type"));
+        } else {
             commonResponse.setMsg("type field is empty");
             commonResponse.setCode("1111");
         }
 
-        return commonResponse;
+        return new ResponseEntity(commonResponse,HttpStatus.OK);
     }
 
 }

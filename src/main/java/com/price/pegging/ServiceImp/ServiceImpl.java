@@ -19,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -625,7 +627,7 @@ public class ServiceImpl implements Service {
     @Override
     public CommonResponse readData(String type) {
         List<DsaDataModel> dsaDataModelList = new ArrayList<>();
-        CommonResponse commonResponse = new CommonResponse();
+        CommonResponse commonResponse=new CommonResponse();
 
         String dsaQuery = "select  b.*, case when b.rate_per_sqft between a.minimum_rate and a.maximum_rate   then \n" +
                 "'G'  when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*10)/100) and (a.maximum_rate-(a.maximum_rate*10)/100) then 'Y'\n" +
@@ -639,24 +641,23 @@ public class ServiceImpl implements Service {
         try {
 
             dsaDataModelList = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DsaDataModel.class));
-            if (generateReport(dsaDataModelList, type)) {
-                commonResponse.setCode("0000");
-                commonResponse.setMsg("file generated successfully");
-            } else {
-                commonResponse.setCode("1111");
-                commonResponse.setMsg("technical issue in file generation process");
-            }
+            commonResponse= generateReport(dsaDataModelList, type) ;
+
+            return commonResponse;
 
         } catch (Exception e) {
             System.out.println(e);
             commonResponse.setCode("1111");
             commonResponse.setMsg("error:" + e);
+            return commonResponse;
+
         }
-        return commonResponse;
     }
 
-    private Boolean generateReport(List<DsaDataModel> dsaDataModel, String type) throws IOException {
+
+    private CommonResponse generateReport(List<DsaDataModel> dsaDataModel, String type) throws IOException {
         List<DsaDataModel> dsaDataModelList = new ArrayList<>();
+        CommonResponse commonResponse =new CommonResponse();
 
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Sheet1");
@@ -702,8 +703,6 @@ public class ServiceImpl implements Service {
             row.createCell(4).setCellValue(dataList.getRate_per_sqft());
 
         }
-
-
         try {
             String userHome = System.getProperty("user.home");
             String downloadFolderPath = userHome + File.separator + "Downloads";
@@ -717,10 +716,18 @@ public class ServiceImpl implements Service {
             workbook.write(outputStream);
             workbook.close();
             outputStream.close();
+
+            commonResponse.setCode("0000");
+            commonResponse.setMsg("file generated");
+            return commonResponse;
+
         } catch (IOException e) {
+
             e.printStackTrace();
+            commonResponse.setCode("0000");
+            commonResponse.setMsg(""+e);
+            return commonResponse;
         }
-        return true;
     }
 }
 
