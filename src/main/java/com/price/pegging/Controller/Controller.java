@@ -122,7 +122,7 @@ public class Controller {
             dsaDataResponse = service.getAllDsaData(fromDate, toDate, applicationNo, region, zone);
         } else {
             dsaDataResponse.setCode("1111");
-            dsaDataResponse.setMsg("toDate fromDate both are required");
+            dsaDataResponse.setMsg("Both From date and To date are required for date range search.");
 
         }
 
@@ -216,7 +216,7 @@ public class Controller {
 
         } else {
             commonDsaExportData.setCode("1111");
-            commonDsaExportData.setMsg("please fill the required fileds");
+            commonDsaExportData.setMsg("please select the required field");
             commonDsaExportData.setDsaExportData(null);
         }
 
