@@ -240,15 +240,10 @@ public class Controller {
         return commonResponse;
     }
 
-    @PostMapping("/invokeDsaReport")
-    public ResponseEntity<CommonResponse> invokeDsaReport(@RequestBody Map<String, String> inputParam) {
+    @GetMapping("/invokeDsaReport/{type}")
+    public ResponseEntity<CommonResponse> invokeDsaReport(@PathVariable String type) {
         CommonResponse commonResponse = new CommonResponse();
-        if (inputParam.containsKey("type")) {
-            commonResponse = service.readData(inputParam.get("type"));
-        } else {
-            commonResponse.setMsg("type field is empty");
-            commonResponse.setCode("1111");
-        }
+        commonResponse = service.readData(type);
 
         return new ResponseEntity(commonResponse,HttpStatus.OK);
     }

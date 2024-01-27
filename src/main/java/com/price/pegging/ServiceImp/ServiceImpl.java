@@ -35,6 +35,9 @@ import java.io.InputStream;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -642,7 +645,6 @@ public class ServiceImpl implements Service {
 
             dsaDataModelList = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DsaDataModel.class));
             commonResponse= generateReport(dsaDataModelList, type) ;
-
             return commonResponse;
 
         } catch (Exception e) {
@@ -703,6 +705,8 @@ public class ServiceImpl implements Service {
             row.createCell(4).setCellValue(dataList.getRate_per_sqft());
 
         }
+        Timestamp timestamp= new Timestamp(System.currentTimeMillis());
+//        System.out.println(timestamp);
         try {
             String userHome = System.getProperty("user.home");
             String downloadFolderPath = userHome + File.separator + "Downloads";
@@ -711,7 +715,7 @@ public class ServiceImpl implements Service {
                 downloadFolder.mkdirs();
             }
 
-            File file = new File(downloadFolder, "dsa_data.xlsx");
+            File file = new File(downloadFolder, "dsa_data_"+timestamp.getTime()+".xlsx");
             FileOutputStream outputStream = new FileOutputStream(file);
             workbook.write(outputStream);
             workbook.close();
