@@ -210,9 +210,18 @@ public class Controller {
 
         if (propertyPincode != null && region != null && zone != null) {
             dsaExportData = service.getDataByPropertyPinCodeRegionZoneLocation(propertyPincode, region, zone);
-            commonDsaExportData.setCode("0000");
-            commonDsaExportData.setMsg("Data found successfully");
-            commonDsaExportData.setDsaExportData(dsaExportData);
+            if(!(dsaExportData.isEmpty())) {
+                commonDsaExportData.setCode("0000");
+                commonDsaExportData.setMsg("Data found successfully");
+                commonDsaExportData.setDsaExportData(dsaExportData);
+            }
+            else
+            {
+                commonDsaExportData.setCode("1111");
+                commonDsaExportData.setMsg("Data not found");
+                commonDsaExportData.setDsaExportData(null);
+            }
+            return commonDsaExportData;
 
         } else {
             commonDsaExportData.setCode("1111");
