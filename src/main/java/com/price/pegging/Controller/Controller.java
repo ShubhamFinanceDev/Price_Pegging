@@ -5,7 +5,9 @@ import com.price.pegging.Entity.PricePegging;
 import com.price.pegging.Model.*;
 import com.price.pegging.Entity.User;
 import com.price.pegging.Service.Service;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.map.HashedMap;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +15,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -252,11 +255,24 @@ public class Controller {
     }
 
     @GetMapping("/invokeDsaReport/{type}")
-    public ResponseEntity<CommonResponse> invokeDsaReport(@PathVariable String type) {
-        CommonResponse commonResponse = new CommonResponse();
-        commonResponse = service.readData(type);
+    public ResponseEntity<String> invokeDsaReport(@PathVariable String type,HttpServletResponse response) throws IOException {
 
-        return new ResponseEntity(commonResponse,HttpStatus.OK);
+        CommonResponse commonResponse=new CommonResponse();
+        List<DsaDataModel> dsaDataModelList = service.readData();
+        if(!(dsaDataModelList.isEmpty()))
+        {
+           commonResponse= service.generateReport(dsaDataModelList,type,response);
+           if(commonResponse.getCode()=="0000") {
+               return new ResponseEntity("Success", HttpStatus.PROCESSING);
+           }
+           else
+           {
+               return new ResponseEntity("Technical issue", HttpStatus.OK);
+
+           }
+        }
+
+        return new ResponseEntity("Data not found",HttpStatus.NOT_FOUND);
     }
 
 }

@@ -4,6 +4,8 @@ import com.price.pegging.Entity.DsaExport;
 import com.price.pegging.Entity.PricePegging;
 import com.price.pegging.Model.*;
 import com.price.pegging.Entity.User;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,6 +44,7 @@ public interface Service {
     List<DsaExportData> getDataByPropertyPinCodeRegionZoneLocation(String propertyPincode, String region, String zone);
 
     CommonResponse saveuser(User userData);
-   CommonResponse readData(String type);
+   List<DsaDataModel> readData();
 
+    CommonResponse generateReport(List<DsaDataModel> dsaDataModelList, String type,HttpServletResponse response);
 }

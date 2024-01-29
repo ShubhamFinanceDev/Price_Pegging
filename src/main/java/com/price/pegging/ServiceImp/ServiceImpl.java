@@ -11,6 +11,7 @@ import com.price.pegging.Repository.PricePeggingRepository;
 import com.price.pegging.Repository.UserRepository;
 import com.price.pegging.Service.Service;
 import com.price.pegging.Utilitty.DateFormatUtility;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.*;
@@ -632,7 +633,7 @@ public class ServiceImpl implements Service {
         return commonResponse;
     }
     @Override
-    public CommonResponse readData(String type) {
+    public List<DsaDataModel> readData() {
         List<DsaDataModel> dsaDataModelList = new ArrayList<>();
         CommonResponse commonResponse=new CommonResponse();
 
@@ -648,22 +649,19 @@ public class ServiceImpl implements Service {
         try {
 
             dsaDataModelList = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DsaDataModel.class));
-            commonResponse= generateReport(dsaDataModelList, type) ;
-            return commonResponse;
 
         } catch (Exception e) {
             System.out.println(e);
-            commonResponse.setCode("1111");
-            commonResponse.setMsg("error:" + e);
-            return commonResponse;
-
         }
+        return dsaDataModelList;
     }
 
 
-    private CommonResponse generateReport(List<DsaDataModel> dsaDataModel, String type) throws IOException {
+
+@Override
+    public CommonResponse generateReport(List<DsaDataModel> dsaDataModel, String type,HttpServletResponse response) {
         List<DsaDataModel> dsaDataModelList = new ArrayList<>();
-        CommonResponse commonResponse =new CommonResponse();
+        CommonResponse commonResponse = new CommonResponse();
 
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Sheet1");
@@ -691,7 +689,7 @@ public class ServiceImpl implements Service {
         int headerColNum = 0;
         for (String data : headerName) {
             Cell cell = headerRow.createCell(headerColNum);
-            cell.setCellValue(headerName.get(headerColNum));
+            cell.setCellValue(data);
             headerColNum++;
         }
 
@@ -709,24 +707,16 @@ public class ServiceImpl implements Service {
             row.createCell(4).setCellValue(dataList.getRate_per_sqft());
 
         }
-        Timestamp timestamp= new Timestamp(System.currentTimeMillis());
-//        System.out.println(timestamp);
+
         try {
-            String userHome = System.getProperty("user.home");
-            String downloadFolderPath = userHome + File.separator + "Downloads";
-            File downloadFolder = new File(downloadFolderPath);
-            if (!downloadFolder.exists()) {
-                downloadFolder.mkdirs();
-            }
 
-            File file = new File(downloadFolder, "dsa_data_"+timestamp.getTime()+".xlsx");
-            FileOutputStream outputStream = new FileOutputStream(file);
-            workbook.write(outputStream);
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setHeader("Content-Disposition", "attachment; filename=dsa_data.xlsx");
+
+            workbook.write(response.getOutputStream());
             workbook.close();
-            outputStream.close();
-
             commonResponse.setCode("0000");
-            commonResponse.setMsg("file generated");
+            commonResponse.setMsg("Success");
             return commonResponse;
 
         } catch (IOException e) {
