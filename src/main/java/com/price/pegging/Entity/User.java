@@ -2,6 +2,7 @@ package com.price.pegging.Entity;
 
 //import lombok.Data;
 
+import com.price.pegging.Model.UserDetail;
 import jakarta.persistence.*;
 import lombok.Data;
 

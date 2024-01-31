@@ -33,8 +33,8 @@ public class Controller {
     @PostMapping("/loginValidation")
     public ResponseEntity<UserDetail> loginAuthentication(@RequestBody User userRequest) {
 
-        List<User> userDetail = new ArrayList<>();
-        UserDetail commonResponse = new UserDetail();
+        User userDetail = new User();
+        UserDetail userDetail1 = new UserDetail();
         String userEmail = userRequest.getEmail();
         String userPassword = userRequest.getPassword();
 
@@ -42,28 +42,27 @@ public class Controller {
             if (!userEmail.isEmpty() && userEmail.contains("@shubham") && !userPassword.isEmpty()) {
                 userDetail = service.userExist(userEmail);
 
-                if (!CollectionUtils.isEmpty(userDetail)) {
+                if (userDetail !=null) {
                     // System.out.print(userDetail.get(0).getPassword());
-                    commonResponse = service.passwordMatch(userPassword, userDetail.get(0));
+                    userDetail1 = service.passwordMatch(userPassword, userDetail);
 
                 } else {
                     System.out.println("Invalid email");
-                    commonResponse.setCode("1111");
-                    commonResponse.setMsg("User does not exist");
+                    userDetail1.setCode("1111");
+                    userDetail1.setMsg("User does not exist");
                 }
             } else {
                 System.out.println("Invalid email");
-                commonResponse.setCode("1111");
-                commonResponse.setMsg("Invalid user email");
+                userDetail1.setCode("1111");
+                userDetail1.setMsg("Invalid user email");
             }
         } catch (Exception e) {
             System.out.println(e);
-            commonResponse.setCode("1111");
-            commonResponse.setMsg("Technical issue");
+            userDetail1.setCode("1111");
+            userDetail1.setMsg("Technical issue");
         }
 
-
-        return new ResponseEntity<UserDetail>(commonResponse, HttpStatus.OK);
+        return new ResponseEntity<UserDetail>(userDetail1, HttpStatus.OK);
     }
 
     @CrossOrigin

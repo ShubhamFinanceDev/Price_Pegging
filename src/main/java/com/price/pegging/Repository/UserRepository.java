@@ -13,5 +13,5 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User,Long> {
 
     @Query("SELECT ud from User ud where ud.email=:email")
-    List<User> findUser(@Param("email") String email);
+    User findUser(@Param("email") String email);
 }

@@ -15,7 +15,7 @@ import java.util.Optional;
 
 public interface Service {
 
-    public List<User> userExist(String userEmail);
+    public User userExist(String userEmail);
 
     UserDetail passwordMatch(String userPassword, User userDetail);
 

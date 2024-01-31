@@ -64,34 +64,34 @@ public class ServiceImpl implements Service {
 
 
     @Override
-    public List<User> userExist(String userEmail) {
+    public User userExist(String userEmail) {
 
 
         return userRepository.findUser(userEmail);
     }
 
     @Override
-    public UserDetail passwordMatch(String userPassword, User userDetail) {
+    public UserDetail passwordMatch(String userPassword, User userDetails) {
 
 
-        UserDetail commonResponse = new UserDetail();
+        UserDetail userDetail = new UserDetail();
         //  System.out.println(savePassword);
 
-        if (passwordEncoder.matches(userPassword, userDetail.getPassword())) {
+        if (passwordEncoder.matches(userPassword,userDetails.getPassword())) {
             System.out.println("password correct");
-            commonResponse.setCode("0000");
-            commonResponse.setMsg("Login successfully");
-            commonResponse.setUserId(userDetail.getUserId());
-            commonResponse.setEmail(userDetail.getEmail());
-            commonResponse.setName(userDetail.getName());
+            userDetail.setCode("0000");
+            userDetail.setMsg("Login successfully");
+            userDetail.setUserId(userDetails.getUserId());
+            userDetail.setEmail(userDetails.getEmail());
+            userDetail.setName(userDetails.getName());
         } else {
             System.out.println("Incorrect password");
-            commonResponse.setCode("1111");
-            commonResponse.setMsg("Password did not matched");
+            userDetail.setCode("1111");
+            userDetail.setMsg("Password did not matched");
         }
 
 
-        return commonResponse;
+        return userDetail;
     }
 
     @Override
@@ -710,8 +710,9 @@ public class ServiceImpl implements Service {
 
         try {
 
-            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+           response.setContentType("text/csv");
             response.setHeader("Content-Disposition", "attachment; filename=dsa_data.xlsx");
+
 
             workbook.write(response.getOutputStream());
             workbook.close();
