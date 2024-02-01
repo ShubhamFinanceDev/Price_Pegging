@@ -42,6 +42,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.zip.ZipFile;
 
 @org.springframework.stereotype.Service
@@ -584,12 +585,19 @@ public class ServiceImpl implements Service {
      */
     @Override
     public List<PricePeggingLineChart> getDataByZoneLocation(String zone, String location) {
-        List<PricePeggingLineChart> pricePeggingLineCharts = new ArrayList<>();
+        List<Object[]> pricePeggings=new ArrayList<>();
+        List<PricePeggingLineChart> pricePeggingLineCharts=new ArrayList<>();
+
         try {
 
-
             if (!(zone == null && location == null)) {
-                pricePeggingLineCharts = pricePeggingRepository.findDataByZoneLocation(zone, location);
+                    pricePeggings = pricePeggingRepository.findDataByZoneLocation(zone, location);
+
+                for (Object[] data: pricePeggings) {
+                    PricePeggingLineChart pricePeggingLineChart=new PricePeggingLineChart(data[1].toString(),data[2].toString(),data[3].toString(),data[0].toString());
+                    pricePeggingLineCharts.add(pricePeggingLineChart);
+                }
+
             }
         } catch (Exception e) {
             System.out.println(e);
