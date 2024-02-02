@@ -1,6 +1,7 @@
 package com.price.pegging.Repository;
 
 import com.price.pegging.Entity.DsaExport;
+import com.price.pegging.Model.DsaExportData;
 import com.price.pegging.Model.FilterModel;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -25,9 +26,21 @@ public interface DsaExportRepository extends JpaRepository<DsaExport,Long> {
  List getAllDistinctRegion();
 
 @Query("SELECT d FROM DsaExport d " +
-        "WHERE (:disbursalDate IS NULL OR d.disbursalDate = :disbursalDate) " +
-        "AND (:zone IS NULL OR d.zone = :zone) " +
+        "WHERE" +
+//        " (:disbursalDate IS NULL OR d.disbursalDate = :disbursalDate) " +
+        " (:zone IS NULL OR d.zone = :zone) " +
         "AND (:region IS NULL OR d.region = :region) " +
         "AND (:applicationNo IS NULL OR d.applicationNo = :applicationNo)")
-    List<DsaExport> findByAll(String applicationNo, Date disbursalDate, String region, String zone, Pageable pageable);
+    List<DsaExport> findByAll(String applicationNo, String region, String zone, Pageable pageable);
+@Query("SELECT d FROM DsaExport d " +
+        "WHERE (:fromDate IS NULL OR d.disbursalDate >= :fromDate) " +
+        "AND (:toDate IS NULL OR d.disbursalDate <= :toDate) " +
+        "AND (:zone IS NULL OR d.zone = :zone) " +
+        "AND (:region IS NULL OR d.region = :region)" +
+        "AND (:applicationNo IS NULL OR d.applicationNo = :applicationNo)")
+    List<DsaExport> findByfromdateTotoDate(Date fromDate, Date toDate, String applicationNo, String region, String zone);
+
+    // NOTE ... //This repository update is made by shagun for getDataForMap controller....
+    @Query("select new com.price.pegging.Model.DsaExportData(d.property_address,d.lattitude,d.longitude) from DsaExport d where  d.propertyPincode = :propertyPincode and d.region = :region and d.zone = :zone")
+    List<DsaExportData> findByPropertyPinCodeRegionZoneLocation(String propertyPincode, String region, String zone);
 }
