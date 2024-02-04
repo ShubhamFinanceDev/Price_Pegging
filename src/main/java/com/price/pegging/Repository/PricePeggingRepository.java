@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Objects;
 
 @Repository
 public interface PricePeggingRepository extends JpaRepository<PricePegging,Long> {
@@ -31,8 +32,8 @@ public interface PricePeggingRepository extends JpaRepository<PricePegging,Long>
  @Query("select distinct pp.zoneDist  from PricePegging pp ")
  List getAllDistinctZone();
 
- @Query("select new com.price.pegging.Model.PricePeggingLineChart(pp.minimumRate,pp.maximumRate,pp.averageRate,pp.uploadDate) from PricePegging pp where pp.zoneDist=:zone AND pp.locations=:location and pp.uploadDate in (select distinct(rr.uploadDate) from  PricePegging rr)")
- List<PricePeggingLineChart> findDataByZoneLocation(String zone,String location);
+ @Query("SELECT DISTINCT date_format(p.uploadDate,'%Y-%M'), max(p.minimumRate),max (p.maximumRate),max(p.averageRate) FROM PricePegging p WHERE p.zoneDist = :zone AND p.locations = :location group by p.uploadDate")
+  List<Object[]> findDataByZoneLocation(String zone, String location);
 @Query("select distinct pp.region  from PricePegging pp ")
 List getAllDistinctRegion();
 }

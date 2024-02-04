@@ -89,7 +89,7 @@ public class FileUtilittyValidation {
         Boolean matched = true;
         String errorMsg="";
 
-        for (int i = 0; i < 9; i++) {
+        for (int i = 0; i < 10; i++) {
             Cell cell= headerRow.getCell(i);
             errorMsg = (cell == null || cell.getCellType() == CellType.BLANK) ? "file upload error due to row no " + i + 1 + " is empty" : "";
 
@@ -125,6 +125,9 @@ public class FileUtilittyValidation {
                         matched = true;
                         break;
                     case "Pincode":
+                        matched = true;
+                        break;
+                    case "Quarter Wise":
                         matched = true;
                         break;
                     default:

@@ -2,9 +2,13 @@ package com.price.pegging.Entity;
 
 //import lombok.Data;
 
+import com.price.pegging.Model.UserDetail;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 
 @Entity
@@ -13,7 +17,7 @@ import lombok.Data;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="user_id")
     private Long userId;
 
@@ -33,7 +37,7 @@ public class User {
     private String password;
 
     @Column(name="createon")
-    private String createon;
+    private LocalDateTime createon;
 
     @Column(name="contenttype")
     private String contenttype;
@@ -43,84 +47,13 @@ public class User {
     @Column(name="profile_picture")
     private String profilePicture;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<UserRole> userRoles;
 
-    public Long getUserId() {
-        return userId;
+    @PrePersist
+    public void prePersist() {
+        this.createon = LocalDateTime.now();
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
 
-    public int getActive() {
-        return active;
-    }
-
-    public void setActive(int active) {
-        this.active = active;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getCreateon() {
-        return createon;
-    }
-
-    public void setCreateon(String createon) {
-        this.createon = createon;
-    }
-
-    public String getContenttype() {
-        return contenttype;
-    }
-
-    public void setContenttype(String contenttype) {
-        this.contenttype = contenttype;
-    }
-
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
-    }
-
-    public String getProfilePicture() {
-        return profilePicture;
-    }
-
-    public void setProfilePicture(String profilePicture) {
-        this.profilePicture = profilePicture;
-    }
 }
