@@ -256,24 +256,13 @@ public class Controller {
     @GetMapping("/invokeDsaReport/{type}")
     public ResponseEntity<String> invokeDsaReport(@PathVariable String type,HttpServletResponse response) throws IOException {
 
-        CommonResponse commonResponse=new CommonResponse();
+        CommonResponse commonResponse = new CommonResponse();
         List<DsaDataModel> dsaDataModelList = service.readData();
-        if(!(dsaDataModelList.isEmpty()))
-        {
-           commonResponse= service.generateReport(dsaDataModelList,type,response);
-           if(commonResponse.getCode()=="0000") {
-               return new ResponseEntity("Success", HttpStatus.PROCESSING);
-           }
-           else
-           {
-               return new ResponseEntity("Technical issue", HttpStatus.OK);
 
-           }
-        }
+        commonResponse = service.generateReport(dsaDataModelList, type, response);
+        return new ResponseEntity("Success", HttpStatus.PROCESSING);
 
-        return new ResponseEntity("Data not found",HttpStatus.NOT_FOUND);
     }
-
 }
 
 
