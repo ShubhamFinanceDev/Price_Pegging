@@ -431,11 +431,13 @@ public class ServiceImpl implements Service {
         DsaDataResponse dsaDataResponse = new DsaDataResponse();
         List<DsaDataModel> dsaDataModelList = new ArrayList<>();
 
-        String dsaQuery = "select  b.*, case when b.rate_per_sqft between a.minimum_rate and a.maximum_rate   then \n" +
-                "'G'  when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*10)/100) and (a.maximum_rate-(a.maximum_rate*10)/100) then 'Y'\n" +
-                "when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*15)/100) and (a.maximum_rate-(a.maximum_rate*15)/100) then 'R'\n" +
-                "  else 'B' end  flag  from price_pegging  a, dsa_export b  where a.pincode = b.property_pincode  and a.region=b.region \n" +
-                "and a.zone_dist = b.zone  and a.location = b.location\n" +
+        String dsaQuery = "select  b.*,a.upload_date,a.minimum_rate,a.maximum_rate,b.rate_per_sqft,a.maximum_rate,a.minimum_rate, case when b.rate_per_sqft between a.minimum_rate and a.maximum_rate   then \r\n"
+        		+ "'G'  when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*10)/100) and (a.maximum_rate-(a.maximum_rate*10)/100) then 'R'\r\n"
+        		+ "when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*15)/100) and (a.maximum_rate-(a.maximum_rate*15)/100) then 'Y'\r\n"
+        		+ "  else 'B' end  flag  from price_pegging  a, dsa_export b  where a.pincode = b.property_pincode  and a.region=b.region \r\n"
+        		+ "and a.zone_dist = b.zone  and a.location = b.location and \r\n"
+        		+ "a.upload_date in (select max(a.upload_date) from price_pegging  a, dsa_export b  where a.pincode = b.property_pincode  and a.region=b.region \r\n"
+        		+ "and a.zone_dist = b.zone  and a.location = b.location) and a.zone_dist = b.zone  and a.location = b.location;" +
                 "and b.application_no=COALESCE(" + prepareVariableForQuery(applicationNo) + ", b.application_no)\n" +
                 "and b.region = COALESCE(" + prepareVariableForQuery(region) + ",b.region)\n" +
                 "and b.zone = COALESCE(" + prepareVariableForQuery(zone) + ",b.zone)\n" +
@@ -1002,19 +1004,19 @@ public class ServiceImpl implements Service {
         List<DsaDataModel> dsaDataModelList = new ArrayList<>();
         CommonResponse commonResponse=new CommonResponse();
 
-        String dsaQuery = "select  b.*, case when b.rate_per_sqft between a.minimum_rate and a.maximum_rate   then \n" +
-                "'G'  when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*10)/100) and (a.maximum_rate-(a.maximum_rate*10)/100) then 'Y'\n" +
-                "when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*15)/100) and (a.maximum_rate-(a.maximum_rate*15)/100) then 'R'\n" +
-                "  else 'B' end  flag  from price_pegging  a, dsa_export b  where a.pincode = b.property_pincode  and a.region=b.region \n" +
-                "and a.zone_dist = b.zone  and a.location = b.location\n" +
-                "and b.application_no=COALESCE(null, b.application_no)\n" +
-                "and b.region = COALESCE(null,b.region)\n" +
-                "and b.zone = COALESCE(null,b.zone)\n" +
-                "and b.disbursal_date between COALESCE(null,b.disbursal_date) And COALESCE(null,b.disbursal_date)";
+        String dsaQuery = "select  b.*,a.upload_date,a.minimum_rate,a.maximum_rate,b.rate_per_sqft,a.maximum_rate,a.minimum_rate, case when b.rate_per_sqft between a.minimum_rate and a.maximum_rate   then \r\n"
+        		+ "'G'  when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*10)/100) and (a.maximum_rate-(a.maximum_rate*10)/100) then 'R'\r\n"
+        		+ "when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*15)/100) and (a.maximum_rate-(a.maximum_rate*15)/100) then 'Y'\r\n"
+        		+ "  else 'B' end  flag  from price_pegging  a, dsa_export b  where a.pincode = b.property_pincode  and a.region=b.region \r\n"
+        		+ "and a.zone_dist = b.zone  and a.location = b.location and \r\n"
+        		+ "a.upload_date in (select max(a.upload_date) from price_pegging  a, dsa_export b  where a.pincode = b.property_pincode  and a.region=b.region \r\n"
+        		+ "and a.zone_dist = b.zone  and a.location = b.location) and a.zone_dist = b.zone  and a.location = b.location";
+      //System.out.print(dsaQuery);
         try {
 
             dsaDataModelList = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DsaDataModel.class));
 
+            System.out.print(dsaDataModelList.size());
         } catch (Exception e) {
             System.out.println(e);
         }
