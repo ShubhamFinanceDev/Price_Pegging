@@ -12,19 +12,19 @@ public class FilterModel {
     @Data
     public static class Pegging
     {
-        private List<Zone> zone;
-
+        private List<ZoneDis> zoneDis;
+        private List<Region> region;
     }
     @Data
     public static class Dsa
     {
-        private List<Zone> zone;
+        private List<ZoneDis> zoneDis;
         private List<Region> region;
     }
     @Data
-    public static class Zone
+    public static class ZoneDis
     {
-        public String zone;
+        public String zoneDis;
 
     }
     @Data

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.boot.autoconfigure.web.WebProperties;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -18,7 +19,10 @@ public class PricePegging {
 
     @Column(name="zone")
     private String zone;
-
+    @Column(name="region")
+    private String region;
+    @Column(name="zone_dist")
+    private String zoneDist;
     @Column(name="location")
     private String locations;
 
@@ -34,77 +38,16 @@ public class PricePegging {
     @Column(name="pincode")
     private String pinCode;
 
-    @Temporal(TemporalType.DATE)
-    @Column(name="upload_date",nullable = false)
-    private String uploadDate;
-    @PrePersist
-    private void oncreate() {
-        LocalDate currentDate = LocalDate.now();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        uploadDate = currentDate.format(formatter);
-    }
+   // @Temporal(TemporalType.DATE)
+  //  @Column(name="upload_date",nullable = false)
+   @Column(name="upload_date")
+    private Date uploadDate;
 
-    public String getUploadDate() {
-        return uploadDate;
-    }
+//    @PrePersist
+//    private void oncreate() {
+//        LocalDate currentDate = LocalDate.now();
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//        uploadDate = currentDate.format(formatter);
+//    }
 
-    public void setUploadDate(String uploadDate) {
-        this.uploadDate = uploadDate;
-    }
-
-    public Long getPeggingId() {
-        return peggingId;
-    }
-
-    public void setPeggingId(Long peggingId) {
-        this.peggingId = peggingId;
-    }
-
-    public String getZone() {
-        return zone;
-    }
-
-    public void setZone(String zone) {
-        this.zone = zone;
-    }
-
-    public String getLocations() {
-        return locations;
-    }
-
-    public void setLocations(String locations) {
-        this.locations = locations;
-    }
-
-    public String getMinimumRate() {
-        return minimumRate;
-    }
-
-    public void setMinimumRate(String minimumRate) {
-        this.minimumRate = minimumRate;
-    }
-
-    public String getMaximumRate() {
-        return maximumRate;
-    }
-
-    public void setMaximumRate(String maximumRate) {
-        this.maximumRate = maximumRate;
-    }
-
-    public String getAverageRate() {
-        return averageRate;
-    }
-
-    public void setAverageRate(String averageRate) {
-        this.averageRate = averageRate;
-    }
-
-    public String getPinCode() {
-        return pinCode;
-    }
-
-    public void setPinCode(String pinCode) {
-        this.pinCode = pinCode;
-    }
 }
