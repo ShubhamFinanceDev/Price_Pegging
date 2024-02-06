@@ -348,15 +348,20 @@ public class ServiceImpl implements Service {
         DsaDataResponse dsaDataResponse = new DsaDataResponse();
         List<DsaDataModel> dsaDataModelList = new ArrayList<>();
 
-        String dsaQuery = "select  b.*, case when b.rate_per_sqft between a.minimum_rate and a.maximum_rate   then \n" +
-                "'G'  when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*10)/100) and (a.maximum_rate-(a.maximum_rate*10)/100) then 'Y'\n" +
-                "when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*15)/100) and (a.maximum_rate-(a.maximum_rate*15)/100) then 'R'\n" +
-                "  else 'B' end  flag  from price_pegging  a, dsa_export b  where a.pincode = b.property_pincode  and a.region=b.region \n" +
-                "and a.zone_dist = b.zone  and a.location = b.location\n" +
-                "and b.application_no=COALESCE(" + prepareVariableForQuery(applicationNo) + ", b.application_no)\n" +
-                "and b.region = COALESCE(" + prepareVariableForQuery(region) + ",b.region)\n" +
-                "and b.zone = COALESCE(" + prepareVariableForQuery(zone) + ",b.zone)\n" +
-                "and b.disbursal_date between COALESCE(" + prepareVariableForQuery(fromDate) + ",b.disbursal_date) And COALESCE(" + prepareVariableForQuery(toDate) + ",b.disbursal_date)";
+        String dsaQuery = "SELECT b.*, a.minimum_rate, a.maximum_rate, b.rate_per_sqft, a.maximum_rate, a.minimum_rate,\r\n"
+        		+ "    CASE \r\n"
+        		+ "        WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G'\r\n"
+        		+ "        WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 10) / 100) AND (a.maximum_rate - (a.maximum_rate * 10) / 100) THEN 'R'\r\n"
+        		+ "        WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y'\r\n"
+        		+ "        ELSE 'B'\r\n"
+        		+ "    END AS flag FROM price_pegging a JOIN dsa_export b ON a.pincode = b.property_pincode AND a.region = b.region AND a.zone_dist = b.zone  AND a.location = b.location\r\n"
+        		+ "WHERE a.upload_date = (SELECT MAX(upload_date) FROM price_pegging WHERE pincode = a.pincode AND region = a.region AND zone_dist = a.zone_dist AND location = a.location\r\n"
+        		+ "    )\r\n"
+        		+ "    AND b.application_no = COALESCE(NULL, b.application_no)\r\n"
+        		+ "    AND b.region = COALESCE(NULL, b.region)\r\n"
+        		+ "    AND b.zone = COALESCE(NULL, b.zone)\r\n"
+        		+ "    AND b.disbursal_date BETWEEN COALESCE(NULL, b.disbursal_date) AND COALESCE(NULL, b.disbursal_date);\r\n"
+        		+ "";
         try {
 
 
@@ -645,19 +650,26 @@ public class ServiceImpl implements Service {
         List<DsaDataModel> dsaDataModelList = new ArrayList<>();
         CommonResponse commonResponse=new CommonResponse();
 
-        String dsaQuery = "select  b.*, case when b.rate_per_sqft between a.minimum_rate and a.maximum_rate   then \n" +
-                "'G'  when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*10)/100) and (a.maximum_rate-(a.maximum_rate*10)/100) then 'Y'\n" +
-                "when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*15)/100) and (a.maximum_rate-(a.maximum_rate*15)/100) then 'R'\n" +
-                "  else 'B' end  flag  from price_pegging  a, dsa_export b  where a.pincode = b.property_pincode  and a.region=b.region \n" +
-                "and a.zone_dist = b.zone  and a.location = b.location\n" +
-                "and b.application_no=COALESCE(null, b.application_no)\n" +
-                "and b.region = COALESCE(null,b.region)\n" +
-                "and b.zone = COALESCE(null,b.zone)\n" +
-                "and b.disbursal_date between COALESCE(null,b.disbursal_date) And COALESCE(null,b.disbursal_date)";
+        String dsaQuery = "SELECT b.*, a.minimum_rate, a.maximum_rate, b.rate_per_sqft, a.maximum_rate, a.minimum_rate,\r\n"
+        		+ "    CASE \r\n"
+        		+ "        WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G'\r\n"
+        		+ "        WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 10) / 100) AND (a.maximum_rate - (a.maximum_rate * 10) / 100) THEN 'R'\r\n"
+        		+ "        WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y'\r\n"
+        		+ "        ELSE 'B'\r\n"
+        		+ "    END AS flag FROM price_pegging a JOIN dsa_export b ON a.pincode = b.property_pincode AND a.region = b.region AND a.zone_dist = b.zone  AND a.location = b.location\r\n"
+        		+ "WHERE a.upload_date = (SELECT MAX(upload_date) FROM price_pegging WHERE pincode = a.pincode AND region = a.region AND zone_dist = a.zone_dist AND location = a.location\r\n"
+        		+ "    )\r\n"
+        		+ "    AND b.application_no = COALESCE(NULL, b.application_no)\r\n"
+        		+ "    AND b.region = COALESCE(NULL, b.region)\r\n"
+        		+ "    AND b.zone = COALESCE(NULL, b.zone)\r\n"
+        		+ "    AND b.disbursal_date BETWEEN COALESCE(NULL, b.disbursal_date) AND COALESCE(NULL, b.disbursal_date);\r\n"
+        		+ "";
+     // System.out.print(dsaQuery);
         try {
 
             dsaDataModelList = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DsaDataModel.class));
 
+            System.out.print(dsaDataModelList.size());
         } catch (Exception e) {
             System.out.println(e);
         }
