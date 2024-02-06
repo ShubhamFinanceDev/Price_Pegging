@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -28,7 +29,7 @@ public interface PricePeggingRepository extends JpaRepository<PricePegging,Long>
           "AND (:toDate IS NULL OR pp.uploadDate <= :toDate) " +
           "AND (:zone IS NULL OR pp.zoneDist = :zone) " +
           "AND (:region IS NULL OR pp.region = :region)")
-    List<PricePegging> findByZoneAndFromDateToRegion(String zone, String fromDate,String toDate,String region,Pageable pageable);
+    List<PricePegging> findByZoneAndFromDateToRegion(String zone, Date fromDate, Date toDate, String region, Pageable pageable);  //change dataType toDate and fromDate
  @Query("select distinct pp.zoneDist  from PricePegging pp ")
  List getAllDistinctZone();
 

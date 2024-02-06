@@ -392,7 +392,7 @@ public class ServiceImpl implements Service {
         return pricePeggings;
     }
 
-    public List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, String fromDate, String toDate, String region) {
+    public List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, Date fromDate, Date toDate, String region) {
         List<PricePegging> pricePeggings = new ArrayList<>();
         Pageable pageable = PageRequest.of(0, 100);
 
