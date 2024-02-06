@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-
-=======
 package com.price.pegging.Utilitty;
 
 import org.springframework.stereotype.Service;
@@ -28,4 +25,3 @@ public class DateFormatUtility {
         return outputDateString;
     }
 }
->>>>>>> development

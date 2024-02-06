@@ -31,18 +31,6 @@ public interface DsaExportRepository extends JpaRepository<DsaExport,Long> {
         " (:zone IS NULL OR d.zone = :zone) " +
         "AND (:region IS NULL OR d.region = :region) " +
         "AND (:applicationNo IS NULL OR d.applicationNo = :applicationNo)")
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-    List<DsaExport> findByAll(String applicationNo, String uploadDate, String region, String zone);
-=======
-    List<DsaExport> findByAll(String applicationNo, String disbursalDate, String region, String zone, Pageable pageable);
-
-@Query("SELECT d FROM DsaExport d WHERE d.location = :location AND d.propertyPincode = :pinCode")
-List<DsaExport> findByLocationAndPincode(String location, String pinCode);
-
-
->>>>>>> Stashed changes
-=======
     List<DsaExport> findByAll(String applicationNo, String region, String zone, Pageable pageable);
 @Query("SELECT d FROM DsaExport d " +
         "WHERE (:fromDate IS NULL OR d.disbursalDate >= :fromDate) " +
@@ -55,5 +43,4 @@ List<DsaExport> findByLocationAndPincode(String location, String pinCode);
     // NOTE ... //This repository update is made by shagun for getDataForMap controller....
     @Query("select new com.price.pegging.Model.DsaExportData(d.property_address,d.lattitude,d.longitude) from DsaExport d where  d.propertyPincode = :propertyPincode and d.region = :region and d.zone = :zone")
     List<DsaExportData> findByPropertyPinCodeRegionZoneLocation(String propertyPincode, String region, String zone);
->>>>>>> development
 }
