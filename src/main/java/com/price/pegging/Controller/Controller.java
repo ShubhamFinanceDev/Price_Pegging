@@ -85,7 +85,7 @@ public class Controller {
 
     @CrossOrigin
     @GetMapping("/pricePeggingData")
-    public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "fromDate", required = false) String fromDate, @RequestParam(name = "toDate", required = false) String toDate, @RequestParam(name = "region", required = false) String region) {
+    public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate, @RequestParam(name = "region", required = false) String region) {
         List<PricePegging> pricePeggingDatas = new ArrayList<>();
         PricePeggingData pricePeggingData = new PricePeggingData();
 
