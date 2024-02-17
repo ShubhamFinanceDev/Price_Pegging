@@ -677,7 +677,7 @@ public class ServiceImpl implements Service {
     }
 
 
-
+                         // Ticket 3301 changes Done
 @Override
     public CommonResponse generateReport(List<DsaDataModel> dsaDataModel, String type,HttpServletResponse response) {
         List<DsaDataModel> dsaDataModelList = new ArrayList<>();
@@ -704,6 +704,8 @@ public class ServiceImpl implements Service {
         headerName.add("property_address");
         headerName.add("location");
         headerName.add("rate_per_sqft");
+        headerName.add("maximum_rate");        // Ticket 3301 changes Done
+        headerName.add("minimum_rate");       // Ticket 3301 changes Done
 
         Row headerRow = sheet.createRow(0);
         int headerColNum = 0;
@@ -725,6 +727,8 @@ public class ServiceImpl implements Service {
             row.createCell(2).setCellValue(dataList.getProperty_address());
             row.createCell(3).setCellValue(dataList.getLocation());
             row.createCell(4).setCellValue(dataList.getRate_per_sqft());
+            row.createCell(5).setCellValue(dataList.getMaximum_rate());         // Ticket 3301 changes Done
+            row.createCell(6).setCellValue(dataList.getMinimum_rate());         // Ticket 3301 changes Done
 
         }
 
