@@ -41,6 +41,7 @@ public interface DsaExportRepository extends JpaRepository<DsaExport,Long> {
     List<DsaExport> findByfromdateTotoDate(Date fromDate, Date toDate, String applicationNo, String region, String zone);
 
     // NOTE ... //This repository update is made by shagun for getDataForMap controller....
-    @Query("select new com.price.pegging.Model.DsaExportData(d.property_address,d.lattitude,d.longitude) from DsaExport d where  d.propertyPincode = :propertyPincode and d.region = :region and d.zone = :zone")
+    // UPDATE IN THIS CODE IS DONE BY TOKEN NO... 3303
+    @Query("select distinct new com.price.pegging.Model.DsaExportData(d.property_address,d.lattitude,d.longitude) from DsaExport d where  d.propertyPincode = :propertyPincode and d.region = :region and d.zone = :zone")
     List<DsaExportData> findByPropertyPinCodeRegionZoneLocation(String propertyPincode, String region, String zone);
 }
