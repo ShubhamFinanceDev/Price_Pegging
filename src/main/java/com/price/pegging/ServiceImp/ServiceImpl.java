@@ -621,21 +621,26 @@ public class ServiceImpl implements Service {
         CommonResponse commonResponse = new CommonResponse();
         User user = new User();
 
+        User emailExist = userRepository.findUser(userData.getEmail());     // Changes for check email exist or not
+        if (emailExist == null) {
+            try {
+                userData.setPassword(passwordEncoder.encode(userData.getPassword()));
+                for (UserRole data : userData.getUserRoles()) {
 
-        try {
-            userData.setPassword(passwordEncoder.encode(userData.getPassword()));
-            for (UserRole data : userData.getUserRoles()) {
+                    data.setUser(userData);
 
-                data.setUser(userData);
+                }
+                userRepository.save(userData);
+                commonResponse.setCode("0000");
+                commonResponse.setMsg("data saved successfully");
 
+            } catch (Exception e) {
+                commonResponse.setCode("1111");
+                commonResponse.setMsg("error" + e);
             }
-            userRepository.save(userData);
-            commonResponse.setCode("0000");
-            commonResponse.setMsg("data saved successfully");
-
-        } catch (Exception e) {
+        }else {                                                     //End
+            commonResponse.setMsg("User already exist");
             commonResponse.setCode("1111");
-            commonResponse.setMsg("error"+e);
         }
         return commonResponse;
     }
