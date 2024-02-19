@@ -78,7 +78,7 @@ public class ServiceImpl implements Service {
         UserDetail userDetail = new UserDetail();
         //  System.out.println(savePassword);
 
-        if (passwordEncoder.matches(userPassword,userDetails.getPassword())) {
+        if (passwordEncoder.matches(userPassword, userDetails.getPassword())) {
             System.out.println("password correct");
             userDetail.setCode("0000");
             userDetail.setMsg("Login successfully");
@@ -120,11 +120,10 @@ public class ServiceImpl implements Service {
                 System.out.println("file format matched");
 
                 while (rowIterator.hasNext()) {
-
                     count++;
                     Row row = rowIterator.next();
                     DsaExport dsaExport = new DsaExport();
-
+                    String applicationNo = null;
 
                     for (int i = 0; i < 13; i++) {
                         Cell cell = row.getCell(i);
@@ -137,6 +136,13 @@ public class ServiceImpl implements Service {
                             switch (i) {
 
                                 case 1:
+                                    applicationNo = row.getCell(1).toString();                                          //check application no already exist or not: 3307
+                                    int countApplicationNo = dsaExportRepository.checkApplicationNo(applicationNo);
+                                    if (countApplicationNo > 0) {
+                                        errorMsg = "application number " + applicationNo + " already exist.";
+                                        System.out.println("error: application number already exist");
+
+                                    }
                                     dsaExport.setApplicationNo(row.getCell(1).toString());
                                     break;
                                 case 2:
@@ -175,13 +181,21 @@ public class ServiceImpl implements Service {
                                     break;
                             }
 
+                            if(errorMsg.isEmpty()) {
+                                for (DsaExport fileRow : dsaExports) {              //duplicate check in uploaded sheet ticket no: 3307
+                                    System.out.println(applicationNo);
 
+                                    if (fileRow.getApplicationNo().equals(applicationNo)) {
+                                        errorMsg = "application number " + applicationNo + " duplicate in uploaded file.";
+                                        System.out.println("error: duplicate application no in uploaded file");
+                                        break;
+                                    }
+                                }
+                            }
                         }
-                        if (!errorMsg.isEmpty())
-                            break;
+                        if (!errorMsg.isEmpty()) break;
                     }
-                    if (!errorMsg.isEmpty())
-                        break;
+                    if (!errorMsg.isEmpty()) break;
                     dsaExports.add(dsaExport);
 
                 }
@@ -247,9 +261,7 @@ public class ServiceImpl implements Service {
                     for (int i = 0; i < 10; i++) {
 
                         Cell cell = row.getCell(i);
-
                         errorMsg = (cell == null || cell.getCellType() == CellType.BLANK) ? "file upload error due to row no " + (row.getRowNum() + 1) + " is empty" : "";
-
                         if (errorMsg.isEmpty()) {
                             switch (i) {
 //                                    case 0: pricePeggingUpload.setsNo(Long.valueOf(row.getCell(0).toString()));//            System.out.println(Long.valueOf(row.getCell(0).toString()));
@@ -282,15 +294,12 @@ public class ServiceImpl implements Service {
                                 case 9:
                                     pricePeggingUpload.setUploadDate(Date.valueOf(dateFormatUtilty.changeDateFormate(row.getCell(9).toString())));
                                     break;
-
                             }
                         }
 
-                        if (!errorMsg.isEmpty())
-                            break;
+                        if (!errorMsg.isEmpty()) break;
                     }
-                    if (!errorMsg.isEmpty())
-                        break;
+                    if (!errorMsg.isEmpty()) break;
                     peggingUploads.add(pricePeggingUpload);
 
                 }
@@ -343,30 +352,20 @@ public class ServiceImpl implements Service {
 //    }
 //
 
+    //Changes done by Dhruv Ticket No. 3304
     public DsaDataResponse getAllDsaData(Date fromDate, Date toDate, String applicationNo, String region, String zone) {
-
         DsaDataResponse dsaDataResponse = new DsaDataResponse();
         List<DsaDataModel> dsaDataModelList = new ArrayList<>();
 
-        String dsaQuery = "select  b.*, case when b.rate_per_sqft between a.minimum_rate and a.maximum_rate   then \n" +
-                "'G'  when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*10)/100) and (a.maximum_rate-(a.maximum_rate*10)/100) then 'Y'\n" +
-                "when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*15)/100) and (a.maximum_rate-(a.maximum_rate*15)/100) then 'R'\n" +
-                "  else 'B' end  flag  from price_pegging  a, dsa_export b  where a.pincode = b.property_pincode  and a.region=b.region \n" +
-                "and a.zone_dist = b.zone  and a.location = b.location\n" +
-                "and b.application_no=COALESCE(" + prepareVariableForQuery(applicationNo) + ", b.application_no)\n" +
-                "and b.region = COALESCE(" + prepareVariableForQuery(region) + ",b.region)\n" +
-                "and b.zone = COALESCE(" + prepareVariableForQuery(zone) + ",b.zone)\n" +
-                "and b.disbursal_date between COALESCE(" + prepareVariableForQuery(fromDate) + ",b.disbursal_date) And COALESCE(" + prepareVariableForQuery(toDate) + ",b.disbursal_date)";
+        String dsaQuery = "SELECT b.*, CASE WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G' \n" + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 10) / 100) AND (a.maximum_rate - (a.maximum_rate * 10) / 100) THEN 'R'\n" + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y'\n" + "        ELSE 'B' END AS flag FROM price_pegging a INNER JOIN dsa_export b ON a.pincode = b.property_pincode AND a.region = b.region AND a.zone_dist = b.zone AND a.location = b.location\n" + "WHERE a.upload_date = (SELECT MAX(upload_date) FROM price_pegging)" + "and b.application_no=COALESCE(" + prepareVariableForQuery(applicationNo) + ", b.application_no)\n" + "and b.region = COALESCE(" + prepareVariableForQuery(region) + ",b.region)\n" + "and b.zone = COALESCE(" + prepareVariableForQuery(zone) + ",b.zone)\n" + "and b.disbursal_date between COALESCE(" + prepareVariableForQuery(fromDate) + ",b.disbursal_date) And COALESCE(" + prepareVariableForQuery(toDate) + ",b.disbursal_date)" + "LIMIT 10000";
+
         try {
-
-
             dsaDataModelList = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DsaDataModel.class));
             dsaDataResponse.setDsaExportList(dsaDataModelList);
-
         } catch (Exception e) {
             System.out.println(e);
             dsaDataResponse.setCode("1111");
-            dsaDataResponse.setMsg("error:" + e);
+            dsaDataResponse.setMsg("Error: " + e.getMessage());
         }
         return dsaDataResponse;
     }
@@ -386,7 +385,7 @@ public class ServiceImpl implements Service {
     @Override
     public List<PricePegging> getAllPricePeggingDataByZoneAndRegion(String zone, String region) {
         List<PricePegging> pricePeggings = new ArrayList<>();
-        Pageable pageable = PageRequest.of(0, 100);
+        Pageable pageable = PageRequest.of(0, 10000); //ticket no.3304
 
         pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone, region, pageable);
         return pricePeggings;
@@ -394,7 +393,7 @@ public class ServiceImpl implements Service {
 
     public List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, Date fromDate, Date toDate, String region) {
         List<PricePegging> pricePeggings = new ArrayList<>();
-        Pageable pageable = PageRequest.of(0, 100);
+        Pageable pageable = PageRequest.of(0, 10000); //ticket no.3304
 
         pricePeggings = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region, pageable);
         return pricePeggings;
@@ -505,11 +504,11 @@ public class ServiceImpl implements Service {
 //        List<DashboardGraph.PeggingData> peggingData=new ArrayList<>();
 
         try {
-            String dsaQuery = "SELECT date_format(upload_date,'%Y-%M') date,COUNT(property_pincode)total FROM dsa_export group BY date_format(upload_date,'%Y-%M')";
-            String peggingQuery = "SELECT date_format(upload_date,'%Y-%M') Date,COUNT(pincode)total FROM price_pegging group BY date_format(upload_date,'%Y-%M')";
+            String dsaQuery = "SELECT date_format(upload_date,'%Y-%M') date,COUNT(DISTINCT property_pincode)total FROM dsa_export group BY date_format(upload_date,'%Y-%M')";
+            String peggingQuery = "SELECT date_format(upload_date,'%Y-%M') Date,COUNT(DISTINCT pincode)total FROM price_pegging group BY date_format(upload_date,'%Y-%M')";
 
-            String dsaQuery1 = "SELECT date_format(upload_date,'%Y-%M') date,COUNT(property_pincode)total FROM dsa_export group BY date_format(upload_date,'%Y-%M')";
-            String peggingQuery1 = "SELECT date_format(upload_date,'%Y-%M') Date,COUNT(pincode)total FROM price_pegging group BY date_format(upload_date,'%Y-%M')";
+            String dsaQuery1 = "SELECT date_format(upload_date,'%Y-%M') date,COUNT(DISTINCT location)total FROM dsa_export group BY date_format(upload_date,'%Y-%M')";
+            String peggingQuery1 = "SELECT date_format(upload_date,'%Y-%M') Date,COUNT(DISTINCT location)total FROM price_pegging group BY date_format(upload_date,'%Y-%M')";
 
 
             pincodesDsa = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DashboardGraph.Pincode.class));
@@ -585,16 +584,16 @@ public class ServiceImpl implements Service {
      */
     @Override
     public List<PricePeggingLineChart> getDataByZoneLocation(String zone, String location) {
-        List<Object[]> pricePeggings=new ArrayList<>();
-        List<PricePeggingLineChart> pricePeggingLineCharts=new ArrayList<>();
+        List<Object[]> pricePeggings = new ArrayList<>();
+        List<PricePeggingLineChart> pricePeggingLineCharts = new ArrayList<>();
 
         try {
 
             if (!(zone == null && location == null)) {
-                    pricePeggings = pricePeggingRepository.findDataByZoneLocation(zone, location);
+                pricePeggings = pricePeggingRepository.findDataByZoneLocation(zone, location);
 
-                for (Object[] data: pricePeggings) {
-                    PricePeggingLineChart pricePeggingLineChart=new PricePeggingLineChart(data[1].toString(),data[2].toString(),data[3].toString(),data[0].toString());
+                for (Object[] data : pricePeggings) {
+                    PricePeggingLineChart pricePeggingLineChart = new PricePeggingLineChart(data[1].toString(), data[2].toString(), data[3].toString(), data[0].toString());
                     pricePeggingLineCharts.add(pricePeggingLineChart);
                 }
 
@@ -617,47 +616,53 @@ public class ServiceImpl implements Service {
 
         return dsaExportData;
     }
+
     @Override
     public CommonResponse saveuser(User userData) {
         CommonResponse commonResponse = new CommonResponse();
         User user = new User();
 
+        User emailExist = userRepository.findUser(userData.getEmail());     // Changes for check email exist or not
+        if (emailExist == null) {
+            try {
+                userData.setPassword(passwordEncoder.encode(userData.getPassword()));
+                for (UserRole data : userData.getUserRoles()) {
 
-        try {
-            userData.setPassword(passwordEncoder.encode(userData.getPassword()));
-            for (UserRole data : userData.getUserRoles()) {
+                    data.setUser(userData);
 
-                data.setUser(userData);
+                }
+                userRepository.save(userData);
+                commonResponse.setCode("0000");
+                commonResponse.setMsg("data saved successfully");
 
+            } catch (Exception e) {
+                commonResponse.setCode("1111");
+                commonResponse.setMsg("error" + e);
             }
-            userRepository.save(userData);
-            commonResponse.setCode("0000");
-            commonResponse.setMsg("data saved successfully");
-
-        } catch (Exception e) {
+        } else {                                                     //End
+            commonResponse.setMsg("User already exist");
             commonResponse.setCode("1111");
-            commonResponse.setMsg("error"+e);
         }
         return commonResponse;
     }
+
+    //Changes done by Dhruv Ticket No. 3304
     @Override
     public List<DsaDataModel> readData() {
         List<DsaDataModel> dsaDataModelList = new ArrayList<>();
-        CommonResponse commonResponse=new CommonResponse();
+        CommonResponse commonResponse = new CommonResponse();
 
-        String dsaQuery = "select  b.*, case when b.rate_per_sqft between a.minimum_rate and a.maximum_rate   then \n" +
-                "'G'  when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*10)/100) and (a.maximum_rate-(a.maximum_rate*10)/100) then 'Y'\n" +
-                "when b.rate_per_sqft between (a.minimum_rate-(a.minimum_rate*15)/100) and (a.maximum_rate-(a.maximum_rate*15)/100) then 'R'\n" +
-                "  else 'B' end  flag  from price_pegging  a, dsa_export b  where a.pincode = b.property_pincode  and a.region=b.region \n" +
-                "and a.zone_dist = b.zone  and a.location = b.location\n" +
-                "and b.application_no=COALESCE(null, b.application_no)\n" +
-                "and b.region = COALESCE(null,b.region)\n" +
-                "and b.zone = COALESCE(null,b.zone)\n" +
-                "and b.disbursal_date between COALESCE(null,b.disbursal_date) And COALESCE(null,b.disbursal_date)";
+        String dsaQuery = "SELECT b.*,a.minimum_rate,a.maximum_rate, CASE WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G' \n" +
+                "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 10) / 100) AND (a.maximum_rate - (a.maximum_rate * 10) / 100) THEN 'R'\n" +
+                "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y'\n" +
+                "        ELSE 'B' END AS flag FROM price_pegging a INNER JOIN dsa_export b ON a.pincode = b.property_pincode AND a.region = b.region AND a.zone_dist = b.zone AND a.location = b.location\n" +
+                "WHERE a.upload_date = (SELECT MAX(upload_date) FROM price_pegging)\n";
+        // System.out.print(dsaQuery);
         try {
 
             dsaDataModelList = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DsaDataModel.class));
 
+            System.out.print(dsaDataModelList.size());
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -665,9 +670,9 @@ public class ServiceImpl implements Service {
     }
 
 
-
-@Override
-    public CommonResponse generateReport(List<DsaDataModel> dsaDataModel, String type,HttpServletResponse response) {
+    // Ticket 3301 changes Done
+    @Override
+    public CommonResponse generateReport(List<DsaDataModel> dsaDataModel, String type, HttpServletResponse response) {
         List<DsaDataModel> dsaDataModelList = new ArrayList<>();
         CommonResponse commonResponse = new CommonResponse();
 
@@ -692,6 +697,8 @@ public class ServiceImpl implements Service {
         headerName.add("property_address");
         headerName.add("location");
         headerName.add("rate_per_sqft");
+        headerName.add("maximum_rate");        // Ticket 3301 changes Done
+        headerName.add("minimum_rate");       // Ticket 3301 changes Done
 
         Row headerRow = sheet.createRow(0);
         int headerColNum = 0;
@@ -713,12 +720,14 @@ public class ServiceImpl implements Service {
             row.createCell(2).setCellValue(dataList.getProperty_address());
             row.createCell(3).setCellValue(dataList.getLocation());
             row.createCell(4).setCellValue(dataList.getRate_per_sqft());
+            row.createCell(5).setCellValue(dataList.getMaximum_rate());         // Ticket 3301 changes Done
+            row.createCell(6).setCellValue(dataList.getMinimum_rate());         // Ticket 3301 changes Done
 
         }
 
         try {
 
-           response.setContentType("text/csv");
+            response.setContentType("text/csv");
             response.setHeader("Content-Disposition", "attachment; filename=dsa_data.xlsx");
 
 
@@ -732,11 +741,16 @@ public class ServiceImpl implements Service {
 
             e.printStackTrace();
             commonResponse.setCode("0000");
-            commonResponse.setMsg(""+e);
+            commonResponse.setMsg("" + e);
             return commonResponse;
         }
     }
+
+
 }
+
+
+
 
 
 
