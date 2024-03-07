@@ -88,11 +88,14 @@ public class Controller {
     public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate, @RequestParam(name = "region", required = false) String region) {
         List<PricePegging> pricePeggingDatas = new ArrayList<>();
         PricePeggingData pricePeggingData = new PricePeggingData();
+        long count =0;             // ticket No  3302  changes for total count
 
         if (fromDate != null && toDate != null) {
             pricePeggingDatas = service.getAllPricePeggingDataByZonFromDateToRegion(zone, fromDate, toDate, region);
+            count = pricePeggingDatas.size();   // ticket No 3302
         } else if (fromDate == null && toDate == null) {
             pricePeggingDatas = service.getAllPricePeggingDataByZoneAndRegion(zone, region);
+            count = pricePeggingDatas.size();      // ticket No 3302
         } else {
             pricePeggingData.setCode("1111");
             pricePeggingData.setMsg("Please select required field");
@@ -103,13 +106,15 @@ public class Controller {
                 pricePeggingData.setCode("1111");
                 pricePeggingData.setMsg("Data not found");
                 pricePeggingData.setPricePeggingList(null);
+                pricePeggingData.setTotalCount(count);  // ticket No 3302
             } else {
                 pricePeggingData.setCode("0000");
                 pricePeggingData.setMsg("Data found successfully");
+                pricePeggingData.setTotalCount(count);  //ticket No 3302
                 pricePeggingData.setPricePeggingList(pricePeggingDatas);
             }
         }
-        return new ResponseEntity<PricePeggingData>(pricePeggingData, HttpStatus.OK);
+        return new ResponseEntity<>(pricePeggingData, HttpStatus.OK);
 
     }
 
@@ -118,30 +123,31 @@ public class Controller {
     @GetMapping("/exportData")
     public ResponseEntity<DsaDataResponse> exportData(@RequestParam(name = "applicationNo", required = false) String applicationNo /*, @RequestParam(name="uploadDate",required = false) Date uploadDate*/, @RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "region", required = false) String region, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate)      // changes for from to todate
     {
-
         DsaDataResponse dsaDataResponse = new DsaDataResponse();
+
+        long count=0;                 // ticket No 3302 changes for total count
         if ((fromDate != null && toDate != null) || (fromDate == null && toDate == null)) {
             dsaDataResponse = service.getAllDsaData(fromDate, toDate, applicationNo, region, zone);
+            count = dsaDataResponse.getDsaExportList().size();     // ticket No 3302
         } else {
             dsaDataResponse.setCode("1111");
             dsaDataResponse.setMsg("Both From date and To date are required for date range search.");
 
         }
-
         if (dsaDataResponse.getCode() != "1111") {
             if (dsaDataResponse.getDsaExportList().isEmpty()) {
                 dsaDataResponse.setCode("1111");
                 dsaDataResponse.setMsg("Data not found");
-
+                dsaDataResponse.setTotalCount(count);       //ticket No 3302
             } else {
                 dsaDataResponse.setCode("0000");
+                dsaDataResponse.setTotalCount(count);    // ticket No 3302
                 dsaDataResponse.setMsg("Data found successfully");
             }
         }
-        return new ResponseEntity<DsaDataResponse>(dsaDataResponse, HttpStatus.OK);
+        return new ResponseEntity<>(dsaDataResponse, HttpStatus.OK);
 
     }
-
     @CrossOrigin
     @GetMapping("/allZone")
     public List zoneDetail() {
@@ -159,6 +165,8 @@ public class Controller {
     @GetMapping("/dashboardDistinctDetail")
     DashboardDistinctDetail dashboardDetail() {
         DashboardDistinctDetail dashboardDistinctDetail = new DashboardDistinctDetail();
+
+
         dashboardDistinctDetail = service.getAllDashboarDetail();
 
         return dashboardDistinctDetail;

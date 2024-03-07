@@ -1,6 +1,5 @@
 package com.price.pegging.Model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.sql.Date;
