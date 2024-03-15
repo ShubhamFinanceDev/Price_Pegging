@@ -181,7 +181,7 @@ public class ServiceImpl implements Service {
                                     break;
                             }
 
-                            if(errorMsg.isEmpty()) {
+                            if (errorMsg.isEmpty()) {
                                 for (DsaExport fileRow : dsaExports) {              //duplicate check in uploaded sheet ticket no: 3307
                                     System.out.println(applicationNo);
 
@@ -383,20 +383,56 @@ public class ServiceImpl implements Service {
      * @return
      */
     @Override
-    public List<PricePegging> getAllPricePeggingDataByZoneAndRegion(String zone, String region) {
-        List<PricePegging> pricePeggings = new ArrayList<>();
-        Pageable pageable = PageRequest.of(0, 10000); //ticket no.3304
+    public PricePeggingData getAllPricePeggingDataByZoneAndRegion(String zone, String region,int pageNo) {
 
-        pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone, region, pageable);
-        return pricePeggings;
+        int pageSize=100;
+        List<PricePegging> pricePeggings = new ArrayList<>();
+        PricePeggingData pricePeggingData =new PricePeggingData();
+
+        Pageable pageable = PageRequest.of(pageNo, pageSize); //ticket no.3304
+try {
+    pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone, region, pageable);
+    long totalCount = pricePeggingRepository.findByZoneAndRegion(zone, region);
+    setDataInObject(pageNo, pageSize, pricePeggings, pricePeggingData, totalCount);
+}
+catch (Exception e)
+{
+    pricePeggingData.setMsg("Technical error");
+    pricePeggingData.setCode("1111");
+}
+        return pricePeggingData;
     }
 
-    public List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, Date fromDate, Date toDate, String region) {
-        List<PricePegging> pricePeggings = new ArrayList<>();
-        Pageable pageable = PageRequest.of(0, 5000); //ticket no.3304
+    private void setDataInObject(int pageNo, int pageSize, List<PricePegging> pricePeggings, PricePeggingData pricePeggingData, long totalCount) {
+        if (!(pricePeggings.isEmpty())) {
+            pricePeggingData.setMsg("Data found successfully");
+            pricePeggingData.setCode("0000");
+            pricePeggingData.setTotalCount(totalCount);
+            pricePeggingData.setNextPage(pageNo < (totalCount / pageSize));
+            pricePeggingData.setPricePeggingList(pricePeggings);
 
-        pricePeggings = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region, pageable);
-        return pricePeggings;
+        } else {
+            pricePeggingData.setMsg("Data not found");
+            pricePeggingData.setCode("1111");
+        }
+    }
+
+
+    public PricePeggingData getAllPricePeggingDataByZonFromDateToRegion(String zone, Date fromDate, Date toDate, String region, int pageNo) {
+        int pageSize = 100;
+        List<PricePegging> pricePeggings = new ArrayList<>();
+        PricePeggingData pricePeggingData = new PricePeggingData();
+        Pageable pageable = PageRequest.of(pageNo, 100); //ticket no.3304
+        try {
+            pricePeggings = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region, pageable);
+            long totalCount = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region);
+            setDataInObject(pageNo, pageSize, pricePeggings, pricePeggingData, totalCount);
+
+        } catch (Exception e) {
+            pricePeggingData.setMsg("Technical error");
+            pricePeggingData.setCode("1111");
+        }
+        return pricePeggingData;
     }
 
 

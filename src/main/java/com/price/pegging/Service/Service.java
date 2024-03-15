@@ -26,8 +26,8 @@ public interface Service {
 //    List<DsaExport> getAllExportData(String applicationNo, String region, String zone);
     DsaDataResponse getAllDsaData(Date fromDate, Date toDate, String applicationNo, String region, String zone);
 //    List<DsaExport> getAllExportDatatoDatetofromDate(Date fomDate, Date toDate, String applicationNo, String region, String zone);
-    List<PricePegging> getAllPricePeggingDataByZoneAndRegion(String zone,String region);
-    List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, Date fromDate,Date toDate,String region);  //change dataType toDate and fromDate
+    PricePeggingData getAllPricePeggingDataByZoneAndRegion(String zone,String region,int pageNo);
+    PricePeggingData getAllPricePeggingDataByZonFromDateToRegion(String zone, Date fromDate,Date toDate,String region, int pageNo);  //change dataType toDate and fromDate
     List getAllZone();
 
     DashboardDistinctDetail getAllDashboarDetail();

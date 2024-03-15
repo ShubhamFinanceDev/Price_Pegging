@@ -9,6 +9,7 @@ import java.util.List;
 public class PricePeggingData {
     private String code;
     private String  msg;
+    private boolean nextPage;
     private Long totalCount;     // add column total count  ticket No 3302
 
 

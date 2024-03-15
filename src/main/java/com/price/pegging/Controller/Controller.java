@@ -85,34 +85,18 @@ public class Controller {
 
     @CrossOrigin
     @GetMapping("/pricePeggingData")                               //change data type of toDate and fromDate
-    public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate, @RequestParam(name = "region", required = false) String region) {
+    public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate, @RequestParam(name = "region", required = false) String region,@RequestParam(name = "pageNo", required = true) int pageNo) {
         List<PricePegging> pricePeggingDatas = new ArrayList<>();
         PricePeggingData pricePeggingData = new PricePeggingData();
-        long count =0;             // ticket No  3302  changes for total count
 
         if (fromDate != null && toDate != null) {
-            pricePeggingDatas = service.getAllPricePeggingDataByZonFromDateToRegion(zone, fromDate, toDate, region);
-            count = pricePeggingDatas.size();   // ticket No 3302
+            pricePeggingData = service.getAllPricePeggingDataByZonFromDateToRegion(zone, fromDate, toDate, region,pageNo);
         } else if (fromDate == null && toDate == null) {
-            pricePeggingDatas = service.getAllPricePeggingDataByZoneAndRegion(zone, region);
-            count = pricePeggingDatas.size();      // ticket No 3302
+            pricePeggingData = service.getAllPricePeggingDataByZoneAndRegion(zone, region, pageNo);
+
         } else {
             pricePeggingData.setCode("1111");
             pricePeggingData.setMsg("Please select required field");
-        }
-
-        if (pricePeggingData.getCode() == null) {
-            if (pricePeggingDatas.isEmpty()) {
-                pricePeggingData.setCode("1111");
-                pricePeggingData.setMsg("Data not found");
-                pricePeggingData.setPricePeggingList(null);
-                pricePeggingData.setTotalCount(count);  // ticket No 3302
-            } else {
-                pricePeggingData.setCode("0000");
-                pricePeggingData.setMsg("Data found successfully");
-                pricePeggingData.setTotalCount(count);  //ticket No 3302
-                pricePeggingData.setPricePeggingList(pricePeggingDatas);
-            }
         }
         return new ResponseEntity<>(pricePeggingData, HttpStatus.OK);
 
@@ -264,24 +248,13 @@ public class Controller {
     @GetMapping("/invokeDsaReport/{type}")
     public ResponseEntity<String> invokeDsaReport(@PathVariable String type,HttpServletResponse response) throws IOException {
 
-        CommonResponse commonResponse=new CommonResponse();
+        CommonResponse commonResponse = new CommonResponse();
         List<DsaDataModel> dsaDataModelList = service.readData();
-        if(!(dsaDataModelList.isEmpty()))
-        {
-           commonResponse= service.generateReport(dsaDataModelList,type,response);
-           if(commonResponse.getCode()=="0000") {
-               return new ResponseEntity("Success", HttpStatus.PROCESSING);
-           }
-           else
-           {
-               return new ResponseEntity("Technical issue", HttpStatus.OK);
 
-           }
-        }
+        commonResponse = service.generateReport(dsaDataModelList, type, response);
+        return new ResponseEntity("Success", HttpStatus.PROCESSING);
 
-        return new ResponseEntity("Data not found",HttpStatus.NOT_FOUND);
     }
-
 }
 
 
