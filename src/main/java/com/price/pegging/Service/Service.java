@@ -24,10 +24,10 @@ public interface Service {
     CommonResponse peggingFileReadData(MultipartFile file);
 
 //    List<DsaExport> getAllExportData(String applicationNo, String region, String zone);
-    DsaDataResponse getAllDsaData(Date fromDate, Date toDate, String applicationNo, String region, String zone);
+    DsaDataResponse getAllDsaData(Date fromDate, Date toDate, String applicationNo, String region, String zone, String pinCode,Integer pageNo);
 //    List<DsaExport> getAllExportDatatoDatetofromDate(Date fomDate, Date toDate, String applicationNo, String region, String zone);
-    List<PricePegging> getAllPricePeggingDataByZoneAndRegion(String zone,String region);
-    List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, String fromDate,String toDate,String region);
+    List<PricePegging> getAllPricePeggingDataByZoneAndRegion(String zone, String region, String pinCode, Integer pageNo);
+    List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, Date fromDate, Date toDate, String region, String pinCode, Integer pageNo);  //change dataType toDate and fromDate
     List getAllZone();
 
     DashboardDistinctDetail getAllDashboarDetail();
