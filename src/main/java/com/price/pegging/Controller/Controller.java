@@ -1,26 +1,20 @@
 package com.price.pegging.Controller;
 
-import com.price.pegging.Entity.DsaExport;
 import com.price.pegging.Entity.PricePegging;
 import com.price.pegging.Model.*;
 import com.price.pegging.Entity.User;
 import com.price.pegging.Service.Service;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.collections4.map.HashedMap;
-import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.sql.Date;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @CrossOrigin
@@ -85,68 +79,37 @@ public class Controller {
 
     @CrossOrigin
     @GetMapping("/pricePeggingData")                               //change data type of toDate and fromDate
-    public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate, @RequestParam(name = "region", required = false) String region,@RequestParam(name = "pinCode",required = false)String pinCode,@RequestParam(name = "pageNo",required = false)Integer pageNo) {
+    public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate, @RequestParam(name = "region", required = false) String region,@RequestParam(name = "pageNo", required = true) int pageNo) {
         List<PricePegging> pricePeggingDatas = new ArrayList<>();
         PricePeggingData pricePeggingData = new PricePeggingData();
-        long count =0;             // ticket No  3302  changes for total count
 
         if (fromDate != null && toDate != null) {
-            pricePeggingDatas = service.getAllPricePeggingDataByZonFromDateToRegion(zone, fromDate, toDate, region,pinCode,pageNo);
-            count = pricePeggingDatas.size();   // ticket No 3302
+            pricePeggingData = service.getAllPricePeggingDataByZonFromDateToRegion(zone, fromDate, toDate, region,pageNo);
         } else if (fromDate == null && toDate == null) {
-            pricePeggingDatas = service.getAllPricePeggingDataByZoneAndRegion(zone, region,pinCode,pageNo);
-            count = pricePeggingDatas.size();      // ticket No 3302
+            pricePeggingData = service.getAllPricePeggingDataByZoneAndRegion(zone, region, pageNo);
+
         } else {
             pricePeggingData.setCode("1111");
             pricePeggingData.setMsg("Please select required field");
-        }
-
-        if (pricePeggingData.getCode() == null) {
-            if (pricePeggingDatas.isEmpty()) {
-                pricePeggingData.setCode("1111");
-                pricePeggingData.setMsg("Data not found");
-                pricePeggingData.setPricePeggingList(null);
-                pricePeggingData.setTotalCount(count);  // ticket No 3302
-            } else {
-                pricePeggingData.setCode("0000");
-                pricePeggingData.setMsg("Data found successfully");
-                pricePeggingData.setTotalCount(count);  //ticket No 3302
-                pricePeggingData.setPricePeggingList(pricePeggingDatas);
-            }
         }
         return new ResponseEntity<>(pricePeggingData, HttpStatus.OK);
 
     }
 
-       // add pinCode parameter
+
     @CrossOrigin
     @GetMapping("/exportData")
-    public ResponseEntity<DsaDataResponse> exportData(@RequestParam(name = "applicationNo", required = false) String applicationNo /*, @RequestParam(name="uploadDate",required = false) Date uploadDate*/, @RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "region", required = false) String region, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate,@RequestParam(name = "pinCode",required = false)String pinCode,@RequestParam(name = "pageNo",required = false)Integer pageNo)      // changes for from to todate
+    public ResponseEntity<DsaDataResponse> exportData(@RequestParam(name = "applicationNo", required = false) String applicationNo /*, @RequestParam(name="uploadDate",required = false) Date uploadDate*/, @RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "region", required = false) String region, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate,@RequestParam(name = "pageNo",required = false)Integer pageNo)      // changes for from to todate
     {
         DsaDataResponse dsaDataResponse = new DsaDataResponse();
 
-        long count=0;                 // ticket No 3302 changes for total count
         if ((fromDate != null && toDate != null) || (fromDate == null && toDate == null)) {
-            dsaDataResponse = service.getAllDsaData(fromDate, toDate, applicationNo, region, zone,pinCode, pageNo);
-            count = dsaDataResponse.getDsaExportList().size();     // ticket No 3302
+            dsaDataResponse = service.getAllDsaData(fromDate, toDate, applicationNo, region, zone, pageNo);
         } else {
             dsaDataResponse.setCode("1111");
             dsaDataResponse.setMsg("Both From date and To date are required for date range search.");
-
-        }
-        if (dsaDataResponse.getCode() != "1111") {
-            if (dsaDataResponse.getDsaExportList().isEmpty()) {
-                dsaDataResponse.setCode("1111");
-                dsaDataResponse.setMsg("Data not found");
-                dsaDataResponse.setTotalCount(count);       //ticket No 3302
-            } else {
-                dsaDataResponse.setCode("0000");
-                dsaDataResponse.setTotalCount(count);    // ticket No 3302
-                dsaDataResponse.setMsg("Data found successfully");
-            }
         }
         return new ResponseEntity<>(dsaDataResponse, HttpStatus.OK);
-
     }
     @CrossOrigin
     @GetMapping("/allZone")
