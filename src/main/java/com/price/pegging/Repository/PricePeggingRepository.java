@@ -16,8 +16,10 @@ import java.util.Objects;
 @Repository
 public interface PricePeggingRepository extends JpaRepository<PricePegging, Long> {
 
-    @Query("select pp from PricePegging pp where (:zone IS NULL OR pp.zoneDist = :zone) AND (:region IS NULL OR pp.region = :region) AND (:pinCode IS NULL OR pp.pinCode = :pinCode)")
-    List<PricePegging> findByZoneAndRegion(String zone, String region, String pinCode, Pageable pageable);
+    @Query("select pp from PricePegging pp where (:zone IS NULL OR pp.zoneDist = :zone) AND (:region IS NULL OR pp.region = :region)")
+    List<PricePegging> findByZoneAndRegion(String zone, String region, Pageable pageable);
+    @Query("select count(pp) from PricePegging pp where (:zone IS NULL OR pp.zoneDist = :zone) AND (:region IS NULL OR pp.region = :region)")
+    long findByZoneAndRegion(String zone, String region);
 
     @Query("select DISTINCT(pp.zone) pp from PricePegging pp")
     List getUniqeZones();
@@ -29,9 +31,15 @@ public interface PricePeggingRepository extends JpaRepository<PricePegging, Long
             "WHERE (:fromDate IS NULL OR pp.uploadDate >= :fromDate) " +
             "AND (:toDate IS NULL OR pp.uploadDate <= :toDate) " +
             "AND (:zone IS NULL OR pp.zoneDist = :zone) " +
-            "AND (:region IS NULL OR pp.region = :region)" +
-            "AND (:pinCode IS NULL OR pp.pinCode = :pinCode)")
-    List<PricePegging> findByZoneAndFromDateToRegion(String zone, Date fromDate, Date toDate, String region, String pinCode, Pageable pageable);  //change dataType toDate and fromDate
+            "AND (:region IS NULL OR pp.region = :region)")
+    List<PricePegging> findByZoneAndFromDateToRegion(String zone, Date fromDate, Date toDate, String region, Pageable pageable);  //change dataType toDate and fromDate
+
+    @Query("SELECT count(pp) FROM PricePegging pp " +
+            "WHERE (:fromDate IS NULL OR pp.uploadDate >= :fromDate) " +
+            "AND (:toDate IS NULL OR pp.uploadDate <= :toDate) " +
+            "AND (:zone IS NULL OR pp.zoneDist = :zone) " +
+            "AND (:region IS NULL OR pp.region = :region)")
+    long findByZoneAndFromDateToRegion(String zone, Date fromDate, Date toDate, String region);  //change dataType toDate and fromDate
 
     @Query("select distinct pp.zoneDist  from PricePegging pp ")
     List getAllDistinctZone();

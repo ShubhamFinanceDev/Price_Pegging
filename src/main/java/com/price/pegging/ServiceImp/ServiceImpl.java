@@ -404,21 +404,23 @@ public class ServiceImpl implements Service {
      * @return
      */
     @Override
-    public PricePeggingData getAllPricePeggingDataByZoneAndRegion(String zone, String region, int pageNo) {
+    public PricePeggingData getAllPricePeggingDataByZoneAndRegion(String zone, String region,int pageNo) {
 
-        int pageSize = 100;
+        int pageSize=100;
         List<PricePegging> pricePeggings = new ArrayList<>();
-        PricePeggingData pricePeggingData = new PricePeggingData();
+        PricePeggingData pricePeggingData =new PricePeggingData();
 
         Pageable pageable = PageRequest.of(pageNo, pageSize); //ticket no.3304
-        try {
-            pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone, region, pageable);
-            long totalCount = pricePeggingRepository.findByZoneAndRegion(zone, region);
-            setDataInObject(pageNo, pageSize, pricePeggings, pricePeggingData, totalCount);
-        } catch (Exception e) {
-            pricePeggingData.setMsg("Technical error");
-            pricePeggingData.setCode("1111");
-        }
+try {
+    pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone, region, pageable);
+    long totalCount = pricePeggingRepository.findByZoneAndRegion(zone, region);
+    setDataInObject(pageNo, pageSize, pricePeggings, pricePeggingData, totalCount);
+}
+catch (Exception e)
+{
+    pricePeggingData.setMsg("Technical error");
+    pricePeggingData.setCode("1111");
+}
         return pricePeggingData;
     }
 
@@ -707,7 +709,11 @@ public class ServiceImpl implements Service {
         List<DsaDataModel> dsaDataModelList = new ArrayList<>();
         CommonResponse commonResponse = new CommonResponse();
 
-        String dsaQuery = "SELECT b.*,a.minimum_rate,a.maximum_rate, CASE WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G' \n" + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 10) / 100) AND (a.maximum_rate - (a.maximum_rate * 10) / 100) THEN 'R'\n" + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y'\n" + "        ELSE 'B' END AS flag FROM price_pegging a INNER JOIN dsa_export b ON a.pincode = b.property_pincode AND a.region = b.region AND a.zone_dist = b.zone AND a.location = b.location\n" + "WHERE a.upload_date = (SELECT MAX(upload_date) FROM price_pegging)\n";
+        String dsaQuery = "SELECT b.*,a.minimum_rate,a.maximum_rate, CASE WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G' \n" +
+                "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 10) / 100) AND (a.maximum_rate - (a.maximum_rate * 10) / 100) THEN 'R'\n" +
+                "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y'\n" +
+                "        ELSE 'B' END AS flag FROM price_pegging a INNER JOIN dsa_export b ON a.pincode = b.property_pincode AND a.region = b.region AND a.zone_dist = b.zone AND a.location = b.location\n" +
+                "WHERE a.upload_date = (SELECT MAX(upload_date) FROM price_pegging)\n";
         // System.out.print(dsaQuery);
         try {
 
