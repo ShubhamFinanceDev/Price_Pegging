@@ -19,10 +19,10 @@ public interface Service {
     CommonResponse peggingFileReadData(MultipartFile file);
 
 //    List<DsaExport> getAllExportData(String applicationNo, String region, String zone);
-    DsaDataResponse getAllDsaData(Date fromDate, Date toDate, String applicationNo, String region, String zone,Integer pageNo);
+    DsaDataResponse getAllDsaData(Date fromDate, Date toDate, String applicationNo, String region, String zone, Integer pageNo, String pinCode);
 //    List<DsaExport> getAllExportDatatoDatetofromDate(Date fomDate, Date toDate, String applicationNo, String region, String zone);
-    PricePeggingData getAllPricePeggingDataByZoneAndRegion(String zone,String region,int pageNo);
-    PricePeggingData getAllPricePeggingDataByZonFromDateToRegion(String zone, Date fromDate,Date toDate,String region, int pageNo);  //change dataType toDate and fromDate
+    PricePeggingData getAllPricePeggingDataByZoneAndRegion(String zone,String region,int pageNo,String pinCode);
+    PricePeggingData getAllPricePeggingDataByZonFromDateToRegion(String zone, Date fromDate,Date toDate,String region, int pageNo,String pinCode);  //change dataType toDate and fromDate
     List getAllZone();
 
     DashboardDistinctDetail getAllDashboarDetail();

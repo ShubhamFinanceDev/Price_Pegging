@@ -79,14 +79,14 @@ public class Controller {
 
     @CrossOrigin
     @GetMapping("/pricePeggingData")                               //change data type of toDate and fromDate
-    public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate, @RequestParam(name = "region", required = false) String region,@RequestParam(name = "pageNo", required = true) int pageNo) {
+    public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate, @RequestParam(name = "region", required = false) String region,@RequestParam(name = "pageNo", required = true) int pageNo,@RequestParam(name = "pinCode")String pinCode){
         List<PricePegging> pricePeggingDatas = new ArrayList<>();
         PricePeggingData pricePeggingData = new PricePeggingData();
 
         if (fromDate != null && toDate != null) {
-            pricePeggingData = service.getAllPricePeggingDataByZonFromDateToRegion(zone, fromDate, toDate, region,pageNo);
+            pricePeggingData = service.getAllPricePeggingDataByZonFromDateToRegion(zone, fromDate, toDate, region,pageNo,pinCode);
         } else if (fromDate == null && toDate == null) {
-            pricePeggingData = service.getAllPricePeggingDataByZoneAndRegion(zone, region, pageNo);
+            pricePeggingData = service.getAllPricePeggingDataByZoneAndRegion(zone, region, pageNo,pinCode);
 
         } else {
             pricePeggingData.setCode("1111");
@@ -99,12 +99,12 @@ public class Controller {
 
     @CrossOrigin
     @GetMapping("/exportData")
-    public ResponseEntity<DsaDataResponse> exportData(@RequestParam(name = "applicationNo", required = false) String applicationNo /*, @RequestParam(name="uploadDate",required = false) Date uploadDate*/, @RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "region", required = false) String region, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate,@RequestParam(name = "pageNo")Integer pageNo)      // changes for from to todate
+    public ResponseEntity<DsaDataResponse> exportData(@RequestParam(name = "applicationNo", required = false) String applicationNo /*, @RequestParam(name="uploadDate",required = false) Date uploadDate*/, @RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "region", required = false) String region, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate,@RequestParam(name = "pageNo", required = true)Integer pageNo,@RequestParam(name = "pinCode", required = false)String pinCode)      // changes for from to todate
     {
         DsaDataResponse dsaDataResponse = new DsaDataResponse();
 
         if ((fromDate != null && toDate != null) || (fromDate == null && toDate == null)) {
-            dsaDataResponse = service.getAllDsaData(fromDate, toDate, applicationNo, region, zone, pageNo);
+            dsaDataResponse = service.getAllDsaData(fromDate, toDate, applicationNo, region, zone, pageNo,pinCode);
         } else {
             dsaDataResponse.setCode("1111");
             dsaDataResponse.setMsg("Both From date and To date are required for date range search.");
