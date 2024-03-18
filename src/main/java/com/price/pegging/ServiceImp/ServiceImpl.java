@@ -356,7 +356,7 @@ public class ServiceImpl implements Service {
     public DsaDataResponse getAllDsaData(Date fromDate, Date toDate, String applicationNo, String region, String zone, Integer pageNo) {
         DsaDataResponse dsaDataResponse = new DsaDataResponse();
         List<DsaDataModel> dsaDataModelList = new ArrayList<>();
-        int offSetData = pageNo * 100;
+        int offSetData = (pageNo - 1)* 100;
         int pageSize = 100;
 
         String dsaQuery = "SELECT b.*,a.minimum_rate,a.maximum_rate,b.rate_per_sqft, CASE WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G' \n" + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 10) / 100) AND (a.maximum_rate - (a.maximum_rate * 10) / 100) THEN 'R'" + "\n" + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y'\n" + "       " + " ELSE 'B' END AS flag FROM price_pegging a INNER JOIN dsa_export b ON a.pincode = b.property_pincode AND a.region = b.region AND a.zone_dist = b.zone AND a.location = b.location\n" + "WHERE a.upload_date = (SELECT MAX(upload_date) FROM price_pegging)" + "and b.application_no=COALESCE(" + prepareVariableForQuery(applicationNo) + ", b.application_no)\n" + "and b.region = COALESCE(" + prepareVariableForQuery(region) + ",b.region)\n" + "and b.zone = COALESCE(" + prepareVariableForQuery(zone) + ",b.zone)\n" + "and b.disbursal_date between COALESCE(" + prepareVariableForQuery(fromDate) + ",b.disbursal_date) And COALESCE(" + prepareVariableForQuery(toDate) + ",b.disbursal_date)" + "ORDER BY b.s_no LIMIT 100 OFFSET " + offSetData;
@@ -366,6 +366,7 @@ public class ServiceImpl implements Service {
             Long totalCountResult = jdbcTemplate.queryForObject(totalCount, Long.class);
 
             dsaDataModelList = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DsaDataModel.class));
+            System.out.println(dsaDataModelList);
             dsaDataResponse.setDsaExportList(dsaDataModelList);
             setDataInDsaObject(pageNo, pageSize, dsaDataModelList, dsaDataResponse, totalCountResult);
 
@@ -410,8 +411,8 @@ public class ServiceImpl implements Service {
         List<PricePegging> pricePeggings = new ArrayList<>();
         PricePeggingData pricePeggingData =new PricePeggingData();
 
-        Pageable pageable = PageRequest.of(pageNo, pageSize); //ticket no.3304
 try {
+    Pageable pageable = PageRequest.of(pageNo - 1, pageSize); //ticket no.3304
     pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone, region, pageable);
     long totalCount = pricePeggingRepository.findByZoneAndRegion(zone, region);
     setDataInObject(pageNo, pageSize, pricePeggings, pricePeggingData, totalCount);
@@ -443,8 +444,9 @@ catch (Exception e)
         int pageSize = 100;
         List<PricePegging> pricePeggings = new ArrayList<>();
         PricePeggingData pricePeggingData = new PricePeggingData();
-        Pageable pageable = PageRequest.of(pageNo, 100); //ticket no.3304
+
         try {
+            Pageable pageable = PageRequest.of(pageNo - 1, 100); //ticket no.3304
             pricePeggings = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region, pageable);
             long totalCount = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region);
             setDataInObject(pageNo, pageSize, pricePeggings, pricePeggingData, totalCount);
