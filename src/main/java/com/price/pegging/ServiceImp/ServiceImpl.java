@@ -353,21 +353,49 @@ public class ServiceImpl implements Service {
 //
 
     //Changes done by Dhruv Ticket No. 3304
-    public DsaDataResponse getAllDsaData(Date fromDate, Date toDate, String applicationNo, String region, String zone) {
+    public DsaDataResponse getAllDsaData(Date fromDate, Date toDate, String applicationNo, String region, String zone, Integer pageNo,String pinCode) {
         DsaDataResponse dsaDataResponse = new DsaDataResponse();
         List<DsaDataModel> dsaDataModelList = new ArrayList<>();
+        int offSetData = (pageNo - 1)* 100;
+        int pageSize = 100;
 
-        String dsaQuery = "SELECT b.*, CASE WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G' \n" + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 10) / 100) AND (a.maximum_rate - (a.maximum_rate * 10) / 100) THEN 'R'\n" + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y'\n" + "        ELSE 'B' END AS flag FROM price_pegging a INNER JOIN dsa_export b ON a.pincode = b.property_pincode AND a.region = b.region AND a.zone_dist = b.zone AND a.location = b.location\n" + "WHERE a.upload_date = (SELECT MAX(upload_date) FROM price_pegging)" + "and b.application_no=COALESCE(" + prepareVariableForQuery(applicationNo) + ", b.application_no)\n" + "and b.region = COALESCE(" + prepareVariableForQuery(region) + ",b.region)\n" + "and b.zone = COALESCE(" + prepareVariableForQuery(zone) + ",b.zone)\n" + "and b.disbursal_date between COALESCE(" + prepareVariableForQuery(fromDate) + ",b.disbursal_date) And COALESCE(" + prepareVariableForQuery(toDate) + ",b.disbursal_date)" + "LIMIT 10000";
+        String dsaQuery = "SELECT b.*,a.minimum_rate,a.maximum_rate,b.rate_per_sqft, CASE WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G' \n" +
+                "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 10) / 100) AND (a.maximum_rate - (a.maximum_rate * 10) / 100) THEN 'R'" + "\n" + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y'\n" +
+                "       " + " ELSE 'B' END AS flag FROM price_pegging a INNER JOIN dsa_export b ON a.pincode = b.property_pincode AND a.region = b.region AND a.zone_dist = b.zone AND a.location = b.location\n" + "WHERE a.upload_date = (SELECT MAX(upload_date) FROM price_pegging)" +
+                "and b.application_no=COALESCE(" + prepareVariableForQuery(applicationNo) + ", b.application_no)\n"  + "and b.property_pincode=COALESCE(" + prepareVariableForQuery(pinCode) + ", b.property_pincode)\n" + "and b.region = COALESCE(" + prepareVariableForQuery(region) + ",b.region)\n" + "and b.zone = COALESCE(" + prepareVariableForQuery(zone) +
+                ",b.zone)\n" + "and b.disbursal_date between COALESCE(" + prepareVariableForQuery(fromDate) + ",b.disbursal_date) And COALESCE(" + prepareVariableForQuery(toDate) + ",b.disbursal_date)" + "ORDER BY b.s_no LIMIT 100 OFFSET " + offSetData;
 
+        String totalCount = "SELECT COUNT(*) FROM ( " + "SELECT b.*, CASE WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G' " + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 10) / 100) AND (a.maximum_rate - (a.maximum_rate * 10) / 100) THEN 'R' " + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y' " +
+                "ELSE 'B' END AS flag FROM price_pegging a INNER JOIN dsa_export b ON a.pincode = b.property_pincode AND a.region = b.region AND a.zone_dist = b.zone AND a.location = b.location " + "WHERE a.upload_date = (SELECT MAX(upload_date) FROM price_pegging) " + "and b.application_no=COALESCE(" + prepareVariableForQuery(applicationNo) + ", b.application_no) " + "and b.property_pincode=COALESCE(" + prepareVariableForQuery(pinCode) + ", b.property_pincode)\n" +
+                "and b.region = COALESCE(" + prepareVariableForQuery(region) + ",b.region) " + "and b.zone = COALESCE(" + prepareVariableForQuery(zone) + ",b.zone) " + "and b.disbursal_date between COALESCE(" + prepareVariableForQuery(fromDate) + ",b.disbursal_date) And COALESCE(" + prepareVariableForQuery(toDate) + ",b.disbursal_date) " + ") AS subquery";
         try {
+            Long totalCountResult = jdbcTemplate.queryForObject(totalCount, Long.class);
+
             dsaDataModelList = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DsaDataModel.class));
+            System.out.println(dsaDataModelList);
             dsaDataResponse.setDsaExportList(dsaDataModelList);
+            setDataInDsaObject(pageNo, pageSize, dsaDataModelList, dsaDataResponse, totalCountResult);
+
         } catch (Exception e) {
             System.out.println(e);
             dsaDataResponse.setCode("1111");
             dsaDataResponse.setMsg("Error: " + e.getMessage());
         }
         return dsaDataResponse;
+    }
+
+    private void setDataInDsaObject(Integer pageNo, int pageSize, List<DsaDataModel> dsaDataModelList, DsaDataResponse dsaDataResponse, Long totalCountResult) {
+        if (!(dsaDataModelList.isEmpty())) {
+            dsaDataResponse.setMsg("Data found successfully");
+            dsaDataResponse.setCode("0000");
+            dsaDataResponse.setTotalCount(totalCountResult);
+            dsaDataResponse.setNextPage(pageNo < (totalCountResult / pageSize));
+            dsaDataResponse.setDsaExportList(dsaDataModelList);
+
+        } else {
+            dsaDataResponse.setMsg("Data not found");
+            dsaDataResponse.setCode("1111");
+        }
     }
 
     public String prepareVariableForQuery(String applicationNo) {
@@ -380,19 +408,20 @@ public class ServiceImpl implements Service {
 
     /**
      * @param zone
+     * @param pinCode
      * @return
      */
     @Override
-    public PricePeggingData getAllPricePeggingDataByZoneAndRegion(String zone, String region,int pageNo) {
+    public PricePeggingData getAllPricePeggingDataByZoneAndRegion(String zone, String region, int pageNo, String pinCode) {
 
         int pageSize=100;
         List<PricePegging> pricePeggings = new ArrayList<>();
         PricePeggingData pricePeggingData =new PricePeggingData();
 
-        Pageable pageable = PageRequest.of(pageNo, pageSize); //ticket no.3304
 try {
-    pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone, region, pageable);
-    long totalCount = pricePeggingRepository.findByZoneAndRegion(zone, region);
+    Pageable pageable = PageRequest.of(pageNo - 1, pageSize); //ticket no.3304
+    pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone, region, pageable,pinCode);
+    long totalCount = pricePeggingRepository.findByZoneAndRegion(zone, region,pinCode);
     setDataInObject(pageNo, pageSize, pricePeggings, pricePeggingData, totalCount);
 }
 catch (Exception e)
@@ -418,14 +447,15 @@ catch (Exception e)
     }
 
 
-    public PricePeggingData getAllPricePeggingDataByZonFromDateToRegion(String zone, Date fromDate, Date toDate, String region, int pageNo) {
+    public PricePeggingData getAllPricePeggingDataByZonFromDateToRegion(String zone, Date fromDate, Date toDate, String region, int pageNo,String pinCode) {
         int pageSize = 100;
         List<PricePegging> pricePeggings = new ArrayList<>();
         PricePeggingData pricePeggingData = new PricePeggingData();
-        Pageable pageable = PageRequest.of(pageNo, 100); //ticket no.3304
+
         try {
-            pricePeggings = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region, pageable);
-            long totalCount = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region);
+            Pageable pageable = PageRequest.of(pageNo - 1, 100); //ticket no.3304
+            pricePeggings = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region, pageable,pinCode);
+            long totalCount = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region,pinCode);
             setDataInObject(pageNo, pageSize, pricePeggings, pricePeggingData, totalCount);
 
         } catch (Exception e) {
