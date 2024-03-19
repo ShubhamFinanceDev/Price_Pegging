@@ -2,6 +2,7 @@ package com.price.pegging.ServiceImp;
 
 import com.price.pegging.Entity.DsaExport;
 import com.price.pegging.Entity.PricePegging;
+import com.price.pegging.Entity.UserRole;
 import com.price.pegging.FileUtilittyValidation;
 import com.price.pegging.Model.*;
 import com.price.pegging.Entity.User;
@@ -10,25 +11,38 @@ import com.price.pegging.Repository.PricePeggingRepository;
 import com.price.pegging.Repository.UserRepository;
 import com.price.pegging.Service.Service;
 import com.price.pegging.Utilitty.DateFormatUtility;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.Data;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.zip.ZipFile;
 
 @org.springframework.stereotype.Service
@@ -47,37 +61,38 @@ public class ServiceImpl implements Service {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
 
     @Override
-    public List<User> userExist(String userEmail) {
+    public User userExist(String userEmail) {
 
 
         return userRepository.findUser(userEmail);
     }
 
     @Override
-    public UserDetail passwordMatch(String userPassword, User userDetail) {
-        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    public UserDetail passwordMatch(String userPassword, User userDetails) {
 
 
-        UserDetail commonResponse = new UserDetail();
+        UserDetail userDetail = new UserDetail();
         //  System.out.println(savePassword);
 
-        if (passwordEncoder.matches(userPassword, userDetail.getPassword())) {
+        if (passwordEncoder.matches(userPassword, userDetails.getPassword())) {
             System.out.println("password correct");
-            commonResponse.setCode("0000");
-            commonResponse.setMsg("Login successfully");
-            commonResponse.setUserId(userDetail.getUserId());
-            commonResponse.setEmail(userDetail.getEmail());
-            commonResponse.setName(userDetail.getName());
+            userDetail.setCode("0000");
+            userDetail.setMsg("Login successfully");
+            userDetail.setUserId(userDetails.getUserId());
+            userDetail.setEmail(userDetails.getEmail());
+            userDetail.setName(userDetails.getName());
         } else {
             System.out.println("Incorrect password");
-            commonResponse.setCode("1111");
-            commonResponse.setMsg("Password did not matched");
+            userDetail.setCode("1111");
+            userDetail.setMsg("Password did not matched");
         }
 
 
-        return commonResponse;
+        return userDetail;
     }
 
     @Override
@@ -105,11 +120,10 @@ public class ServiceImpl implements Service {
                 System.out.println("file format matched");
 
                 while (rowIterator.hasNext()) {
-
                     count++;
                     Row row = rowIterator.next();
                     DsaExport dsaExport = new DsaExport();
-
+                    String applicationNo = null;
 
                     for (int i = 0; i < 13; i++) {
                         Cell cell = row.getCell(i);
@@ -122,6 +136,13 @@ public class ServiceImpl implements Service {
                             switch (i) {
 
                                 case 1:
+                                    applicationNo = row.getCell(1).toString();                                          //check application no already exist or not: 3307
+                                    int countApplicationNo = dsaExportRepository.checkApplicationNo(applicationNo);
+                                    if (countApplicationNo > 0) {
+                                        errorMsg = "application number " + applicationNo + " already exist.";
+                                        System.out.println("error: application number already exist");
+
+                                    }
                                     dsaExport.setApplicationNo(row.getCell(1).toString());
                                     break;
                                 case 2:
@@ -160,13 +181,21 @@ public class ServiceImpl implements Service {
                                     break;
                             }
 
+                            if (errorMsg.isEmpty()) {
+                                for (DsaExport fileRow : dsaExports) {              //duplicate check in uploaded sheet ticket no: 3307
+                                    System.out.println(applicationNo);
 
+                                    if (fileRow.getApplicationNo().equals(applicationNo)) {
+                                        errorMsg = "application number " + applicationNo + " duplicate in uploaded file.";
+                                        System.out.println("error: duplicate application no in uploaded file");
+                                        break;
+                                    }
+                                }
+                            }
                         }
-                        if (!errorMsg.isEmpty())
-                            break;
+                        if (!errorMsg.isEmpty()) break;
                     }
-                    if (!errorMsg.isEmpty())
-                        break;
+                    if (!errorMsg.isEmpty()) break;
                     dsaExports.add(dsaExport);
 
                 }
@@ -229,12 +258,10 @@ public class ServiceImpl implements Service {
                     Row row = rowIterator.next();
                     PricePegging pricePeggingUpload = new PricePegging();
 
-                    for (int i = 0; i < 9; i++) {
+                    for (int i = 0; i < 10; i++) {
 
                         Cell cell = row.getCell(i);
-
                         errorMsg = (cell == null || cell.getCellType() == CellType.BLANK) ? "file upload error due to row no " + (row.getRowNum() + 1) + " is empty" : "";
-
                         if (errorMsg.isEmpty()) {
                             switch (i) {
 //                                    case 0: pricePeggingUpload.setsNo(Long.valueOf(row.getCell(0).toString()));//            System.out.println(Long.valueOf(row.getCell(0).toString()));
@@ -264,14 +291,15 @@ public class ServiceImpl implements Service {
                                 case 8:
                                     pricePeggingUpload.setPinCode(row.getCell(8).toString().replace(".0", ""));
                                     break;
+                                case 9:
+                                    pricePeggingUpload.setUploadDate(Date.valueOf(dateFormatUtilty.changeDateFormate(row.getCell(9).toString())));
+                                    break;
                             }
                         }
 
-                        if (!errorMsg.isEmpty())
-                            break;
+                        if (!errorMsg.isEmpty()) break;
                     }
-                    if (!errorMsg.isEmpty())
-                        break;
+                    if (!errorMsg.isEmpty()) break;
                     peggingUploads.add(pricePeggingUpload);
 
                 }
@@ -307,39 +335,134 @@ public class ServiceImpl implements Service {
         return commonResponse;
     }
 
-    @Override
-    public List<DsaExport> getAllExportData(String applicationNo, Date disbursalDate,String region,String zone) {
-        List<DsaExport> exportsData = new ArrayList<>();
-//        String disbursalDateNew=null;
-        Pageable pageable = PageRequest.of(0, 100);
+//    @Override
+//    public List<DsaExport> getAllExportData(String applicationNo, String region, String zone) {
+//        List<DsaExport> exportsData = new ArrayList<>();
+//        Pageable pageable = PageRequest.of(0, 100);
+//
+//        exportsData = dsaExportRepository.findByAll(applicationNo, region, zone, pageable);
+//        return exportsData;
+//    }
+//
+//
+//    public List<DsaExport> getAllExportDatatoDatetofromDate(Date fromDate, Date toDate, String applicationNo, String region, String zone) {
+//        List<DsaExport> exportsDatafromDateTotoDate = new ArrayList<>();
+//        exportsDatafromDateTotoDate = dsaExportRepository.findByfromdateTotoDate(fromDate, toDate, applicationNo, region, zone);
+//        return exportsDatafromDateTotoDate;
+//    }
+//
 
-//        if(!(disbursalDate==null)) {
-//             disbursalDateNew =dateFormatUtilty.changeDateFormate(disbursalDate);
-//        }
-       exportsData=dsaExportRepository.findByAll(applicationNo,disbursalDate,region,zone,pageable);
-       System.out.println(disbursalDate);
-        return exportsData;
+    //Changes done by Dhruv Ticket No. 3304
+    public DsaDataResponse getAllDsaData(Date fromDate, Date toDate, String applicationNo, String region, String zone, Integer pageNo,String pinCode) {
+        DsaDataResponse dsaDataResponse = new DsaDataResponse();
+        List<DsaDataModel> dsaDataModelList = new ArrayList<>();
+        int offSetData = (pageNo - 1)* 100;
+        int pageSize = 100;
+
+        String dsaQuery = "SELECT b.*,a.minimum_rate,a.maximum_rate,b.rate_per_sqft, CASE WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G' \n" +
+                "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 10) / 100) AND (a.maximum_rate - (a.maximum_rate * 10) / 100) THEN 'R'" + "\n" + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y'\n" +
+                "       " + " ELSE 'B' END AS flag FROM price_pegging a INNER JOIN dsa_export b ON a.pincode = b.property_pincode AND a.region = b.region AND a.zone_dist = b.zone AND a.location = b.location\n" + "WHERE a.upload_date = (SELECT MAX(upload_date) FROM price_pegging)" +
+                "and b.application_no=COALESCE(" + prepareVariableForQuery(applicationNo) + ", b.application_no)\n"  + "and b.property_pincode=COALESCE(" + prepareVariableForQuery(pinCode) + ", b.property_pincode)\n" + "and b.region = COALESCE(" + prepareVariableForQuery(region) + ",b.region)\n" + "and b.zone = COALESCE(" + prepareVariableForQuery(zone) +
+                ",b.zone)\n" + "and b.disbursal_date between COALESCE(" + prepareVariableForQuery(fromDate) + ",b.disbursal_date) And COALESCE(" + prepareVariableForQuery(toDate) + ",b.disbursal_date)" + "ORDER BY b.s_no LIMIT 100 OFFSET " + offSetData;
+
+        String totalCount = "SELECT COUNT(*) FROM ( " + "SELECT b.*, CASE WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G' " + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 10) / 100) AND (a.maximum_rate - (a.maximum_rate * 10) / 100) THEN 'R' " + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y' " +
+                "ELSE 'B' END AS flag FROM price_pegging a INNER JOIN dsa_export b ON a.pincode = b.property_pincode AND a.region = b.region AND a.zone_dist = b.zone AND a.location = b.location " + "WHERE a.upload_date = (SELECT MAX(upload_date) FROM price_pegging) " + "and b.application_no=COALESCE(" + prepareVariableForQuery(applicationNo) + ", b.application_no) " + "and b.property_pincode=COALESCE(" + prepareVariableForQuery(pinCode) + ", b.property_pincode)\n" +
+                "and b.region = COALESCE(" + prepareVariableForQuery(region) + ",b.region) " + "and b.zone = COALESCE(" + prepareVariableForQuery(zone) + ",b.zone) " + "and b.disbursal_date between COALESCE(" + prepareVariableForQuery(fromDate) + ",b.disbursal_date) And COALESCE(" + prepareVariableForQuery(toDate) + ",b.disbursal_date) " + ") AS subquery";
+        try {
+            Long totalCountResult = jdbcTemplate.queryForObject(totalCount, Long.class);
+
+            dsaDataModelList = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DsaDataModel.class));
+            System.out.println(dsaDataModelList);
+            dsaDataResponse.setDsaExportList(dsaDataModelList);
+            setDataInDsaObject(pageNo, pageSize, dsaDataModelList, dsaDataResponse, totalCountResult);
+
+        } catch (Exception e) {
+            System.out.println(e);
+            dsaDataResponse.setCode("1111");
+            dsaDataResponse.setMsg("Error: " + e.getMessage());
+        }
+        return dsaDataResponse;
+    }
+
+    private void setDataInDsaObject(Integer pageNo, int pageSize, List<DsaDataModel> dsaDataModelList, DsaDataResponse dsaDataResponse, Long totalCountResult) {
+        if (!(dsaDataModelList.isEmpty())) {
+            dsaDataResponse.setMsg("Data found successfully");
+            dsaDataResponse.setCode("0000");
+            dsaDataResponse.setTotalCount(totalCountResult);
+            dsaDataResponse.setNextPage(pageNo < (totalCountResult / pageSize));
+            dsaDataResponse.setDsaExportList(dsaDataModelList);
+
+        } else {
+            dsaDataResponse.setMsg("Data not found");
+            dsaDataResponse.setCode("1111");
+        }
+    }
+
+    public String prepareVariableForQuery(String applicationNo) {
+        return (applicationNo == null) ? null : "'" + applicationNo + "'";
+    }
+
+    public String prepareVariableForQuery(Date applicationNo) {
+        return (applicationNo == null) ? null : "'" + applicationNo + "'";
     }
 
     /**
      * @param zone
+     * @param pinCode
      * @return
      */
     @Override
-    public List<PricePegging> getAllPricePeggingDataByZoneAndRegion(String zone,String region) {
-        List<PricePegging> pricePeggings = new ArrayList<>();
-        Pageable pageable = PageRequest.of(0, 100);
+    public PricePeggingData getAllPricePeggingDataByZoneAndRegion(String zone, String region, int pageNo, String pinCode) {
 
-        pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone,region,pageable);
-        return pricePeggings;
+        int pageSize=100;
+        List<PricePegging> pricePeggings = new ArrayList<>();
+        PricePeggingData pricePeggingData =new PricePeggingData();
+
+try {
+    Pageable pageable = PageRequest.of(pageNo - 1, pageSize); //ticket no.3304
+    pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone, region, pageable,pinCode);
+    long totalCount = pricePeggingRepository.findByZoneAndRegion(zone, region,pinCode);
+    setDataInObject(pageNo, pageSize, pricePeggings, pricePeggingData, totalCount);
+}
+catch (Exception e)
+{
+    pricePeggingData.setMsg("Technical error");
+    pricePeggingData.setCode("1111");
+}
+        return pricePeggingData;
     }
 
-    public List<PricePegging> getAllPricePeggingDataByZonFromDateToRegion(String zone, String fromDate,String toDate,String region) {
-        List<PricePegging> pricePeggings = new ArrayList<>();
-        Pageable pageable = PageRequest.of(0, 100);
+    private void setDataInObject(int pageNo, int pageSize, List<PricePegging> pricePeggings, PricePeggingData pricePeggingData, long totalCount) {
+        if (!(pricePeggings.isEmpty())) {
+            pricePeggingData.setMsg("Data found successfully");
+            pricePeggingData.setCode("0000");
+            pricePeggingData.setTotalCount(totalCount);
+            pricePeggingData.setNextPage(pageNo < (totalCount / pageSize));
+            pricePeggingData.setPricePeggingList(pricePeggings);
 
-        pricePeggings = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate,toDate,region,pageable);
-        return pricePeggings;
+        } else {
+            pricePeggingData.setMsg("Data not found");
+            pricePeggingData.setCode("1111");
+        }
+    }
+
+
+    public PricePeggingData getAllPricePeggingDataByZonFromDateToRegion(String zone, Date fromDate, Date toDate, String region, int pageNo,String pinCode) {
+        int pageSize = 100;
+        List<PricePegging> pricePeggings = new ArrayList<>();
+        PricePeggingData pricePeggingData = new PricePeggingData();
+
+        try {
+            Pageable pageable = PageRequest.of(pageNo - 1, 100); //ticket no.3304
+            pricePeggings = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region, pageable,pinCode);
+            long totalCount = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region,pinCode);
+            setDataInObject(pageNo, pageSize, pricePeggings, pricePeggingData, totalCount);
+
+        } catch (Exception e) {
+            pricePeggingData.setMsg("Technical error");
+            pricePeggingData.setCode("1111");
+        }
+        return pricePeggingData;
     }
 
 
@@ -447,11 +570,11 @@ public class ServiceImpl implements Service {
 //        List<DashboardGraph.PeggingData> peggingData=new ArrayList<>();
 
         try {
-            String dsaQuery = "SELECT date_format(upload_date,'%Y-%M') date,COUNT(property_pincode)total FROM dsa_export group BY date_format(upload_date,'%Y-%M')";
-            String peggingQuery = "SELECT date_format(upload_date,'%Y-%M') Date,COUNT(pincode)total FROM price_pegging group BY date_format(upload_date,'%Y-%M')";
+            String dsaQuery = "SELECT date_format(upload_date,'%Y-%M') date,COUNT(DISTINCT property_pincode)total FROM dsa_export group BY date_format(upload_date,'%Y-%M')";
+            String peggingQuery = "SELECT date_format(upload_date,'%Y-%M') Date,COUNT(DISTINCT pincode)total FROM price_pegging group BY date_format(upload_date,'%Y-%M')";
 
-            String dsaQuery1 = "SELECT date_format(upload_date,'%Y-%M') date,COUNT(property_pincode)total FROM dsa_export group BY date_format(upload_date,'%Y-%M')";
-            String peggingQuery1 = "SELECT date_format(upload_date,'%Y-%M') Date,COUNT(pincode)total FROM price_pegging group BY date_format(upload_date,'%Y-%M')";
+            String dsaQuery1 = "SELECT date_format(upload_date,'%Y-%M') date,COUNT(DISTINCT location)total FROM dsa_export group BY date_format(upload_date,'%Y-%M')";
+            String peggingQuery1 = "SELECT date_format(upload_date,'%Y-%M') Date,COUNT(DISTINCT location)total FROM price_pegging group BY date_format(upload_date,'%Y-%M')";
 
 
             pincodesDsa = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DashboardGraph.Pincode.class));
@@ -485,42 +608,36 @@ public class ServiceImpl implements Service {
     @Override
     public FilterModel getAllFilterData() {
 
-        FilterModel filterModel=new FilterModel();
-        FilterModel.Dsa dsa=new FilterModel.Dsa();
-        FilterModel.Pegging pegging=new FilterModel.Pegging();
-try {
-    List<FilterModel.ZoneDis> zoneListPegging = new ArrayList<>();
-    zoneListPegging = pricePeggingRepository.getAllDistinctZone();
-    pegging.setZoneDis(zoneListPegging);
-    List<FilterModel.Region> regionListpegging = new ArrayList<>();
-    regionListpegging = pricePeggingRepository.getAllDistinctRegion();
-    pegging.setRegion(regionListpegging);
+        FilterModel filterModel = new FilterModel();
+        FilterModel.Dsa dsa = new FilterModel.Dsa();
+        FilterModel.Pegging pegging = new FilterModel.Pegging();
+        try {
+            List<FilterModel.ZoneDis> zoneListPegging = new ArrayList<>();
+            zoneListPegging = pricePeggingRepository.getAllDistinctZone();
+            pegging.setZoneDis(zoneListPegging);
+            List<FilterModel.Region> regionListpegging = new ArrayList<>();
+            regionListpegging = pricePeggingRepository.getAllDistinctRegion();
+            pegging.setRegion(regionListpegging);
 
 
-    List<FilterModel.ZoneDis> zoneListDsa = new ArrayList<>();
-    zoneListDsa = dsaExportRepository.getAllDistinctZone();
-    dsa.setZoneDis(zoneListDsa);
-    List<FilterModel.Region> regionListDsa = new ArrayList<>();
-    regionListDsa = dsaExportRepository.getAllDistinctRegion();
-    dsa.setRegion(regionListDsa);
-}
-catch (Exception e)
-{
-    System.out.println(e);
-}
-        if(dsa==null && pegging== null)
-        {
+            List<FilterModel.ZoneDis> zoneListDsa = new ArrayList<>();
+            zoneListDsa = dsaExportRepository.getAllDistinctZone();
+            dsa.setZoneDis(zoneListDsa);
+            List<FilterModel.Region> regionListDsa = new ArrayList<>();
+            regionListDsa = dsaExportRepository.getAllDistinctRegion();
+            dsa.setRegion(regionListDsa);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        if (dsa == null && pegging == null) {
             filterModel.setMsg("Data is not found for Pegging.");
             filterModel.setCode("1111");
-        }
-        else
-        {
+        } else {
             filterModel.setMsg("Data found successfully.");
             filterModel.setCode("0000");
         }
         filterModel.setDsa(dsa);
         filterModel.setPegging(pegging);
-
 
 
         return filterModel;
@@ -533,16 +650,21 @@ catch (Exception e)
      */
     @Override
     public List<PricePeggingLineChart> getDataByZoneLocation(String zone, String location) {
+        List<Object[]> pricePeggings = new ArrayList<>();
         List<PricePeggingLineChart> pricePeggingLineCharts = new ArrayList<>();
+
         try {
 
+            if (!(zone == null && location == null)) {
+                pricePeggings = pricePeggingRepository.findDataByZoneLocation(zone, location);
 
-        if (!(zone == null && location == null)) {
-            pricePeggingLineCharts = pricePeggingRepository.findDataByZoneLocation(zone, location);
-        }
-    }
-        catch (Exception e)
-        {
+                for (Object[] data : pricePeggings) {
+                    PricePeggingLineChart pricePeggingLineChart = new PricePeggingLineChart(data[1].toString(), data[2].toString(), data[3].toString(), data[0].toString());
+                    pricePeggingLineCharts.add(pricePeggingLineChart);
+                }
+
+            }
+        } catch (Exception e) {
             System.out.println(e);
         }
 
@@ -550,27 +672,151 @@ catch (Exception e)
     }
 
 
-
     // NOTE ... //This service implementation is made by shagun for getDataForMap controller....
     @Override
-    public List<DsaExportData> getDataByPropertyPinCodeRegionZoneLocation(String propertyPincode, String region, String zone, String location) {
+    public List<DsaExportData> getDataByPropertyPinCodeRegionZoneLocation(String propertyPincode, String region, String zone) {
         List<DsaExportData> dsaExportData = new ArrayList<>();
         CommonDsaExportData commonDsaExportData = new CommonDsaExportData();
 
+        dsaExportData = dsaExportRepository.findByPropertyPinCodeRegionZoneLocation(propertyPincode, region, zone);
 
-//        try {
-//
-                dsaExportData = dsaExportRepository.findByPropertyPinCodeRegionZoneLocation(propertyPincode, region, zone, location);
-
-
-//        } catch (Exception e) {
-//            System.out.println(e);
-//        }
         return dsaExportData;
+    }
+
+    @Override
+    public CommonResponse saveuser(User userData) {
+        CommonResponse commonResponse = new CommonResponse();
+        User user = new User();
+
+        User emailExist = userRepository.findUser(userData.getEmail());     // Changes for check email exist or not
+        if (emailExist == null) {
+            try {
+                userData.setPassword(passwordEncoder.encode(userData.getPassword()));
+                for (UserRole data : userData.getUserRoles()) {
+
+                    data.setUser(userData);
+
+                }
+                userRepository.save(userData);
+                commonResponse.setCode("0000");
+                commonResponse.setMsg("data saved successfully");
+
+            } catch (Exception e) {
+                commonResponse.setCode("1111");
+                commonResponse.setMsg("error" + e);
+            }
+        } else {                                                     //End
+            commonResponse.setMsg("User already exist");
+            commonResponse.setCode("1111");
+        }
+        return commonResponse;
+    }
+
+    //Changes done by Dhruv Ticket No. 3304
+    @Override
+    public List<DsaDataModel> readData() {
+        List<DsaDataModel> dsaDataModelList = new ArrayList<>();
+        CommonResponse commonResponse = new CommonResponse();
+
+        String dsaQuery = "SELECT b.*,a.minimum_rate,a.maximum_rate, CASE WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G' \n" +
+                "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 10) / 100) AND (a.maximum_rate - (a.maximum_rate * 10) / 100) THEN 'R'\n" +
+                "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y'\n" +
+                "        ELSE 'B' END AS flag FROM price_pegging a INNER JOIN dsa_export b ON a.pincode = b.property_pincode AND a.region = b.region AND a.zone_dist = b.zone AND a.location = b.location\n" +
+                "WHERE a.upload_date = (SELECT MAX(upload_date) FROM price_pegging)\n";
+        // System.out.print(dsaQuery);
+        try {
+
+            dsaDataModelList = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DsaDataModel.class));
+
+            System.out.print(dsaDataModelList.size());
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        return dsaDataModelList;
+    }
+
+
+    // Ticket 3301 changes Done
+    @Override
+    public CommonResponse generateReport(List<DsaDataModel> dsaDataModel, String type, HttpServletResponse response) {
+        List<DsaDataModel> dsaDataModelList = new ArrayList<>();
+        CommonResponse commonResponse = new CommonResponse();
+
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Sheet1");
+        if (!type.equals("All")) {
+            for (DsaDataModel data : dsaDataModel) {
+                if (data.getFlag().equals(type)) {
+                    dsaDataModelList.add(data);
+                }
+            }
+        } else {
+            dsaDataModelList = new ArrayList<>(dsaDataModel);
+
+
+            System.out.println(dsaDataModelList.size());
+        }
+
+        List<String> headerName = new ArrayList<>();
+        headerName.add("applicationNo");
+        headerName.add("disbursal_date");
+        headerName.add("property_address");
+        headerName.add("location");
+        headerName.add("rate_per_sqft");
+        headerName.add("maximum_rate");        // Ticket 3301 changes Done
+        headerName.add("minimum_rate");       // Ticket 3301 changes Done
+
+        Row headerRow = sheet.createRow(0);
+        int headerColNum = 0;
+        for (String data : headerName) {
+            Cell cell = headerRow.createCell(headerColNum);
+            cell.setCellValue(data);
+            headerColNum++;
+        }
+
+
+        int rowNum = 1;
+
+        for (DsaDataModel dataList : dsaDataModelList) {
+
+            Row row = sheet.createRow(rowNum++);
+
+            row.createCell(0).setCellValue(dataList.getApplicationNo());
+            row.createCell(1).setCellValue(dataList.getDisbursal_date());
+            row.createCell(2).setCellValue(dataList.getProperty_address());
+            row.createCell(3).setCellValue(dataList.getLocation());
+            row.createCell(4).setCellValue(dataList.getRate_per_sqft());
+            row.createCell(5).setCellValue(dataList.getMaximum_rate());         // Ticket 3301 changes Done
+            row.createCell(6).setCellValue(dataList.getMinimum_rate());         // Ticket 3301 changes Done
+
+        }
+
+        try {
+
+            response.setContentType("text/csv");
+            response.setHeader("Content-Disposition", "attachment; filename=dsa_data.xlsx");
+
+
+            workbook.write(response.getOutputStream());
+            workbook.close();
+            commonResponse.setCode("0000");
+            commonResponse.setMsg("Success");
+            return commonResponse;
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+            commonResponse.setCode("0000");
+            commonResponse.setMsg("" + e);
+            return commonResponse;
+        }
     }
 
 
 }
+
+
+
 
 
 

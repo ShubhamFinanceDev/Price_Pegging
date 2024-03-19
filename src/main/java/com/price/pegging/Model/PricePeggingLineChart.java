@@ -2,7 +2,10 @@ package com.price.pegging.Model;
 
 import lombok.Data;
 
+import java.sql.Date;
+
 @Data
+
 public class PricePeggingLineChart {
 
     private String minimumRate;
@@ -10,12 +13,12 @@ public class PricePeggingLineChart {
     private String averageRate;
     private String uploadDate;
 
-        public PricePeggingLineChart(String minimumRate, String maximumRate, String averageRate, String uploadDate) {
-            this.minimumRate = minimumRate;
-            this.maximumRate = maximumRate;
-            this.averageRate = averageRate;
-            this.uploadDate = uploadDate;
-        }
+    public PricePeggingLineChart(String minimumRate, String maximumRate, String averageRate, String uploadDate) {
+        this.minimumRate = minimumRate;
+        this.maximumRate = maximumRate;
+        this.averageRate = averageRate;
+        this.uploadDate = uploadDate;
     }
+}
 
 

@@ -12,32 +12,42 @@ import java.sql.Date;
 import java.util.List;
 
 @Repository
-public interface DsaExportRepository extends JpaRepository<DsaExport,Long> {
-   @Query("select ds from DsaExport ds where ds.applicationNo=:applicationNo")
+public interface DsaExportRepository extends JpaRepository<DsaExport, Long> {
+    @Query("select ds from DsaExport ds where ds.applicationNo=:applicationNo")
     List<DsaExport> findByApplicationNo(String applicationNo);
 
     @Query("select pp from DsaExport pp where pp.applicationNo=:applicationNo AND pp.uploadDate=:updateddate")
     List<DsaExport> findByApllicationAndUpdatedDate(String applicationNo, String updateddate);
+
     @Query("select pp from DsaExport pp where pp.uploadDate=:updateddate")
     List<DsaExport> findByUpdatedDate(String updateddate);
- @Query("select distinct pp.zone from DsaExport pp ")
+
+    @Query("select distinct pp.zone from DsaExport pp ")
     List getAllDistinctZone();
- @Query("select distinct pp.region   from DsaExport pp ")
- List getAllDistinctRegion();
 
-@Query("SELECT d FROM DsaExport d " +
-        "WHERE (:disbursalDate IS NULL OR d.disbursalDate = :disbursalDate) " +
-        "AND (:zone IS NULL OR d.zone = :zone) " +
-        "AND (:region IS NULL OR d.region = :region) " +
-        "AND (:applicationNo IS NULL OR d.applicationNo = :applicationNo)")
-<<<<<<< Updated upstream
-    List<DsaExport> findByAll(String applicationNo, Date disbursalDate, String region, String zone, Pageable pageable);
-=======
-    List<DsaExport> findByAll(String applicationNo, String disbursalDate, String region, String zone, Pageable pageable);
+    @Query("select distinct pp.region   from DsaExport pp ")
+    List getAllDistinctRegion();
 
+    @Query("SELECT d FROM DsaExport d " +
+            "WHERE" +
+//        " (:disbursalDate IS NULL OR d.disbursalDate = :disbursalDate) " +
+            " (:zone IS NULL OR d.zone = :zone) " +
+            "AND (:region IS NULL OR d.region = :region) " +
+            "AND (:applicationNo IS NULL OR d.applicationNo = :applicationNo)")
+    List<DsaExport> findByAll(String applicationNo, String region, String zone, Pageable pageable);
+
+    @Query("SELECT d FROM DsaExport d " +
+            "WHERE (:fromDate IS NULL OR d.disbursalDate >= :fromDate) " +
+            "AND (:toDate IS NULL OR d.disbursalDate <= :toDate) " +
+            "AND (:zone IS NULL OR d.zone = :zone) " +
+            "AND (:region IS NULL OR d.region = :region)" +
+            "AND (:applicationNo IS NULL OR d.applicationNo = :applicationNo)")
+    List<DsaExport> findByfromdateTotoDate(Date fromDate, Date toDate, String applicationNo, String region, String zone);
 
     // NOTE ... //This repository update is made by shagun for getDataForMap controller....
-    @Query("select new com.price.pegging.Model.DsaExportData(d.property_address,d.lattitude,d.longitude) from DsaExport d where d.location = :location and d.propertyPincode = :propertyPincode and d.region = :region and d.zone = :zone")
-    List<DsaExportData> findByPropertyPinCodeRegionZoneLocation(String propertyPincode, String region, String zone, String location);
->>>>>>> Stashed changes
+    // UPDATE IN THIS CODE IS DONE BY TOKEN NO... 3303
+    @Query("select distinct new com.price.pegging.Model.DsaExportData(d.property_address,d.lattitude,d.longitude) from DsaExport d where  d.propertyPincode = :propertyPincode and d.region = :region and d.zone = :zone")
+    List<DsaExportData> findByPropertyPinCodeRegionZoneLocation(String propertyPincode, String region, String zone);
+    @Query("select count(ds) from DsaExport ds where ds.applicationNo=:applicationNo")
+    int checkApplicationNo(String applicationNo);
 }
