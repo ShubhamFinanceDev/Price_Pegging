@@ -84,64 +84,40 @@ public class Controller {
     }
 
     @CrossOrigin
-    @GetMapping("/pricePeggingData")
-    public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate, @RequestParam(name = "region", required = false) String region) {
+    @GetMapping("/pricePeggingData")                               //change data type of toDate and fromDate
+    public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate, @RequestParam(name = "region", required = false) String region,@RequestParam(name = "pageNo", required = true) int pageNo,@RequestParam(name = "pinCode",required = false)String pinCode){
         List<PricePegging> pricePeggingDatas = new ArrayList<>();
         PricePeggingData pricePeggingData = new PricePeggingData();
 
         if (fromDate != null && toDate != null) {
-            pricePeggingDatas = service.getAllPricePeggingDataByZonFromDateToRegion(zone, fromDate, toDate, region);
+            pricePeggingData = service.getAllPricePeggingDataByZonFromDateToRegion(zone, fromDate, toDate, region,pageNo,pinCode);
         } else if (fromDate == null && toDate == null) {
-            pricePeggingDatas = service.getAllPricePeggingDataByZoneAndRegion(zone, region);
+            pricePeggingData = service.getAllPricePeggingDataByZoneAndRegion(zone, region, pageNo,pinCode);
+
         } else {
             pricePeggingData.setCode("1111");
             pricePeggingData.setMsg("Please select required field");
         }
-
-        if (pricePeggingData.getCode() == null) {
-            if (pricePeggingDatas.isEmpty()) {
-                pricePeggingData.setCode("1111");
-                pricePeggingData.setMsg("Data not found");
-                pricePeggingData.setPricePeggingList(null);
-            } else {
-                pricePeggingData.setCode("0000");
-                pricePeggingData.setMsg("Data found successfully");
-                pricePeggingData.setPricePeggingList(pricePeggingDatas);
-            }
-        }
-        return new ResponseEntity<PricePeggingData>(pricePeggingData, HttpStatus.OK);
+        return new ResponseEntity<>(pricePeggingData, HttpStatus.OK);
 
     }
 
 
     @CrossOrigin
     @GetMapping("/exportData")
-    public ResponseEntity<DsaDataResponse> exportData(@RequestParam(name = "applicationNo", required = false) String applicationNo /*, @RequestParam(name="uploadDate",required = false) Date uploadDate*/, @RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "region", required = false) String region, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate)      // changes for from to todate
+    public ResponseEntity<DsaDataResponse> exportData(@RequestParam(name = "applicationNo", required = false) String applicationNo /*, @RequestParam(name="uploadDate",required = false) Date uploadDate*/, @RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "region", required = false) String region, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate,@RequestParam(name = "pageNo", required = true)Integer pageNo,@RequestParam(name = "pinCode", required = false)String pinCode)      // changes for from to todate
     {
 
         DsaDataResponse dsaDataResponse = new DsaDataResponse();
+
         if ((fromDate != null && toDate != null) || (fromDate == null && toDate == null)) {
-            dsaDataResponse = service.getAllDsaData(fromDate, toDate, applicationNo, region, zone);
+            dsaDataResponse = service.getAllDsaData(fromDate, toDate, applicationNo, region, zone, pageNo,pinCode);
         } else {
             dsaDataResponse.setCode("1111");
             dsaDataResponse.setMsg("Both From date and To date are required for date range search.");
-
         }
-
-        if (dsaDataResponse.getCode() != "1111") {
-            if (dsaDataResponse.getDsaExportList().isEmpty()) {
-                dsaDataResponse.setCode("1111");
-                dsaDataResponse.setMsg("Data not found");
-
-            } else {
-                dsaDataResponse.setCode("0000");
-                dsaDataResponse.setMsg("Data found successfully");
-            }
-        }
-        return new ResponseEntity<DsaDataResponse>(dsaDataResponse, HttpStatus.OK);
-
+        return new ResponseEntity<>(dsaDataResponse, HttpStatus.OK);
     }
-
     @CrossOrigin
     @GetMapping("/allZone")
     public List zoneDetail() {
@@ -159,6 +135,8 @@ public class Controller {
     @GetMapping("/dashboardDistinctDetail")
     DashboardDistinctDetail dashboardDetail() {
         DashboardDistinctDetail dashboardDistinctDetail = new DashboardDistinctDetail();
+
+
         dashboardDistinctDetail = service.getAllDashboarDetail();
 
         return dashboardDistinctDetail;
@@ -256,24 +234,13 @@ public class Controller {
     @GetMapping("/invokeDsaReport/{type}")
     public ResponseEntity<String> invokeDsaReport(@PathVariable String type,HttpServletResponse response) throws IOException {
 
-        CommonResponse commonResponse=new CommonResponse();
+        CommonResponse commonResponse = new CommonResponse();
         List<DsaDataModel> dsaDataModelList = service.readData();
-        if(!(dsaDataModelList.isEmpty()))
-        {
-           commonResponse= service.generateReport(dsaDataModelList,type,response);
-           if(commonResponse.getCode()=="0000") {
-               return new ResponseEntity("Success", HttpStatus.PROCESSING);
-           }
-           else
-           {
-               return new ResponseEntity("Technical issue", HttpStatus.OK);
 
-           }
-        }
+        commonResponse = service.generateReport(dsaDataModelList, type, response);
+        return new ResponseEntity("Success", HttpStatus.PROCESSING);
 
-        return new ResponseEntity("Data not found",HttpStatus.NOT_FOUND);
     }
-
 }
 
 

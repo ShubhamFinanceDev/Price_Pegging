@@ -20,8 +20,8 @@ public class DsaDataModel {
     private String longitude;
     private String product;
     private String uploadDate;
-//    private String minimum_rate;
-//    private String maximum_rate;
+    private String minimum_rate;
+    private String maximum_rate;
     private String flag;
 
 

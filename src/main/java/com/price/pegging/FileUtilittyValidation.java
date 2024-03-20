@@ -18,116 +18,73 @@ public class FileUtilittyValidation {
 
         Boolean matched = true;
         String errorMsg="";
-        List<String> headers = new ArrayList<>();
-        headers.add("S.No");
-        headers.add("Application_Number");
-        headers.add("Product");
-        headers.add("First Disbursal Date");
-        headers.add("Property Address");
-        headers.add("Property Pincode");
-        headers.add("Region");
-        headers.add("Zone/Dist");
-        headers.add("Locations");
-        headers.add("Rate Per sqft");
-        headers.add("Property Type");
-        headers.add("Lattitude");
-        headers.add("Longitude");
+
+
         for (int i = 0; i < 13; i++) {
             Cell cell= headerRow.getCell(i);
-            errorMsg = (cell == null || cell.getCellType() == CellType.BLANK) ? "file upload error due to row no " + (i + 1) + " is empty" : "";
+            errorMsg = (cell == null || cell.getCellType() == CellType.BLANK) ? "file upload error due to row no " + i + 1 + " is empty" : "";
 
            if(errorMsg.isEmpty() && matched==true ) {
 
        //        System.out.println("Header value" + cell.toString() + "\n");
                String cellName = cell.toString();
-
-
-               for(String headercell: headers){
-                   if (headercell.equals(cellName)){
-                       matched=true;
+               switch (cellName) {
+                   case "S.No":
+                       matched = true;
+                       break;
+                   case "Application_Number":
+                       matched = true;
+                       break;
+                   case "Product":
+                       matched = true;
+                       break;
+                   case "First Disbursal Date":
+                       matched = true;
+                       break;
+                   case "Property Address":
+                       matched = true;
+                       break;
+                   case "Property Pincode":
+                       matched = true;
+                       break;
+                   case "Region":
+                       matched = true;
+                       break;
+                   case "Zone/Dist":
+                       matched = true;
+                       break;
+                   case "Locations":
+                       matched = true;
                        break;
 
-                   }
-                   matched=false;
+                   case "Rate Per sqft":
+                       matched = true;
+                       break;
+                   case "Property Type":
+                       matched = true;
+                       break;
+                   case "Lattitude":
+                       matched = true;
+                       break;
+                   case "Longitude":
+                       matched = true;
+                       break;
+                   default:
+                       matched=false;
+                       break;
+
                }
            }
-
+           else
+           {
+               matched=false;
+           }
         }
 
         return matched;
 
 
     }
-
-
-//
-//
-
-
-
-
-
-
-
-
-
-//               switch (cellName) {
-//                   case "S.No":
-//                       matched = true;
-//                       break;
-//                   case "Application_Number":
-//                       matched = true;
-//                       break;
-//                   case "Product":
-//                       matched = true;
-//                       break;
-//                   case "First Disbursal Date":
-//                       matched = true;
-//                       break;
-//                   case "Property Address":
-//                       matched = true;
-//                       break;
-//                   case "Property Pincode":
-//                       matched = true;
-//                       break;
-//                   case "Region":
-//                       matched = true;
-//                       break;
-//                   case "Zone/Dist":
-//                       matched = true;
-//                       break;
-//                   case "Locations":
-//                       matched = true;
-//                       break;
-//
-//                   case "Rate Per sqft":
-//                       matched = true;
-//                       break;
-//                   case "Property Type":
-//                       matched = true;
-//                       break;
-//                   case "Lattitude":
-//                       matched = true;
-//                       break;
-//                   case "Longitude":
-//                       matched = true;
-//                       break;
-//                   default:
-//                       matched=false;
-//                       break;
-//
-//               }
-//           }
-//           else
-//           {
-//               matched=false;
-//           }
-//        }
-//
-//            return matched;
-//
-//
-//        }
 
 
     public boolean pricePeggingFileFormat(Row headerRow) {
@@ -148,62 +105,57 @@ public class FileUtilittyValidation {
 
         for (int i = 0; i < 10; i++) {
             Cell cell= headerRow.getCell(i);
-            errorMsg = (cell == null || cell.getCellType() == CellType.BLANK) ? "file upload error due to row no " + (i + 1) + " is empty" : "";
+            errorMsg = (cell == null || cell.getCellType() == CellType.BLANK) ? "file upload error due to row no " + i + 1 + " is empty" : "";
 
             if(errorMsg.isEmpty() && matched==true) {
 
 //                System.out.println("Header value" + cell.toString() + "\n");
                 String cellName = cell.toString();
-                for(String headercell: headers){
-                    if (headercell.equals(cellName)){
-                        matched=true;
+                switch (cellName) {
+
+                    case "S.No":
+                        matched = true;
+                        break;
+                    case  "Zone":
+                        matched = true;
+                        break;
+                    case  "Zone/Dist":
+                        matched = true;
+                        break;
+                    case  "Region":
+                        matched = true; // Add column
+                        break;
+                    case "Locations":
+                        matched = true;
                         break;
 
-                    }
-                    matched=false;
+                    case "Minimum Rate":
+                        matched = true;
+                        break;
+                    case "Maximum Rate":
+                        matched = true;
+                        break;
+                    case "Average Rate":
+                        matched = true;
+                        break;
+                    case "Pincode":
+                        matched = true;
+                        break;
+                    case "Quarter Wise":
+                        matched = true;
+                        break;
+                    default:
+                        matched=false;
+                        break;
                 }
             }
-
+            else
+            {
+                matched=false;
+            }
         }
 
         return matched;
 
     }
 }
-//                switch (cellName) {
-//
-//                    case "S.No":
-//                        matched = true;
-//                        break;
-//                    case  "Zone":
-//                        matched = true;
-//                        break;
-//                    case  "Zone/Dist":
-//                        matched = true;
-//                        break;
-//                    case  "Region":
-//                        matched = true; // Add column
-//                        break;
-//                    case "Locations":
-//                        matched = true;
-//                        break;
-//
-//                    case "Minimum Rate":
-//                        matched = true;
-//                        break;
-//                    case "Maximum Rate":
-//                        matched = true;
-//                        break;
-//                    case "Average Rate":
-//                        matched = true;
-//                        break;
-//                    case "Pincode":
-//                        matched = true;
-//                        break;
-//                    case "Quarter Wise":
-//                        matched = true;
-//                        break;
-//                    default:
-//                        matched=false;
-//                        break;
-
