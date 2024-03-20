@@ -8,5 +8,9 @@ import java.util.List;
 public class DsaDataResponse {
     private String msg;
     private String code;
+    private Long totalCount;
+    private boolean nextPage;
     private List<DsaDataModel> dsaExportList;
+
+
 }
