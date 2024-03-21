@@ -389,9 +389,8 @@ public class ServiceImpl implements Service {
             dsaDataResponse.setMsg("Data found successfully");
             dsaDataResponse.setCode("0000");
             dsaDataResponse.setTotalCount(totalCountResult);
-            dsaDataResponse.setNextPage(pageNo < (totalCountResult / pageSize));
+            dsaDataResponse.setNextPage(pageNo <= (totalCountResult / pageSize));
             dsaDataResponse.setDsaExportList(dsaDataModelList);
-
         } else {
             dsaDataResponse.setMsg("Data not found");
             dsaDataResponse.setCode("1111");
@@ -437,7 +436,7 @@ catch (Exception e)
             pricePeggingData.setMsg("Data found successfully");
             pricePeggingData.setCode("0000");
             pricePeggingData.setTotalCount(totalCount);
-            pricePeggingData.setNextPage(pageNo < (totalCount / pageSize));
+            pricePeggingData.setNextPage(pageNo <= (totalCount / pageSize));
             pricePeggingData.setPricePeggingList(pricePeggings);
 
         } else {
