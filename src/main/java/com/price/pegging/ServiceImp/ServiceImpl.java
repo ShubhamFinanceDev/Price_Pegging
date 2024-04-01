@@ -11,6 +11,8 @@ import com.price.pegging.Repository.PricePeggingRepository;
 import com.price.pegging.Repository.UserRepository;
 import com.price.pegging.Service.Service;
 import com.price.pegging.Utilitty.DateFormatUtility;
+import com.price.pegging.Utilitty.DsaUtility;
+import com.price.pegging.Utilitty.PricePeggingUtility;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
@@ -58,6 +60,11 @@ public class ServiceImpl implements Service {
     private FileUtilittyValidation fileUtilittyValidation;
     @Autowired
     private DateFormatUtility dateFormatUtilty;
+
+    @Autowired
+    private DsaUtility dsaUtility;
+    @Autowired
+    private PricePeggingUtility pricePeggingUtility;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -359,15 +366,8 @@ public class ServiceImpl implements Service {
         int offSetData = (pageNo - 1)* 100;
         int pageSize = 100;
 
-        String dsaQuery = "SELECT b.*,a.minimum_rate,a.maximum_rate,b.rate_per_sqft, CASE WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G' \n" +
-                "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 10) / 100) AND (a.maximum_rate - (a.maximum_rate * 10) / 100) THEN 'R'" + "\n" + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y'\n" +
-                "       " + " ELSE 'B' END AS flag FROM price_pegging a INNER JOIN dsa_export b ON a.pincode = b.property_pincode AND a.region = b.region AND a.zone_dist = b.zone AND a.location = b.location\n" + "WHERE a.upload_date = (SELECT MAX(upload_date) FROM price_pegging)" +
-                "and b.application_no=COALESCE(" + prepareVariableForQuery(applicationNo) + ", b.application_no)\n"  + "and b.property_pincode=COALESCE(" + prepareVariableForQuery(pinCode) + ", b.property_pincode)\n" + "and b.region = COALESCE(" + prepareVariableForQuery(region) + ",b.region)\n" + "and b.zone = COALESCE(" + prepareVariableForQuery(zone) +
-                ",b.zone)\n" + "and b.disbursal_date between COALESCE(" + prepareVariableForQuery(fromDate) + ",b.disbursal_date) And COALESCE(" + prepareVariableForQuery(toDate) + ",b.disbursal_date)" + "ORDER BY b.s_no LIMIT 100 OFFSET " + offSetData;
-
-        String totalCount = "SELECT COUNT(*) FROM ( " + "SELECT b.*, CASE WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G' " + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 10) / 100) AND (a.maximum_rate - (a.maximum_rate * 10) / 100) THEN 'R' " + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y' " +
-                "ELSE 'B' END AS flag FROM price_pegging a INNER JOIN dsa_export b ON a.pincode = b.property_pincode AND a.region = b.region AND a.zone_dist = b.zone AND a.location = b.location " + "WHERE a.upload_date = (SELECT MAX(upload_date) FROM price_pegging) " + "and b.application_no=COALESCE(" + prepareVariableForQuery(applicationNo) + ", b.application_no) " + "and b.property_pincode=COALESCE(" + prepareVariableForQuery(pinCode) + ", b.property_pincode)\n" +
-                "and b.region = COALESCE(" + prepareVariableForQuery(region) + ",b.region) " + "and b.zone = COALESCE(" + prepareVariableForQuery(zone) + ",b.zone) " + "and b.disbursal_date between COALESCE(" + prepareVariableForQuery(fromDate) + ",b.disbursal_date) And COALESCE(" + prepareVariableForQuery(toDate) + ",b.disbursal_date) " + ") AS subquery";
+       String dsaQuery=dsaUtility.dsaQuery(fromDate,toDate,applicationNo,region,zone,pageNo,pinCode,offSetData);
+       String totalCount=dsaUtility.totalCount(fromDate,toDate,applicationNo,region,zone,pageNo,pinCode);
         try {
             Long totalCountResult = jdbcTemplate.queryForObject(totalCount, Long.class);
 
@@ -389,22 +389,13 @@ public class ServiceImpl implements Service {
             dsaDataResponse.setMsg("Data found successfully");
             dsaDataResponse.setCode("0000");
             dsaDataResponse.setTotalCount(totalCountResult);
-            dsaDataResponse.setNextPage(pageNo <= (totalCountResult / pageSize));
+            dsaDataResponse.setNextPage(pageNo < (totalCountResult / pageSize));
             dsaDataResponse.setDsaExportList(dsaDataModelList);
         } else {
             dsaDataResponse.setMsg("Data not found");
             dsaDataResponse.setCode("1111");
         }
     }
-
-    public String prepareVariableForQuery(String applicationNo) {
-        return (applicationNo == null) ? null : "'" + applicationNo + "'";
-    }
-
-    public String prepareVariableForQuery(Date applicationNo) {
-        return (applicationNo == null) ? null : "'" + applicationNo + "'";
-    }
-
     /**
      * @param zone
      * @param pinCode
@@ -436,7 +427,7 @@ catch (Exception e)
             pricePeggingData.setMsg("Data found successfully");
             pricePeggingData.setCode("0000");
             pricePeggingData.setTotalCount(totalCount);
-            pricePeggingData.setNextPage(pageNo <= (totalCount / pageSize));
+            pricePeggingData.setNextPage(pageNo < (totalCount / pageSize));
             pricePeggingData.setPricePeggingList(pricePeggings);
 
         } else {
@@ -482,11 +473,8 @@ catch (Exception e)
         DashboardDistinctDetail.PeggingData peggingData = new DashboardDistinctDetail.PeggingData();
 
         try {
-
-
-            String peggingQuery = " SELECT  COUNT(DISTINCT pincode) AS distinctCountPincode,COUNT(DISTINCT zone_dist) AS distinctCountZone,COUNT(DISTINCT location) AS distinctCountLocations, COUNT(DISTINCT upload_date) AS distinctCountUploadDate from price_pegging";
-            String dsaQuery = "SELECT  COUNT(DISTINCT property_pincode) AS distinctCountPincode,COUNT(DISTINCT zone) AS distinctCountZone,COUNT(DISTINCT location) AS distinctCountLocations,COUNT(DISTINCT region) AS distinctCountRegion, COUNT(DISTINCT upload_date) As distinctCountUploadDate from dsa_export";
-
+String peggingQuery=pricePeggingUtility.CountPeggingQuery();
+String dsaQuery=dsaUtility.CountDsaQuery();
             peggingData = jdbcTemplate.queryForObject(peggingQuery, new MyRowMapperPegging());
             dashboardDsa = jdbcTemplate.queryForObject(dsaQuery, new MyRowMapperDsa());
 
@@ -569,12 +557,11 @@ catch (Exception e)
 //        List<DashboardGraph.PeggingData> peggingData=new ArrayList<>();
 
         try {
-            String dsaQuery = "SELECT date_format(upload_date,'%Y-%M') date,COUNT(DISTINCT property_pincode)total FROM dsa_export group BY date_format(upload_date,'%Y-%M')";
-            String peggingQuery = "SELECT date_format(upload_date,'%Y-%M') Date,COUNT(DISTINCT pincode)total FROM price_pegging group BY date_format(upload_date,'%Y-%M')";
+                String dsaQuery=dsaUtility.dsaDateFormat();
+                String peggingQuery = pricePeggingUtility.peggingDateFormate();
 
-            String dsaQuery1 = "SELECT date_format(upload_date,'%Y-%M') date,COUNT(DISTINCT location)total FROM dsa_export group BY date_format(upload_date,'%Y-%M')";
-            String peggingQuery1 = "SELECT date_format(upload_date,'%Y-%M') Date,COUNT(DISTINCT location)total FROM price_pegging group BY date_format(upload_date,'%Y-%M')";
-
+                String dsaQuery1=dsaUtility.dsaDateFormat1();
+                String peggingQuery1=pricePeggingUtility.peggingDateFormate1();
 
             pincodesDsa = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DashboardGraph.Pincode.class));
             pincodesPegging = jdbcTemplate.query(peggingQuery, new BeanPropertyRowMapper<>(DashboardGraph.Pincode.class));
@@ -716,12 +703,7 @@ catch (Exception e)
     public List<DsaDataModel> readData() {
         List<DsaDataModel> dsaDataModelList = new ArrayList<>();
         CommonResponse commonResponse = new CommonResponse();
-
-        String dsaQuery = "SELECT b.*,a.minimum_rate,a.maximum_rate, CASE WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G' \n" +
-                "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 10) / 100) AND (a.maximum_rate - (a.maximum_rate * 10) / 100) THEN 'R'\n" +
-                "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y'\n" +
-                "        ELSE 'B' END AS flag FROM price_pegging a INNER JOIN dsa_export b ON a.pincode = b.property_pincode AND a.region = b.region AND a.zone_dist = b.zone AND a.location = b.location\n" +
-                "WHERE a.upload_date = (SELECT MAX(upload_date) FROM price_pegging)\n";
+        String dsaQuery=dsaUtility.dsaReport();
         // System.out.print(dsaQuery);
         try {
 
