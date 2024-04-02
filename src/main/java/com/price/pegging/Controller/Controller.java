@@ -233,10 +233,9 @@ public class Controller {
     @GetMapping("/invokeDsaReport/{type}")
     public ResponseEntity<String> invokeDsaReport(@PathVariable String type,HttpServletResponse response) throws IOException {
 
-        CommonResponse commonResponse = new CommonResponse();
         List<DsaDataModel> dsaDataModelList = service.readData();
 
-        commonResponse = service.generateReport(dsaDataModelList, type, response);
+        CommonResponse commonResponse = service.generateReport(dsaDataModelList, type, response);
         return new ResponseEntity("Success", HttpStatus.PROCESSING);
 
     }
