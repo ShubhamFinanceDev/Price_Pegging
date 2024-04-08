@@ -391,7 +391,6 @@ public class ServiceImpl implements Service {
             dsaDataResponse.setTotalCount(totalCountResult);
             dsaDataResponse.setNextPage(pageNo < (totalCountResult / pageSize));
             dsaDataResponse.setDsaExportList(dsaDataModelList);
-
         } else {
             dsaDataResponse.setMsg("Data not found");
             dsaDataResponse.setCode("1111");
