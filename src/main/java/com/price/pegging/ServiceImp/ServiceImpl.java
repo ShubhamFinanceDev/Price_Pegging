@@ -360,14 +360,14 @@ public class ServiceImpl implements Service {
 //
 
     //Changes done by Dhruv Ticket No. 3304
-    public DsaDataResponse getAllDsaData(Date fromDate, Date toDate, String applicationNo, String region, String zone, Integer pageNo,String pinCode) {
+    public DsaDataResponse getAllDsaData(Date fromDate, Date toDate, String applicationNo, String region, String zone, Integer pageNo, String pinCode) {
         DsaDataResponse dsaDataResponse = new DsaDataResponse();
         List<DsaDataModel> dsaDataModelList = new ArrayList<>();
-        int offSetData = (pageNo - 1)* 100;
+        int offSetData = (pageNo - 1) * 100;
         int pageSize = 100;
 
-       String dsaQuery=dsaUtility.dsaQuery(fromDate,toDate,applicationNo,region,zone,pageNo,pinCode,offSetData);
-       String totalCount=dsaUtility.totalCount(fromDate,toDate,applicationNo,region,zone,pageNo,pinCode);
+        String dsaQuery = dsaUtility.dsaQuery(fromDate, toDate, applicationNo, region, zone, pageNo, pinCode, offSetData);
+        String totalCount = dsaUtility.totalCount(fromDate, toDate, applicationNo, region, zone, pageNo, pinCode);
         try {
             Long totalCountResult = jdbcTemplate.queryForObject(totalCount, Long.class);
 
@@ -396,6 +396,7 @@ public class ServiceImpl implements Service {
             dsaDataResponse.setCode("1111");
         }
     }
+
     /**
      * @param zone
      * @param pinCode
@@ -404,21 +405,19 @@ public class ServiceImpl implements Service {
     @Override
     public PricePeggingData getAllPricePeggingDataByZoneAndRegion(String zone, String region, int pageNo, String pinCode) {
 
-        int pageSize=100;
+        int pageSize = 100;
         List<PricePegging> pricePeggings = new ArrayList<>();
-        PricePeggingData pricePeggingData =new PricePeggingData();
+        PricePeggingData pricePeggingData = new PricePeggingData();
 
-try {
-    Pageable pageable = PageRequest.of(pageNo - 1, pageSize); //ticket no.3304
-    pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone, region, pageable,pinCode);
-    long totalCount = pricePeggingRepository.findByZoneAndRegion(zone, region,pinCode);
-    setDataInObject(pageNo, pageSize, pricePeggings, pricePeggingData, totalCount);
-}
-catch (Exception e)
-{
-    pricePeggingData.setMsg("Technical error");
-    pricePeggingData.setCode("1111");
-}
+        try {
+            Pageable pageable = PageRequest.of(pageNo - 1, pageSize); //ticket no.3304
+            pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone, region, pageable, pinCode);
+            long totalCount = pricePeggingRepository.findByZoneAndRegion(zone, region, pinCode);
+            setDataInObject(pageNo, pageSize, pricePeggings, pricePeggingData, totalCount);
+        } catch (Exception e) {
+            pricePeggingData.setMsg("Technical error");
+            pricePeggingData.setCode("1111");
+        }
         return pricePeggingData;
     }
 
@@ -437,15 +436,15 @@ catch (Exception e)
     }
 
 
-    public PricePeggingData getAllPricePeggingDataByZonFromDateToRegion(String zone, Date fromDate, Date toDate, String region, int pageNo,String pinCode) {
+    public PricePeggingData getAllPricePeggingDataByZonFromDateToRegion(String zone, Date fromDate, Date toDate, String region, int pageNo, String pinCode) {
         int pageSize = 100;
         List<PricePegging> pricePeggings = new ArrayList<>();
         PricePeggingData pricePeggingData = new PricePeggingData();
 
         try {
             Pageable pageable = PageRequest.of(pageNo - 1, 100); //ticket no.3304
-            pricePeggings = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region, pageable,pinCode);
-            long totalCount = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region,pinCode);
+            pricePeggings = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region, pageable, pinCode);
+            long totalCount = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region, pinCode);
             setDataInObject(pageNo, pageSize, pricePeggings, pricePeggingData, totalCount);
 
         } catch (Exception e) {
@@ -473,17 +472,17 @@ catch (Exception e)
         DashboardDistinctDetail.PeggingData peggingData = new DashboardDistinctDetail.PeggingData();
 
         try {
-String peggingQuery=pricePeggingUtility.CountPeggingQuery();
-String dsaQuery=dsaUtility.CountDsaQuery();
+            String peggingQuery = pricePeggingUtility.CountPeggingQuery();
+            String dsaQuery = dsaUtility.CountDsaQuery();
             peggingData = jdbcTemplate.queryForObject(peggingQuery, new MyRowMapperPegging());
             dashboardDsa = jdbcTemplate.queryForObject(dsaQuery, new MyRowMapperDsa());
 
             if (dashboardDsa == null && peggingData == null) {
-                dashboardDistinctDetail.setMsg("Data found successfully.");
-                dashboardDistinctDetail.setCode("0000");
+                dashboardDistinctDetail.setMsg("Data not found.");
+                dashboardDistinctDetail.setCode("1111");
             } else {
                 if (dashboardDsa == null) {
-                    dashboardDistinctDetail.setMsg("Data not available  for Dsa.");
+                    dashboardDistinctDetail.setMsg("Data not available for Dsa.");
                     dashboardDistinctDetail.setCode("1111");
                 } else {
                     if (peggingData == null) {
@@ -492,7 +491,7 @@ String dsaQuery=dsaUtility.CountDsaQuery();
                     } else
 
                         dashboardDistinctDetail.setMsg("Data found successfully.");
-                    dashboardDistinctDetail.setCode("0000");
+                        dashboardDistinctDetail.setCode("0000");
 
                 }
 
@@ -557,11 +556,11 @@ String dsaQuery=dsaUtility.CountDsaQuery();
 //        List<DashboardGraph.PeggingData> peggingData=new ArrayList<>();
 
         try {
-                String dsaQuery=dsaUtility.dsaDateFormat();
-                String peggingQuery = pricePeggingUtility.peggingDateFormate();
+            String dsaQuery = dsaUtility.dsaDateFormat();
+            String peggingQuery = pricePeggingUtility.peggingDateFormate();
 
-                String dsaQuery1=dsaUtility.dsaDateFormat1();
-                String peggingQuery1=pricePeggingUtility.peggingDateFormate1();
+            String dsaQuery1 = dsaUtility.dsaDateFormat1();
+            String peggingQuery1 = pricePeggingUtility.peggingDateFormate1();
 
             pincodesDsa = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DashboardGraph.Pincode.class));
             pincodesPegging = jdbcTemplate.query(peggingQuery, new BeanPropertyRowMapper<>(DashboardGraph.Pincode.class));
@@ -703,7 +702,7 @@ String dsaQuery=dsaUtility.CountDsaQuery();
     public List<DsaDataModel> readData() {
         List<DsaDataModel> dsaDataModelList = new ArrayList<>();
         CommonResponse commonResponse = new CommonResponse();
-        String dsaQuery=dsaUtility.dsaReport();
+        String dsaQuery = dsaUtility.dsaReport();
         // System.out.print(dsaQuery);
         try {
 
