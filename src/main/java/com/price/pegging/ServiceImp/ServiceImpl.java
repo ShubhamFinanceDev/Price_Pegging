@@ -478,21 +478,20 @@ public class ServiceImpl implements Service {
             dashboardDsa = jdbcTemplate.queryForObject(dsaQuery, new MyRowMapperDsa());
 
             if (dashboardDsa == null && peggingData == null) {
-                dashboardDistinctDetail.setMsg("Data not found.");
-                dashboardDistinctDetail.setCode("1111");
+                dashboardDistinctDetail.setMsg("Data found successfully.");
+                dashboardDistinctDetail.setCode("0000");
             } else {
                 if (dashboardDsa == null) {
-                    dashboardDistinctDetail.setMsg("Data not available for Dsa.");
+                    dashboardDistinctDetail.setMsg("Data not available  for Dsa.");
                     dashboardDistinctDetail.setCode("1111");
                 } else {
                     if (peggingData == null) {
                         dashboardDistinctDetail.setMsg("Data is not found for Pegging.");
                         dashboardDistinctDetail.setCode("1111");
-                    } else
-
+                    } else {
                         dashboardDistinctDetail.setMsg("Data found successfully.");
                         dashboardDistinctDetail.setCode("0000");
-
+                    }
                 }
 
             }
