@@ -478,8 +478,8 @@ public class ServiceImpl implements Service {
             dashboardDsa = jdbcTemplate.queryForObject(dsaQuery, new MyRowMapperDsa());
 
             if (dashboardDsa == null && peggingData == null) {
-                dashboardDistinctDetail.setMsg("Data found successfully.");
-                dashboardDistinctDetail.setCode("0000");
+                dashboardDistinctDetail.setMsg("Data not found.");
+                dashboardDistinctDetail.setCode("1111");
             } else {
                 if (dashboardDsa == null) {
                     dashboardDistinctDetail.setMsg("Data not available  for Dsa.");
