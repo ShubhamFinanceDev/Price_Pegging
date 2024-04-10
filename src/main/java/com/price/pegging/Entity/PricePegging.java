@@ -37,6 +37,8 @@ public class PricePegging {
 
     @Column(name="pincode")
     private String pinCode;
+    @Column(name="upload_by")
+    private String uploadBy;
 
    // @Temporal(TemporalType.DATE)
   //  @Column(name="upload_date",nullable = false)

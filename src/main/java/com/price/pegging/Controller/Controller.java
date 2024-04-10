@@ -67,18 +67,18 @@ public class Controller {
 
     @CrossOrigin
     @PostMapping("/dsaExportUpload")
-    public ResponseEntity<CommonResponse> exportFileUpload(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<CommonResponse> exportFileUpload(@RequestParam("file") MultipartFile file,@RequestParam("uploadBy")String uploadBy) {
         CommonResponse commonResponse = new CommonResponse();
-        commonResponse = service.readDataDsa(file);
+        commonResponse = service.readDataDsa(file,uploadBy);
 
         return new ResponseEntity<CommonResponse>(commonResponse, HttpStatus.OK);
     }
 
     @CrossOrigin
     @PostMapping("/pricePeggingUpload")
-    public ResponseEntity<CommonResponse> peggingFileUpload(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<CommonResponse> peggingFileUpload(@RequestParam("file") MultipartFile file,@RequestParam("uploadBy")String uploadBy) {
         CommonResponse commonResponse = new CommonResponse();
-        commonResponse = service.peggingFileReadData(file);
+        commonResponse = service.peggingFileReadData(file,uploadBy);
 
         return new ResponseEntity<CommonResponse>(commonResponse, HttpStatus.OK);
     }
@@ -105,12 +105,12 @@ public class Controller {
 
     @CrossOrigin
     @GetMapping("/exportData")
-    public ResponseEntity<DsaDataResponse> exportData(@RequestParam(name = "applicationNo", required = false) String applicationNo /*, @RequestParam(name="uploadDate",required = false) Date uploadDate*/, @RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "region", required = false) String region, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate,@RequestParam(name = "pageNo", required = true)Integer pageNo,@RequestParam(name = "pinCode", required = false)String pinCode)      // changes for from to todate
+    public ResponseEntity<DsaDataResponse> exportData(@RequestParam(name = "applicationNo", required = false) String applicationNo /*, @RequestParam(name="uploadDate",required = false) Date uploadDate*/, @RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "region", required = false) String region, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate,@RequestParam(name = "pageNo", required = true)Integer pageNo,@RequestParam(name = "pinCode", required = false)String pinCode,@RequestParam(name = "flag",required = false)String flag)      // changes for from to todate
     {
         DsaDataResponse dsaDataResponse = new DsaDataResponse();
 
         if ((fromDate != null && toDate != null) || (fromDate == null && toDate == null)) {
-            dsaDataResponse = service.getAllDsaData(fromDate, toDate, applicationNo, region, zone, pageNo,pinCode);
+            dsaDataResponse = service.getAllDsaData(fromDate, toDate, applicationNo, region, zone, pageNo,pinCode,flag);
         } else {
             dsaDataResponse.setCode("1111");
             dsaDataResponse.setMsg("Both From date and To date are required for date range search.");

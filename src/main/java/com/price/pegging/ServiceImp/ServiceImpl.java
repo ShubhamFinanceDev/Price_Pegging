@@ -14,38 +14,28 @@ import com.price.pegging.Utilitty.DateFormatUtility;
 import com.price.pegging.Utilitty.DsaUtility;
 import com.price.pegging.Utilitty.PricePeggingUtility;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.Data;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
-import java.util.zip.ZipFile;
 
 @org.springframework.stereotype.Service
 
@@ -69,7 +59,7 @@ public class ServiceImpl implements Service {
     @Autowired
     private JdbcTemplate jdbcTemplate;
     BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-
+    Logger logger = LoggerFactory.getLogger(ServiceImpl.class);
 
     @Override
     public User userExist(String userEmail) {
@@ -103,7 +93,7 @@ public class ServiceImpl implements Service {
     }
 
     @Override
-    public CommonResponse readDataDsa(MultipartFile file) {
+    public CommonResponse readDataDsa(MultipartFile file, String uploadBy) {
 
         List<DsaExport> dsaExports = new ArrayList<>();
         String errorMsg = "";
@@ -203,6 +193,7 @@ public class ServiceImpl implements Service {
                         if (!errorMsg.isEmpty()) break;
                     }
                     if (!errorMsg.isEmpty()) break;
+                    dsaExport.setUploadBy(uploadBy);
                     dsaExports.add(dsaExport);
 
                 }
@@ -210,6 +201,7 @@ public class ServiceImpl implements Service {
             } else {
                 //   System.out.println("file format is not matched");
                 errorMsg = "file format is not matching or technical issue.";
+                logger.error("file format is not matching or technical issue :" + uploadBy);
             }
 
             System.out.println(errorMsg);
@@ -217,18 +209,21 @@ public class ServiceImpl implements Service {
         } catch (Exception e) {
             System.out.println(e);
             errorMsg = "file is empty or technical issue.";
+            logger.error("file is empty or technical issue or Exception :" + uploadBy,e);
         }
 
         if (errorMsg.isEmpty() && count > 0) {
             dsaExportRepository.saveAll(dsaExports);
             commonResponse.setCode("0000");
             commonResponse.setMsg("file uploaded successfully " + dsaExports.size() + " row uploaded.");
+            logger.info("file uploaded successfully \" + dsaExports.size() + \" row uploaded :" + uploadBy);
         } else {
             if (errorMsg.isEmpty()) {
                 errorMsg = "file is empty or technical issue";
                 System.out.println(errorMsg);
                 commonResponse.setCode("1111");
                 commonResponse.setMsg(errorMsg);
+                logger.error(errorMsg,uploadBy);
             } else {
                 System.out.println(errorMsg);
                 commonResponse.setCode("1111");
@@ -240,7 +235,7 @@ public class ServiceImpl implements Service {
     }
 
     @Override
-    public CommonResponse peggingFileReadData(MultipartFile file) {
+    public CommonResponse peggingFileReadData(MultipartFile file, String uploadBy) {
         List<PricePegging> peggingUploads = new ArrayList<>();
         String errorMsg = "";
         CommonResponse commonResponse = new CommonResponse();
@@ -307,35 +302,41 @@ public class ServiceImpl implements Service {
                         if (!errorMsg.isEmpty()) break;
                     }
                     if (!errorMsg.isEmpty()) break;
+                    pricePeggingUpload.setUploadBy(uploadBy);
                     peggingUploads.add(pricePeggingUpload);
 
                 }
             } else {
                 System.out.println("file format is not matched");
                 errorMsg = "file format is not matching or technical issue.";
+                logger.error(errorMsg,uploadBy);
             }
 
             System.out.println(errorMsg);
             System.out.println(count);
         } catch (Exception e) {
             System.out.println(e);
-            errorMsg = "file is empty or technical issue";
+            errorMsg = "file is empty or technical issue :";
+            logger.error(errorMsg,uploadBy,e);
         }
 
         if (errorMsg.isEmpty() && count > 0) {
             pricePeggingRepository.saveAll(peggingUploads);
             commonResponse.setCode("0000");
             commonResponse.setMsg("file uploaded successfully " + peggingUploads.size() + " row uploaded.");
+            logger.info("file uploaded successfully " + peggingUploads.size() + " row uploaded." + uploadBy);
         } else {
             if (errorMsg.isEmpty()) {
                 errorMsg = "file is empty or technical issue";
                 System.out.println(errorMsg);
                 commonResponse.setCode("1111");
                 commonResponse.setMsg(errorMsg);
+                logger.error(errorMsg,uploadBy);
             } else {
                 System.out.println(errorMsg);
                 commonResponse.setCode("1111");
                 commonResponse.setMsg(errorMsg);
+                logger.error(errorMsg,uploadBy);
             }
         }
 
@@ -360,13 +361,13 @@ public class ServiceImpl implements Service {
 //
 
     //Changes done by Dhruv Ticket No. 3304
-    public DsaDataResponse getAllDsaData(Date fromDate, Date toDate, String applicationNo, String region, String zone, Integer pageNo,String pinCode) {
+    public DsaDataResponse getAllDsaData(Date fromDate, Date toDate, String applicationNo, String region, String zone, Integer pageNo, String pinCode, String flag) {
         DsaDataResponse dsaDataResponse = new DsaDataResponse();
         List<DsaDataModel> dsaDataModelList = new ArrayList<>();
         int offSetData = (pageNo - 1)* 100;
         int pageSize = 100;
 
-       String dsaQuery=dsaUtility.dsaQuery(fromDate,toDate,applicationNo,region,zone,pageNo,pinCode,offSetData);
+       String dsaQuery=dsaUtility.dsaQuery(fromDate,toDate,applicationNo,region,zone,pageNo,pinCode,offSetData,flag);
        String totalCount=dsaUtility.totalCount(fromDate,toDate,applicationNo,region,zone,pageNo,pinCode);
         try {
             Long totalCountResult = jdbcTemplate.queryForObject(totalCount, Long.class);
