@@ -1,17 +1,12 @@
 package com.price.pegging.Service;
 
-import com.price.pegging.Entity.DsaExport;
-import com.price.pegging.Entity.PricePegging;
 import com.price.pegging.Model.*;
 import com.price.pegging.Entity.User;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.sql.Date;
 import java.util.List;
-import java.util.Optional;
 
 public interface Service {
 
@@ -26,8 +21,8 @@ public interface Service {
 //    List<DsaExport> getAllExportData(String applicationNo, String region, String zone);
     DsaDataResponse getAllDsaData(Date fromDate, Date toDate, String applicationNo, String region, String zone, Integer pageNo, String pinCode);
 //    List<DsaExport> getAllExportDatatoDatetofromDate(Date fomDate, Date toDate, String applicationNo, String region, String zone);
-    PricePeggingData getAllPricePeggingDataByZoneAndRegion(String zone,String region,int pageNo,String pinCode);
-    PricePeggingData getAllPricePeggingDataByZonFromDateToRegion(String zone, Date fromDate,Date toDate,String region, int pageNo,String pinCode);  //change dataType toDate and fromDate
+    PricePeggingData getAllPricePeggingDataByZoneAndRegion(String zone, String region, int pageNo, String pinCode, String area);
+    PricePeggingData getAllPricePeggingDataByZonFromDateToRegion(String zone, Date fromDate,Date toDate,String region, int pageNo,String pinCode,String area);  //change dataType toDate and fromDate
     List getAllZone();
 
     DashboardDistinctDetail getAllDashboarDetail();

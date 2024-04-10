@@ -85,14 +85,14 @@ public class Controller {
 
     @CrossOrigin
     @GetMapping("/pricePeggingData")                               //change data type of toDate and fromDate
-    public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate, @RequestParam(name = "region", required = false) String region,@RequestParam(name = "pageNo", required = true) int pageNo,@RequestParam(name = "pinCode",required = false)String pinCode){
+    public ResponseEntity<PricePeggingData> exportPeggingData(@RequestParam(name = "zone", required = false) String zone, @RequestParam(name = "fromDate", required = false) Date fromDate, @RequestParam(name = "toDate", required = false) Date toDate, @RequestParam(name = "region", required = false) String region,@RequestParam(name = "pageNo", required = true) int pageNo,@RequestParam(name = "pinCode",required = false)String pinCode,@RequestParam(name = "area",required = false)String area){
         List<PricePegging> pricePeggingDatas = new ArrayList<>();
         PricePeggingData pricePeggingData = new PricePeggingData();
 
         if (fromDate != null && toDate != null) {
-            pricePeggingData = service.getAllPricePeggingDataByZonFromDateToRegion(zone, fromDate, toDate, region,pageNo,pinCode);
+            pricePeggingData = service.getAllPricePeggingDataByZonFromDateToRegion(zone, fromDate, toDate, region,pageNo,pinCode,area);
         } else if (fromDate == null && toDate == null) {
-            pricePeggingData = service.getAllPricePeggingDataByZoneAndRegion(zone, region, pageNo,pinCode);
+            pricePeggingData = service.getAllPricePeggingDataByZoneAndRegion(zone, region, pageNo,pinCode,area);
 
         } else {
             pricePeggingData.setCode("1111");

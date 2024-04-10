@@ -15,8 +15,8 @@ import java.util.List;
 @Repository
 public interface PricePeggingRepository extends JpaRepository<PricePegging, Long> {
 
-    @Query("select pp from PricePegging pp where (:zone IS NULL OR pp.zoneDist = :zone) AND (:region IS NULL OR pp.region = :region)AND (:pinCode IS NULL OR pp.pinCode = :pinCode)")
-    List<PricePegging> findByZoneAndRegion(String zone, String region, Pageable pageable,String pinCode);
+    @Query("select pp from PricePegging pp where (:zone IS NULL OR pp.zoneDist = :zone) AND (:region IS NULL OR pp.region = :region)AND (:pinCode IS NULL OR pp.pinCode = :pinCode)AND (:area IS NULL OR pp.locations LIKE CONCAT(:area, '%'))")
+    List<PricePegging> findByZoneAndRegion(String zone, String region, Pageable pageable,String pinCode,String area);
     @Query("select count(pp) from PricePegging pp where (:zone IS NULL OR pp.zoneDist = :zone) AND (:region IS NULL OR pp.region = :region)AND (:pinCode IS NULL OR pp.pinCode = :pinCode)")
     long findByZoneAndRegion(String zone, String region,String pinCode);
 
@@ -30,17 +30,19 @@ public interface PricePeggingRepository extends JpaRepository<PricePegging, Long
             "WHERE (:fromDate IS NULL OR pp.uploadDate >= :fromDate) " +
             "AND (:toDate IS NULL OR pp.uploadDate <= :toDate) " +
             "AND (:zone IS NULL OR pp.zoneDist = :zone) " +
-            "AND (:region IS NULL OR pp.region = :region)" +
-            "AND (:pinCode IS NULL OR pp.pinCode = :pinCode)")
-    List<PricePegging> findByZoneAndFromDateToRegion(String zone, Date fromDate, Date toDate, String region, Pageable pageable,String pinCode);  //change dataType toDate and fromDate
+            "AND (:region IS NULL OR pp.region = :region) " +
+            "AND (:pinCode IS NULL OR pp.pinCode = :pinCode) " +
+            "AND (:area IS NULL OR pp.locations LIKE CONCAT(:area, '%'))")
+    List<PricePegging> findByZoneAndFromDateToRegion(String zone, Date fromDate, Date toDate, String region, Pageable pageable, String pinCode, String area);
 
     @Query("SELECT count(pp) FROM PricePegging pp " +
             "WHERE (:fromDate IS NULL OR pp.uploadDate >= :fromDate) " +
             "AND (:toDate IS NULL OR pp.uploadDate <= :toDate) " +
             "AND (:zone IS NULL OR pp.zoneDist = :zone) " +
             "AND (:region IS NULL OR pp.region = :region)" +
-            "AND (:pinCode IS NULL OR pp.pinCode = :pinCode)")
-    long findByZoneAndFromDateToRegion(String zone, Date fromDate, Date toDate, String region,String pinCode);  //change dataType toDate and fromDate
+            "AND (:pinCode IS NULL OR pp.pinCode = :pinCode)"+
+            "AND (:area IS NULL OR pp.locations LIKE  :area%)")
+    long findByZoneAndFromDateToRegion(String zone, Date fromDate, Date toDate, String region,String pinCode,String area);  //change dataType toDate and fromDate
 
     @Query("select distinct pp.zoneDist  from PricePegging pp ")
     List getAllDistinctZone();

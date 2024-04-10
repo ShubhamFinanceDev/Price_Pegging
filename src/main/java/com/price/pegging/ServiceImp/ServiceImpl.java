@@ -14,38 +14,26 @@ import com.price.pegging.Utilitty.DateFormatUtility;
 import com.price.pegging.Utilitty.DsaUtility;
 import com.price.pegging.Utilitty.PricePeggingUtility;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.Data;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.batch.BatchProperties;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.util.ResourceUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
-import java.util.zip.ZipFile;
 
 @org.springframework.stereotype.Service
 
@@ -400,10 +388,11 @@ public class ServiceImpl implements Service {
     /**
      * @param zone
      * @param pinCode
+     * @param area
      * @return
      */
     @Override
-    public PricePeggingData getAllPricePeggingDataByZoneAndRegion(String zone, String region, int pageNo, String pinCode) {
+    public PricePeggingData getAllPricePeggingDataByZoneAndRegion(String zone, String region, int pageNo, String pinCode, String area) {
 
         int pageSize=100;
         List<PricePegging> pricePeggings = new ArrayList<>();
@@ -411,7 +400,7 @@ public class ServiceImpl implements Service {
 
 try {
     Pageable pageable = PageRequest.of(pageNo - 1, pageSize); //ticket no.3304
-    pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone, region, pageable,pinCode);
+    pricePeggings = pricePeggingRepository.findByZoneAndRegion(zone, region, pageable,pinCode,area);
     long totalCount = pricePeggingRepository.findByZoneAndRegion(zone, region,pinCode);
     setDataInObject(pageNo, pageSize, pricePeggings, pricePeggingData, totalCount);
 }
@@ -438,15 +427,15 @@ catch (Exception e)
     }
 
 
-    public PricePeggingData getAllPricePeggingDataByZonFromDateToRegion(String zone, Date fromDate, Date toDate, String region, int pageNo,String pinCode) {
+    public PricePeggingData getAllPricePeggingDataByZonFromDateToRegion(String zone, Date fromDate, Date toDate, String region, int pageNo,String pinCode,String area) {
         int pageSize = 100;
         List<PricePegging> pricePeggings = new ArrayList<>();
         PricePeggingData pricePeggingData = new PricePeggingData();
 
         try {
             Pageable pageable = PageRequest.of(pageNo - 1, 100); //ticket no.3304
-            pricePeggings = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region, pageable,pinCode);
-            long totalCount = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region,pinCode);
+            pricePeggings = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region, pageable,pinCode,area);
+            long totalCount = pricePeggingRepository.findByZoneAndFromDateToRegion(zone, fromDate, toDate, region,pinCode,area);
             setDataInObject(pageNo, pageSize, pricePeggings, pricePeggingData, totalCount);
 
         } catch (Exception e) {
