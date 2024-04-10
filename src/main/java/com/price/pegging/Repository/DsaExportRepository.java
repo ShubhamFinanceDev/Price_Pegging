@@ -23,10 +23,10 @@ public interface DsaExportRepository extends JpaRepository<DsaExport, Long> {
     List<DsaExport> findByUpdatedDate(String updateddate);
 
     @Query("select distinct pp.zone from DsaExport pp ")
-    List<FilterModel.ZoneDis> getAllDistinctZone();
+    List getAllDistinctZone();
 
     @Query("select distinct pp.region   from DsaExport pp ")
-    List<FilterModel.Region> getAllDistinctRegion();
+    List getAllDistinctRegion();
 
     @Query("SELECT d FROM DsaExport d " +
             "WHERE" +
