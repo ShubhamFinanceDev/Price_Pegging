@@ -12,13 +12,24 @@ public class PricePeggingUtility {
     }
 
     public String peggingDateFormate1() {
-
-        String peggingQuery1 = "SELECT date_format(upload_date,'%Y-%M') Date,COUNT(DISTINCT location)total FROM price_pegging group BY date_format(upload_date,'%Y-%M')";
+        String peggingQuery1 = " SELECT date Date, total , updatedDate \n"+
+                " FROM ( \n"+
+        "  SELECT  DATE_FORMAT(upload_date,'%b-%Y') AS date, COUNT(DISTINCT location) AS total , CONCAT(YEAR(upload_date),'-',LPAD(MONTH(upload_date), 2, '0')) AS updatedDate\n"+
+        "       FROM price_pegging\n"+
+        "        GROUP BY date,updatedDate\n"+
+        " ) AS subquery\n"+
+        " ORDER BY updatedDate\n";
 
         return peggingQuery1;
     }
     public String peggingDateFormate() {
-        String peggingQuery = "SELECT date_format(upload_date,'%Y-%M') Date,COUNT(DISTINCT pincode)total FROM price_pegging group BY date_format(upload_date,'%Y-%M')";
+        String peggingQuery = " SELECT date Date, total , updatedDate \n"+
+                " FROM ( \n"+
+                "  SELECT  DATE_FORMAT(upload_date,'%b-%Y') AS date, COUNT(DISTINCT pincode) AS total , CONCAT(YEAR(upload_date),'-',LPAD(MONTH(upload_date), 2, '0')) AS updatedDate\n"+
+                "       FROM price_pegging\n"+
+                "        GROUP BY date,updatedDate\n"+
+                " ) AS subquery\n"+
+                " ORDER BY updatedDate\n";
 
         return peggingQuery;
     }

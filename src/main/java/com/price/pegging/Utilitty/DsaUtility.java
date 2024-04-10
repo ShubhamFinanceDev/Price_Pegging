@@ -68,15 +68,25 @@ public class DsaUtility {
     }
 
     public String dsaDateFormat() {
-
-        String dsaQuery = "SELECT date_format(upload_date,'%Y-%M') date,COUNT(DISTINCT property_pincode)total FROM dsa_export group BY date_format(upload_date,'%Y-%M')";
+        String dsaQuery = " SELECT date Date, total , updatedDate \n"+
+                " FROM ( \n"+
+                "  SELECT  DATE_FORMAT(upload_date,'%b-%Y') AS date, COUNT(DISTINCT property_pincode) AS total , CONCAT(YEAR(upload_date),'-',LPAD(MONTH(upload_date), 2, '0')) AS updatedDate\n"+
+                "       FROM dsa_export\n"+
+                "        GROUP BY date,updatedDate\n"+
+                " ) AS subquery\n"+
+                " ORDER BY updatedDate\n";
 
         return dsaQuery;
     }
 
     public String dsaDateFormat1() {
-
-        String dsaQuery1 = "SELECT date_format(upload_date,'%Y-%M') date,COUNT(DISTINCT location)total FROM dsa_export group BY date_format(upload_date,'%Y-%M')";
+        String dsaQuery1 = " SELECT date Date, total , updatedDate \n"+
+                " FROM ( \n"+
+                "  SELECT  DATE_FORMAT(upload_date,'%b-%Y') AS date, COUNT(DISTINCT location) AS total , CONCAT(YEAR(upload_date),'-',LPAD(MONTH(upload_date), 2, '0')) AS updatedDate\n"+
+                "       FROM dsa_export\n"+
+                "        GROUP BY date,updatedDate\n"+
+                " ) AS subquery\n"+
+                " ORDER BY updatedDate\n";
 
         return dsaQuery1;
     }
