@@ -47,7 +47,7 @@ public interface PricePeggingRepository extends JpaRepository<PricePegging, Long
     @Query("select distinct pp.zoneDist  from PricePegging pp ")
     List getAllDistinctZone();
 
-    @Query("SELECT date_format(p.uploadDate,'%b-%Y'), max(p.minimumRate),max (p.maximumRate),max(p.averageRate) FROM PricePegging p WHERE p.zoneDist = :zone AND p.locations = :location group by p.uploadDate order by p.uploadDate")
+    @Query("SELECT date_format(p.uploadDate,'%b-%Y') as formattedDate,p.minimumRate,p.maximumRate,p.averageRate FROM PricePegging p WHERE p.zoneDist = :zone AND p.locations = :location order by p.uploadDate")
     List<Object[]> findDataByZoneLocation(String zone, String location);
 
     @Query("select distinct pp.region  from PricePegging pp ")

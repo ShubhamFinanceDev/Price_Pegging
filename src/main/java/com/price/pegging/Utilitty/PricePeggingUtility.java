@@ -10,7 +10,7 @@ public class PricePeggingUtility {
         return " SELECT  COUNT(DISTINCT pincode) AS distinctCountPincode,COUNT(DISTINCT zone_dist) AS distinctCountZone,COUNT(DISTINCT location) AS distinctCountLocations, COUNT(DISTINCT upload_date) AS distinctCountUploadDate from price_pegging";
     }
 
-    public String peggingDateFormate1() {
+    public String peggingDateFormat1() {
 
         return " SELECT date Date, total , updatedDate \n"+
                 " FROM ( \n"+
@@ -20,7 +20,7 @@ public class PricePeggingUtility {
         " ) AS subquery\n"+
         " ORDER BY updatedDate\n";
     }
-    public String peggingDateFormate() {
+    public String peggingDateFormat() {
 
         return " SELECT date Date, total , updatedDate \n"+
                 " FROM ( \n"+

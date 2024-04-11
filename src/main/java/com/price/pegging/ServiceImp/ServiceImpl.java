@@ -528,9 +528,9 @@ public class ServiceImpl implements Service {
         DashboardGraph.PeggingData peggingData = new DashboardGraph.PeggingData();
 
         String dsaPincode = dsaUtility.dsaDateFormat();
-        String peggingPincode = pricePeggingUtility.peggingDateFormate();
+        String peggingPincode = pricePeggingUtility.peggingDateFormat();
         String dsaLocation = dsaUtility.dsaDateFormat1();
-        String peggingLocation = pricePeggingUtility.peggingDateFormate1();
+        String peggingLocation = pricePeggingUtility.peggingDateFormat1();
 
         try {
 
