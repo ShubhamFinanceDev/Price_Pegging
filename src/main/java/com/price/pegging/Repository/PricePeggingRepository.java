@@ -20,7 +20,7 @@ public interface PricePeggingRepository extends JpaRepository<PricePegging, Long
     @Query("select count(pp) from PricePegging pp where (:zone IS NULL OR pp.zoneDist = :zone) AND (:region IS NULL OR pp.region = :region)AND (:pinCode IS NULL OR pp.pinCode = :pinCode) AND (:area IS NULL OR pp.locations LIKE CONCAT(:area, '%'))")
     long findByZoneAndRegion(String zone, String region,String pinCode,String area);
 
-    @Query("select DISTINCT(pp.zone) pp from PricePegging pp")
+    @Query("select DISTINCT(pp.zone) from PricePegging pp")
     List<String> getUniqueZones();
 
 
@@ -47,7 +47,7 @@ public interface PricePeggingRepository extends JpaRepository<PricePegging, Long
     @Query("select distinct pp.zoneDist  from PricePegging pp ")
     List getAllDistinctZone();
 
-    @Query("SELECT DISTINCT date_format(p.uploadDate,'%b-%Y'), max(p.minimumRate),max (p.maximumRate),max(p.averageRate) FROM PricePegging p WHERE p.zoneDist = :zone AND p.locations = :location group by p.uploadDate")
+    @Query("SELECT date_format(p.uploadDate,'%b-%Y'), max(p.minimumRate),max (p.maximumRate),max(p.averageRate) FROM PricePegging p WHERE p.zoneDist = :zone AND p.locations = :location group by p.uploadDate order by p.uploadDate")
     List<Object[]> findDataByZoneLocation(String zone, String location);
 
     @Query("select distinct pp.region  from PricePegging pp ")
