@@ -52,14 +52,14 @@ public class Controller {
 
     @CrossOrigin
     @PostMapping("/dsaExportUpload")
-    public ResponseEntity<CommonResponse> exportFileUpload(@RequestParam("file") MultipartFile file, @RequestParam("uploadBy") String uploadBy) {
+    public ResponseEntity<CommonResponse> exportFileUpload(@RequestParam("file") MultipartFile file, @RequestParam(value = "uploadBy", required = false) String uploadBy  ) {
         CommonResponse commonResponse = service.readDataDsa(file, uploadBy);
         return new ResponseEntity<>(commonResponse, HttpStatus.OK);
     }
 
     @CrossOrigin
     @PostMapping("/pricePeggingUpload")
-    public ResponseEntity<CommonResponse> peggingFileUpload(@RequestParam("file") MultipartFile file, @RequestParam("uploadBy") String uploadBy) {
+    public ResponseEntity<CommonResponse> peggingFileUpload(@RequestParam("file") MultipartFile file, @RequestParam(value = "uploadBy",required = false) String uploadBy) {
         CommonResponse commonResponse = service.peggingFileReadData(file, uploadBy);
         return new ResponseEntity<>(commonResponse, HttpStatus.OK);
     }
