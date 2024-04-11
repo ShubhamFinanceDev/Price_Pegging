@@ -351,7 +351,7 @@ public class ServiceImpl implements Service {
         int pageSize = 100;
 
         String dsaQuery = dsaUtility.dsaQuery(fromDate, toDate, applicationNo, region, zone, pageNo, pinCode, offSetData, flag);
-        String totalCount = dsaUtility.totalCount(fromDate, toDate, applicationNo, region, zone, pageNo, pinCode);
+        String totalCount = dsaUtility.totalCount(fromDate, toDate, applicationNo, region, zone, pageNo, pinCode,flag);
         try {
             Long totalCountResult = jdbcTemplate.queryForObject(totalCount, Long.class);
 
