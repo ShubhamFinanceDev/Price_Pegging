@@ -346,7 +346,7 @@ public class ServiceImpl implements Service {
 
     public DsaDataResponse getAllDsaData(Date fromDate, Date toDate, String applicationNo, String region, String zone, Integer pageNo, String pinCode, String flag) {
         DsaDataResponse dsaDataResponse = new DsaDataResponse();
-        List<DsaDataModel> dsaDataModelList = new ArrayList<>();
+
         int offSetData = (pageNo - 1) * 100;
         int pageSize = 100;
 
@@ -355,8 +355,8 @@ public class ServiceImpl implements Service {
         try {
             Long totalCountResult = jdbcTemplate.queryForObject(totalCount, Long.class);
 
-            dsaDataModelList = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DsaDataModel.class));
-            System.out.println(dsaDataModelList);
+            List<DsaDataModel> dsaDataModelList = jdbcTemplate.query(dsaQuery, new BeanPropertyRowMapper<>(DsaDataModel.class));
+
             dsaDataResponse.setDsaExportList(dsaDataModelList);
             setDataInDsaObject(pageNo, pageSize, dsaDataModelList, dsaDataResponse, totalCountResult);
 
