@@ -40,6 +40,8 @@ public class DsaExport {
     private String lattitude;
     @Column(name="longitude")
     private String longitude;
+    @Column(name="upload_by")
+    private String uploadBy;
 
     @Temporal(TemporalType.DATE)
     @Column(name="upload_date",nullable = false)
