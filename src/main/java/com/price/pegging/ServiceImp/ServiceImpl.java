@@ -135,7 +135,7 @@ public class ServiceImpl implements Service {
                                     applicationNo = row.getCell(1).toString();                                          //check application no already exist or not: 3307
                                     int countApplicationNo = dsaExportRepository.checkApplicationNo(applicationNo);
                                     if (countApplicationNo > 0) {
-                                        errorMsg = "application number " + applicationNo + " already exist.";
+                                        errorMsg = "Application number " + applicationNo + " already exist.";
                                         System.out.println("error: application number already exist");
 
                                     }
@@ -177,17 +177,6 @@ public class ServiceImpl implements Service {
                                     break;
                             }
 
-                            if (errorMsg.isEmpty()) {
-                                for (DsaExport fileRow : dsaExports) {              //duplicate check in uploaded sheet ticket no: 3307
-//                                    System.out.println(applicationNo);
-
-                                    if (fileRow.getApplicationNo().equals(applicationNo)) {
-                                        errorMsg = "application number " + applicationNo + " duplicate in uploaded file.";
-                                        System.out.println("error: duplicate application no in uploaded file");
-                                        break;
-                                    }
-                                }
-                            }
                         }
                         if (!errorMsg.isEmpty()) break;
                     }
