@@ -177,23 +177,24 @@ public class ServiceImpl implements Service {
                                     break;
                             }
 
-                            if (errorMsg.isEmpty()) {
-                                for (DsaExport fileRow : dsaExports) {              //duplicate check in uploaded sheet ticket no: 3307
-                                    System.out.println(applicationNo);
-
-                                    if (fileRow.getApplicationNo().equals(applicationNo)) {
-                                        errorMsg = "application number " + applicationNo + " duplicate in uploaded file.";
-                                        System.out.println("error: duplicate application no in uploaded file");
-                                        break;
-                                    }
-                                }
-                            }
+//                            if (errorMsg.isEmpty()) {
+//                                for (DsaExport fileRow : dsaExports) {              //duplicate check in uploaded sheet ticket no: 3307
+//                                    System.out.println(applicationNo);
+//
+//                                    if (fileRow.getApplicationNo().equals(applicationNo)) {
+//                                        errorMsg = "application number " + applicationNo + " duplicate in uploaded file.";
+//                                        System.out.println("error: duplicate application no in uploaded file");
+//                                        break;
+//                                    }
+//                                }
+//                            }
                         }
                         if (!errorMsg.isEmpty()) break;
                     }
                     if (!errorMsg.isEmpty()) break;
                     dsaExport.setUploadBy(uploadBy);
                     dsaExports.add(dsaExport);
+                    System.out.println("dsa size="+dsaExports);
 
                 }
 
