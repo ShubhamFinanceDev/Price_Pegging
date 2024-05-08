@@ -194,7 +194,7 @@ public class ServiceImpl implements Service {
                     if (!errorMsg.isEmpty()) break;
                     dsaExport.setUploadBy(uploadBy);
                     dsaExports.add(dsaExport);
-                    System.out.println("dsa size="+dsaExports);
+                    System.out.println("dsa size="+dsaExports.size());
 
                 }
 
