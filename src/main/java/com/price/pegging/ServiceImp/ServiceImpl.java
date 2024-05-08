@@ -179,7 +179,7 @@ public class ServiceImpl implements Service {
 
                             if (errorMsg.isEmpty()) {
                                 for (DsaExport fileRow : dsaExports) {              //duplicate check in uploaded sheet ticket no: 3307
-                                    System.out.println(applicationNo);
+//                                    System.out.println(applicationNo);
 
                                     if (fileRow.getApplicationNo().equals(applicationNo)) {
                                         errorMsg = "application number " + applicationNo + " duplicate in uploaded file.";
