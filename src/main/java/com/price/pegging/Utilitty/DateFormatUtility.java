@@ -16,8 +16,8 @@ public class DateFormatUtility {
 
              outputDateString = desiredFormat.format(inputDate);
 
-            System.out.println("Original Date: " + uploadDate);
-            System.out.println("Converted Date: " + outputDateString);
+//            System.out.println("Original Date: " + uploadDate);
+//            System.out.println("Converted Date: " + outputDateString);
 
         } catch (Exception e) {
             System.out.println(e);
