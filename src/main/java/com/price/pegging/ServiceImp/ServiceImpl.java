@@ -205,7 +205,7 @@ public class ServiceImpl implements Service {
             dsaExportRepository.saveAll(dsaExports);
             commonResponse.setCode("0000");
             commonResponse.setMsg("file uploaded successfully " + dsaExports.size() + " row uploaded.");
-            logger.info("file uploaded successfully \" + dsaExports.size() + \" row uploaded :" + uploadBy);
+            logger.info("file uploaded successfully " + dsaExports.size() + " row uploaded :" + uploadBy);
         } else {
             if (errorMsg.isEmpty()) {
                 errorMsg = "file is empty or technical issue";
