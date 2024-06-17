@@ -15,7 +15,7 @@ public class DsaUtility {
                 "        b.*,  \n" +
                 "        a.minimum_rate,\n" +
                 "        a.maximum_rate,\n" +
-                "        \n" +
+                "        b.rate_per_sqft AS dsa_rate_per_sqft,  \n" +
                 "        CASE \n" +
                 "            WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G' \n" +
                 "            WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y'\n" +
@@ -68,8 +68,8 @@ public class DsaUtility {
                 "        b.rate_per_sqft AS dsa_rate_per_sqft,  \n" +
                 "        CASE \n" +
                 "            WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G' \n" +
-                "            WHEN b.rate_per_sqft BETWEEN (a.minimum_rate + (a.minimum_rate * 15) / 100) AND (a.maximum_rate + (a.maximum_rate * 15) / 100) THEN 'R'\n" +
                 "            WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y'\n" +
+                "            WHEN b.rate_per_sqft BETWEEN (a.minimum_rate + (a.minimum_rate * 15) / 100) AND (a.maximum_rate + (a.maximum_rate * 15) / 100) THEN 'R'\n" +
                 "            ELSE 'B' \n" +
                 "        END AS flag \n" +
                 "    FROM \n" +
@@ -118,6 +118,6 @@ public class DsaUtility {
     }
 
     public String dsaReport() {
-        return "SELECT b.*,a.minimum_rate,a.maximum_rate, CASE WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G' \n" + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 10) / 100) AND (a.maximum_rate - (a.maximum_rate * 10) / 100) THEN 'R'\n" + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y'\n" + "        ELSE 'B' END AS flag FROM price_pegging a INNER JOIN dsa_export b ON a.pincode = b.property_pincode AND a.region = b.region AND a.zone_dist = b.zone AND a.location = b.location\n" + "WHERE a.upload_date = (SELECT MAX(upload_date) FROM price_pegging)\n";
+        return "SELECT b.*,a.minimum_rate,a.maximum_rate, CASE WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G' \n" + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate + (a.minimum_rate * 15) / 100) AND (a.maximum_rate + (a.maximum_rate * 15) / 100) THEN 'R'\n" + "WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y'\n" + "        ELSE 'B' END AS flag FROM price_pegging a INNER JOIN dsa_export b ON a.pincode = b.property_pincode AND a.region = b.region AND a.zone_dist = b.zone AND a.location = b.location\n" + "WHERE a.upload_date = (SELECT MAX(upload_date) FROM price_pegging)\n";
     }
 }
