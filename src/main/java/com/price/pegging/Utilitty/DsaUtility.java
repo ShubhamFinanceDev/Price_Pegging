@@ -68,8 +68,7 @@ public class DsaUtility {
                 "        CASE \n" +
                 "            WHEN b.rate_per_sqft BETWEEN a.minimum_rate AND a.maximum_rate THEN 'G' \n" +
                 "            WHEN b.rate_per_sqft BETWEEN (a.minimum_rate - (a.minimum_rate * 15) / 100) AND (a.maximum_rate - (a.maximum_rate * 15) / 100) THEN 'Y'\n" +
-                "            WHEN b.rate_per_sqft BETWEEN (a.minimum_rate + (a.minimum_rate * 15) / 100) AND (a.maximum_rate + (a.maximum_rate * 15) / 100) THEN 'R'\n" +
-                "            ELSE 'B' \n" +
+                "            ELSE 'Y' \n" +
                 "        END AS flag \n" +
                 "    FROM \n" +
                 "        price_pegging a \n" +
